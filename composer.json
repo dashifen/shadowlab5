@@ -1,0 +1,21 @@
+{
+	"name": "dashifen/shadowlab",
+	"description": "an interface to my private shadowrun fifth edition databases.",
+	"authors": [{ "name": "David Dashifen Kees", "email": "dashifen@dashifen.com" }],
+	"minimum-stability": "dev",
+	"version": "0.0.1",
+	"autoload": {
+		"psr-4": {
+			"Shadowlab\\": "src/"
+		}
+	},
+	"require": {
+		"dashifen/database": ">=1.0.0-beta",
+		"zendframework/zend-diactoros": "^1.4@dev",
+		"authy/php": "2.*",
+		"aura/di": "3.x-dev"
+	},
+	"require-dev": {
+		"league/booboo": ">=1.0.0"
+	}
+}
