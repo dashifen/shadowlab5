@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec86cfe2f8cb328cbd0cf8e4015ca0cb",
+    "content-hash": "df845f63343449e46d6eed360c18d409",
     "packages": [
         {
             "name": "aura/di",
@@ -57,6 +57,55 @@
                 "di container"
             ],
             "time": "2017-02-10 02:08:53"
+        },
+        {
+            "name": "aura/router",
+            "version": "3.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/auraphp/Aura.Router.git",
+                "reference": "a6897f8f66fe8b89d6ef0ab988ff77b5f77076ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/auraphp/Aura.Router/zipball/a6897f8f66fe8b89d6ef0ab988ff77b5f77076ce",
+                "reference": "a6897f8f66fe8b89d6ef0ab988ff77b5f77076ce",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0",
+                "psr/http-message": "~1.0",
+                "psr/log": "~1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~5.7 || ~4.8",
+                "zendframework/zend-diactoros": "~1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Aura\\Router\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aura.Router Contributors",
+                    "homepage": "https://github.com/auraphp/Aura.Router/contributors"
+                }
+            ],
+            "description": "Powerful, flexible web routing for PSR-7 requests.",
+            "homepage": "https://github.com/auraphp/Aura.Router",
+            "keywords": [
+                "psr-7",
+                "route",
+                "router",
+                "routing"
+            ],
+            "time": "2017-04-14 15:52:59"
         },
         {
             "name": "aura/sql",
@@ -189,21 +238,63 @@
             "time": "2017-02-14T19:40:03+00:00"
         },
         {
-            "name": "dashifen/database",
-            "version": "dev-master",
+            "name": "dashifen/action",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/dashifen/database.git",
-                "reference": "ec4457c487bdaa64b008cdb74112861d49150bac"
+                "url": "https://github.com/dashifen/action.git",
+                "reference": "d71deaa49b7bad82c59344272a5ad031f2a8dfc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/ec4457c487bdaa64b008cdb74112861d49150bac",
-                "reference": "ec4457c487bdaa64b008cdb74112861d49150bac",
+                "url": "https://api.github.com/repos/dashifen/action/zipball/d71deaa49b7bad82c59344272a5ad031f2a8dfc0",
+                "reference": "d71deaa49b7bad82c59344272a5ad031f2a8dfc0",
                 "shasum": ""
             },
             "require": {
-                "aura/sql": ">=3.0.0-alpha1"
+                "dashifen/domain": "<2.0",
+                "dashifen/request": "^1.0",
+                "dashifen/response": "<2.0",
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Action\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "an action object that handles a web request, interacts with a domain, and helps to emit a response",
+            "time": "2017-04-19T22:29:59+00:00"
+        },
+        {
+            "name": "dashifen/database",
+            "version": "1.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/database.git",
+                "reference": "6256dede61680a023669b32b2ab6f7c0b07c6700"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/6256dede61680a023669b32b2ab6f7c0b07c6700",
+                "reference": "6256dede61680a023669b32b2ab6f7c0b07c6700",
+                "shasum": ""
+            },
+            "require": {
+                "aura/sql": "^3.0.0-alpha1",
+                "php": "^7.1"
             },
             "require-dev": {
                 "league/booboo": "^1.0"
@@ -233,7 +324,167 @@
                 "database",
                 "pdo"
             ],
-            "time": "2017-04-13 19:11:50"
+            "time": "2017-04-18T14:26:29+00:00"
+        },
+        {
+            "name": "dashifen/domain",
+            "version": "0.9.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/domain.git",
+                "reference": "b2ec97d2b2c44b3d893d65eaa2f88ad38734314c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/domain/zipball/b2ec97d2b2c44b3d893d65eaa2f88ad38734314c",
+                "reference": "b2ec97d2b2c44b3d893d65eaa2f88ad38734314c",
+                "shasum": ""
+            },
+            "require": {
+                "dashifen/database": "^1.0",
+                "dashifen/session": "^1.0",
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Domain\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "interfaces and implementation for domains and payload delivery",
+            "time": "2017-04-19T17:15:11+00:00"
+        },
+        {
+            "name": "dashifen/request",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/request.git",
+                "reference": "2d765c0575fb48bc547af14d73cef2b77014a5fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/request/zipball/2d765c0575fb48bc547af14d73cef2b77014a5fa",
+                "reference": "2d765c0575fb48bc547af14d73cef2b77014a5fa",
+                "shasum": ""
+            },
+            "require": {
+                "dashifen/session": "^1.0",
+                "php": "^7.1",
+                "zendframework/zend-diactoros": "^1.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Request\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "a basic encapsulation of an http request from a visitor to a website",
+            "time": "2017-04-15T21:51:15+00:00"
+        },
+        {
+            "name": "dashifen/response",
+            "version": "0.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/response.git",
+                "reference": "b07ad329d024f06a488daf25d41834861674ef98"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/response/zipball/b07ad329d024f06a488daf25d41834861674ef98",
+                "reference": "b07ad329d024f06a488daf25d41834861674ef98",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1",
+                "zendframework/zend-diactoros": "^1.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Response\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "an encapsulation of a HTTP response",
+            "time": "2017-04-19T20:46:43+00:00"
+        },
+        {
+            "name": "dashifen/session",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/session.git",
+                "reference": "83af55e55853fb50511ad1ebcf690732e41b1e11"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/session/zipball/83af55e55853fb50511ad1ebcf690732e41b1e11",
+                "reference": "83af55e55853fb50511ad1ebcf690732e41b1e11",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Session\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "a PHP session handling object",
+            "keywords": [
+                "session"
+            ],
+            "time": "2017-04-21T15:49:39+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -637,16 +888,16 @@
     "packages-dev": [
         {
             "name": "league/booboo",
-            "version": "dev-master",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/booboo.git",
-                "reference": "c1408f44f1f6a548c52535653e7e7ef870784acd"
+                "reference": "50008c980c5f710599705cb6758723588e875133"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/booboo/zipball/c1408f44f1f6a548c52535653e7e7ef870784acd",
-                "reference": "c1408f44f1f6a548c52535653e7e7ef870784acd",
+                "url": "https://api.github.com/repos/thephpleague/booboo/zipball/50008c980c5f710599705cb6758723588e875133",
+                "reference": "50008c980c5f710599705cb6758723588e875133",
                 "shasum": ""
             },
             "require": {
@@ -678,14 +929,14 @@
                 }
             ],
             "description": "Provides an error handler for PHP that can execute a stack of handlers for various purposes.",
-            "time": "2017-02-01 03:26:41"
+            "time": "2015-02-25T19:12:30+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "zendframework/zend-diactoros": 20,
-        "aura/di": 20
+        "aura/di": 20,
+        "aura/router": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

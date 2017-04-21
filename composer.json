@@ -1,7 +1,14 @@
 {
 	"name": "dashifen/shadowlab",
 	"description": "an interface to my private shadowrun fifth edition databases.",
-	"authors": [{ "name": "David Dashifen Kees", "email": "dashifen@dashifen.com" }],
+	"authors": [
+		{
+			"name": "David Dashifen Kees",
+			"email": "dashifen@dashifen.com",
+			"homepage": "https://dashifen.com",
+			"role": "developer"
+		}
+	],
 	"minimum-stability": "dev",
 	"version": "0.0.1",
 	"autoload": {
@@ -10,12 +17,16 @@
 		}
 	},
 	"require": {
-		"dashifen/database": ">=1.0.0-beta",
-		"zendframework/zend-diactoros": "^1.4@dev",
+		"dashifen/database": "^1.0",
+		"dashifen/request": "^1.0",
+		"dashifen/session": "^1.0",
+		"dashifen/response": "<2.0",
+		"dashifen/action": "<2.0",
+		"aura/di": "3.x-dev",
 		"authy/php": "2.*",
-		"aura/di": "3.x-dev"
+		"aura/router": "3.x-dev"
 	},
 	"require-dev": {
-		"league/booboo": ">=1.0.0"
+		"league/booboo": "^1.0"
 	}
 }

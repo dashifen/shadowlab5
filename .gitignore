@@ -134,5 +134,5 @@ composer.phar
 pma
 .idea/
 /src/Config/Credentials/
-/parsers/data/
+/wwwroot/parsers/data/*.xml
 *test*

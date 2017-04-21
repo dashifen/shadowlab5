@@ -1,6 +1,5 @@
 <?php
-session_start();
-require("vendor/autoload.php");
+require("../vendor/autoload.php");
 
 use League\BooBoo\Runner;
 use League\BooBoo\Formatter\HtmlTableFormatter;
@@ -11,5 +10,10 @@ $runner->pushFormatter(new HtmlTableFormatter());
 $runner->register();
 
 $cb = new ContainerBuilder();
-$di = $cb->newConfiguredInstance([]);
-
+$di = $cb->newConfiguredInstance([
+	'Shadowlab\Config\Database',
+	
+	
+	
+	'Shadowlab\Config\Dispatcher',
+]);
