@@ -1,0 +1,1 @@
+.clicker{color:#900;cursor:pointer;text-decoration:underline}.clicker:focus,.clicker:hover{color:red}.clicker::before,.clicker::after{color:#202020;cursor:default;display:inline-block;text-decoration:none}

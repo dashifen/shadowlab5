@@ -133,6 +133,7 @@ composer.phar
 
 pma
 .idea/
+/src/Config/Template/
 /src/Config/Credentials/
-/wwwroot/parsers/data/*.xml
+/wwwroot/parsers/data/
 *test*

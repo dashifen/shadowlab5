@@ -1,0 +1,37 @@
+<?php
+
+use Shadowlab\Response\AbstractShadowlabResponse;
+
+class LoginResponse extends AbstractShadowlabResponse {
+	public function handleSuccess(array $data = []): void {
+		
+		// handleSuccess is not actually a successful login in this case.
+		// it's simply the page that show the login form.  there's not much
+		// to do, really, other than set our data and load up the login
+		// form.
+		
+		$this->setContent("index.html");
+		$this->setData($data);
+	}
+	
+	public function handleFailure(array $data = []): void {
+		
+		// perhaps oddly, the success and failure responses include the same
+		// content.  the information in our data is what's different.
+		
+		$this->setContent("index.html");
+		$this->setData($data);
+	}
+	
+	public function handleError(array $data = []): void {
+		
+		// and, our error response is for when they've exceeded 5 login
+		// attempts.  this will, hopefully, help to mitigate attempts to
+		// brute force access to the system.
+		
+		$this->setStatusCode(401);						// unauthorized
+		$this->setContent("unauthorized.html");
+		$this->setData($data);
+	}
+	
+}

@@ -1,0 +1,162 @@
+$minimum-width:  320px;
+$small-size:     480px;
+$medium-size:    768px;
+$large-size:     960px;
+$full-size:     1080px;
+$maximum-width: 1080px;
+
+@mixin small-size  { @media screen and (min-width: #{$small-size})  { @content; } }
+@mixin medium-size { @media screen and (min-width: #{$medium-size}) { @content; } }
+@mixin large-size  { @media screen and (min-width: #{$large-size})  { @content; } }
+@mixin full-size   { @media screen and (min-width: #{$full-size})   { @content; } }
+
+$font-size:   10;
+$body-text:   "Droid Sans", sans-serif;
+$header-text: "Droid Serif", sans-serif;
+
+/*
+ * COLOR PALLETS
+ * Source: http://erskinedesign.com/blog/friendlier-colour-names-sass-maps/
+ * Accessed: 2015-06-17
+ */
+
+$palettes: (
+	blue: (
+		base:		rgb(  26,  96, 158 )
+	),
+
+	mono: (
+		white:      rgb( 255, 255, 255 ),
+		light:		rgb( 240, 240, 240 ),
+		mid-light:	rgb( 192, 192, 192 ),
+		base:		rgb( 128, 128, 128 ),
+		mid-dark:	rgb(  64,  64,  64 ),
+		text:		rgb(  32,  32,  32 ), 
+		dark:		rgb(   0,   0,   0 )
+	),
+
+	red: (
+		light:		rgb( 255,   0,   0 ),
+		mid-light:	rgb( 153,   0,   0 ),
+		base:		rgb( 110,  15,  15 )
+	)
+);
+	
+@function palette($palette, $tone: 'base') {
+    @return map-get(map-get($palettes, $palette), $tone);
+}
+
+@function rem($pixels, $base: '') {
+	$rems: $pixels / $font-size;
+	$retv: '';
+
+	@if($base == '') {
+		$retv: #{$rems}rem;	
+	} @else {
+		$retv: calc(#{$base} - #{$rems}rem);
+	}
+
+	@return $retv;
+}
+
+@mixin visuallyhidden {
+	/* from the html5 boilerplate */
+
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+
+	&.focusable:active,
+	&.focusable:focus {
+		clip: auto;
+		height: auto;
+		margin: 0;
+		overflow: visible;
+		position: static;
+		width: auto;
+	}
+}
+
+@mixin clearfix {
+	/* from the html5 boilerplate */
+
+	&::after,
+	&::before {
+		content: " ";
+		display: table;
+	}
+
+	&::after {
+		clear: both;
+	}
+}
+
+@mixin text-stroke($color) {
+	text-shadow: -1px -1px 0 $color, 1px -1px 0 $color, -1px 1px 0 $color, 1px 1px 0 $color;
+}
+
+@mixin oxford {
+	display: inline;
+	margin:  0;
+	padding: 0;
+	
+	li {
+		display: inline;
+	}
+	
+	&:not(.semicolon) li:not(:only-child):not(:last-child):after {
+		content: ", ";
+	}
+	
+	&.semicolon li:not(:only-child):not(:last-child):after {
+		content: "; ";
+	}
+	
+	li:nth-last-child(n+2):nth-last-child(-n+2):first-child:after,
+	li:nth-last-child(n+2):nth-last-child(-n+2):first-child ~ li:after {
+		content: "";
+	}
+	
+	li:last-child:not(:only-child):before {
+		content: " and\00a0";
+		font-style: normal;
+	}
+}
+
+@mixin band($size: '0px', $zindex: 100) {
+	position: relative;
+	
+	&:before {
+		background-color: inherit;
+		border-top-color: inherit;
+		border-top-style: inherit;
+		border-top-width: inherit;
+		content: " ";
+		display: inline-block;
+		height: calc(100% + #{$size});
+		left: -10000px;
+		position: absolute;
+		top: -$size;
+		width: 10000px;
+	}
+	
+	&:after {
+		background-color: inherit;
+		border-top-color: inherit;
+		border-top-style: inherit;
+		border-top-width: inherit;
+		content: " ";
+		display: inline-block;
+		height: calc(100% + #{$size});
+		left: 100%;
+		position: absolute;
+		top: -$size;
+		width: 10000px;
+		z-index: $zindex;
+	}
+}

@@ -1,0 +1,42 @@
+table[data-sortable] {
+	th[scope=col] {
+		&:not(.no-sort) {
+			cursor: pointer;
+		}
+		
+		&.asc::after {
+			content: "\f0aa";
+			display: inline-block;
+			font-family: FontAwesome;
+			font-weight: normal;
+			height: 1em;
+			line-height: .7em;
+			margin-left: .5em;
+			text-align: center;
+			width: 1em;
+		}
+		
+		&.desc::after {
+			content: "\f0ab";
+			display: inline-block;
+			font-family: FontAwesome;
+			font-weight: normal;
+			height: 1em;
+			line-height: .7em;
+			margin-left: .5em;
+			text-align: center;
+			width: 1em;
+		}
+		
+		a,
+		em,
+		a:link,
+		a:hover,
+		a:focus,
+		a:active {
+			color: #FFF;
+			font-style: normal;
+			text-decoration: underline;
+		}
+	}
+}

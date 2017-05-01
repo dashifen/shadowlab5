@@ -1,0 +1,25 @@
+@import "../config";
+
+form#log-in {
+	li.field-password {
+		display: flex;
+		flex-flow: column;
+
+		label {
+			order: 1;
+		}
+
+		input {
+			order: 2;
+		}
+
+		p {
+			font-size: 85%;
+			order: 3;
+		}
+	}
+
+	input {
+		width: rem(200);
+	}
+}

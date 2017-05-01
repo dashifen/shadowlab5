@@ -1,0 +1,34 @@
+<p>Welcome to the Shadowlab!</p>
+
+<form method="post" action="/authenticate">
+<input type="hidden" name="redirect_to" value="$redirect_to">
+
+<fieldset>
+	<legend>
+		<label>Log In</label>
+	</legend>
+	
+	<ol>
+		<li>
+			<label for="email">Email Address:</label>
+			<input type="email" id="email" name="email" value="$email">
+		</li>
+		<li>
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" value="">
+		</li>
+		<li class="visuallyhidden">
+			<label for="honeypot">Leave This Blank!</label>
+			<p>Our apologies if you're reading or hearing about this field.  It's
+			to try and catch bots that might try to log in here.  It has to be
+			blank or we'll automatically reject your attempt to log in.</p>
+			<input type="text" id="honeypot" name="honeypot" value="$honeypot">
+		</li>
+	</ol>
+	
+	<button type="submit">
+		<i class="fa fa-fw fa-login" aria-hidden="true"></i>
+		Log In
+	</button>
+</fieldset>
+</form>

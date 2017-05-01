@@ -1,0 +1,77 @@
+header[role=banner] {
+	padding: rem(25) 0 0 10rem;
+	position: relative;
+	
+	a {
+		text-decoration: none;
+		a:active, a:focus, a:hover { }
+		a:link, a:visited { }
+	}
+	
+	h1 {
+		color: #fff;
+		display: inline-block;
+		font-family: Iceland,sans-serif;
+		font-size: rem(40);
+		font-weight: normal;
+		line-height: 0.8;
+		position: relative;
+		text-indent: rem(15);
+		top: rem(-15);
+		z-index: 10;
+	
+		&:first-line {
+			color: #000; 
+		}
+		
+		&:before {
+			background: url("../../media/images/sr5.png") no-repeat;
+			content: " ";
+			display: inline-block;
+			height: rem(115);
+			left: rem(-90);
+			position: absolute;
+			top:  rem(-32);
+			width: rem(100);
+		}
+	}
+	
+	nav {
+		background: #a01a1e; /* Old browsers */
+		background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2EwMWExZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjY2JSIgc3RvcC1jb2xvcj0iIzAwMDAwMCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ1cmwoI2dyYWQtdWNnZy1nZW5lcmF0ZWQpIiAvPgo8L3N2Zz4=);
+		background: -moz-linear-gradient(left,  #a01a1e 0%, #000000 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, right top, color-stop(0%,#a01a1e), color-stop(100%,#000000)); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(left,  #a01a1e 0%,#000000 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(left,  #a01a1e 0%,#000000 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(left,  #a01a1e 0%,#000000 100%); /* IE10+ */
+		background: linear-gradient(to right,  #a01a1e 0%,#000000 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a01a1e', endColorstr='#000000',GradientType=1 ); /* IE6-8 */
+
+		height: rem(40);
+		margin: 0 rem(20) 0 rem(200);
+		position: relative;
+		top: rem(-78);
+		z-index: 5;
+				
+		&:before {
+			background-color: #a01a1e;
+			content: " ";
+			display: inline-block;
+			height: rem(40);
+			margin-left: rem(-6997);
+			position: absolute;
+			width: rem(6997);
+		}
+		
+		&:after {
+			background-color: #000000;
+			content: " ";
+			display: inline-block;
+			height: rem(40);
+			left: 100%;
+			position: absolute;
+			top: 0;
+			width: rem(6997);
+		}
+	}
+}

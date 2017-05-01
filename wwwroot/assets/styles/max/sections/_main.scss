@@ -1,0 +1,81 @@
+main {
+	background: #fff;
+	border: rem(1) solid #000;
+	height: auto;
+	margin: rem(20);
+	min-height: rem(150);
+	padding: rem(20);
+	position: relative;
+	
+	&:before {
+		background: url("../../media/images/bar.png") no-repeat;
+		content: " ";
+		display: inline-block;
+		height: rem(100);
+		left: rem(-20);
+		position: absolute;
+		top: rem(-20);
+		width: rem(100);
+	}
+	
+	&:after {
+		background: url("../../media/images/bar.png") no-repeat;
+		bottom: rem(-20);
+		content: " ";
+		display: inline-block;
+		height: rem(100);
+		right: rem(-20);
+		position: absolute;
+		width: rem(100);
+		transform: rotate(180deg);
+	}
+	
+	h2       { font-size: rem(25); margin: 0; }
+	h3       { font-size: rem(20); }
+	h4,h5,h6 { font-size: rem(16); }
+	
+	h5,h6 { font-weight: normal;        }
+	h4,h5 { text-transform: uppercase;  }
+	h6    { text-decoration: underline; }
+
+	p, ol, ul, dl, form, table, fieldset, blockquote, .notice {
+		margin-bottom: rem(12);
+		margin-top: rem(12);
+	}
+	
+	#cheatsheets {
+		display: flex;
+		flex-wrap: wrap;
+
+		.sheet {
+			width: 30%;
+		}
+
+		ol {
+			list-style-type: none;
+			margin:  0;
+			padding: 0;
+		}
+		
+		li.incomplete a {
+			color: palette(mono);
+			cursor: pointer;
+			text-decoration: none;
+		}
+	}
+
+	.notice {
+		border: rem(1) solid palette(mono, text);
+		border-left-width: rem(5);
+		padding: rem(10);
+
+		p {
+			margin: 0;
+		}
+
+		&.notice-error {
+			background-color: lighten(palette(red), 72.5%);
+			border-color: palette(red);
+		}
+	}
+}

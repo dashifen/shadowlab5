@@ -1,0 +1,60 @@
+table {
+	border: 1px solid palette(mono, dark);
+	border-collapse: collapse;
+	width: 100%;
+
+	td, th {
+		padding: rem(5);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	thead th {
+		background-color: #333;
+		color: #fff;
+		text-align: left;
+		vertical-align: bottom;
+
+		span {
+			@include visuallyhidden;
+		}
+	}
+
+	th {
+		font-weight: bold;
+	}
+
+	tbody tr {
+		border-bottom: 1px solid palette(mono, dark);
+	}
+
+	&.summarized {
+		tbody:not(.clicked) .description {
+			display: none;
+		}
+
+		tbody.clicked {
+			.summary {
+				border-bottom-style: none;
+			}
+
+			.summary,
+			.description {
+				background-color: palette(mono, white) !important;
+			}
+		}
+	}
+
+	&.stat-block {
+		thead th {
+			width: 9.09090909%;
+		}
+
+		thead th,
+		tbody tr:first-child td {
+			text-align: center;
+		}
+
+
+	}
+}

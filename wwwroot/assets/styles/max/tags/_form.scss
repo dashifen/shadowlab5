@@ -1,0 +1,176 @@
+form {
+	fieldset {
+		background: lighten(palette(mono, light), 2.5%);
+		border: rem(1) solid palette(mono, dark);
+		padding: rem(12);
+		position: relative;
+
+		legend {
+			label {
+				@extend h2;
+				font-weight: bold;
+				padding: 0 rem(5);
+			}
+
+			& + * {
+				margin-top: 0;
+			}
+		}
+
+		ol, p {
+			@extend .no-list;
+			padding-left: rem(5);
+			margin-bottom: rem(1);
+		}
+
+		li {
+			button {
+				margin: 0;
+			}
+
+			& + li {
+				margin-top: rem(12);
+			}
+
+			&.field-honeypot {
+				@include visuallyhidden;
+			}
+
+			p {
+				padding-left: 0;
+			}
+		}
+
+		label {
+			display: block;
+			font-weight: bold;
+			padding-bottom: rem(2.5);
+
+			&:not(.no-colon) span:after {
+				content: ":";
+			}
+
+			strong,
+			&.error {
+				color: palette(red);
+				display: block;
+			}
+
+			&.required {
+				position: relative;
+
+				i.fa-star {
+					right: rem(-1);
+				}
+			}
+		}
+
+		button {
+			margin-left: rem(5);
+		}
+
+		fieldset {
+			border-style: none;
+			padding: 0;
+
+			legend label {
+				font-size: rem(10);
+				font-weight: bold;
+				padding: 0 0 rem(2.5);
+			}
+
+			ol {
+				margin-bottom: 0;
+				padding-left: rem(15);
+
+				&.bold-labels label {
+					font-weight: bold;
+				}
+			}
+
+			li {
+				margin-top: 0;
+			}
+
+			label {
+				font-weight: normal;
+				padding-bottom: 0;
+			}
+
+			p {
+				margin-bottom: rem(5);
+				padding-left: 0;
+			}
+		}
+	}
+
+	optgroup {
+		padding-bottom: rem(10);
+	}
+
+	i.fa-star {
+		color: #a01a1e;
+		font-size: rem(8);
+		position: relative;
+		top: -1px;
+	}
+}
+
+form.searchbar {
+	fieldset {
+		background-color: #ffc;
+		border-color: #fc0;
+	}
+
+	label {
+		display: inline-block;
+
+		&:not(.checkbox) {
+			margin-right: rem(10);
+		}
+
+		em {
+			font-family: $body-text;
+			font-style: normal;
+
+			&::after {
+				content: ":";
+			}
+		}
+
+		&.toggle strong {
+			color: palette(mono, text);
+			display: inline;
+		}
+	}
+
+	ol, li {
+		margin-bottom: 0;
+	}
+
+	ol + ol {
+		margin-top: rem(5);
+	}
+
+	li {
+		display: inline;
+		width: auto;
+
+		& + li {
+			margin-left: rem(10);
+		}
+	}
+
+	ol:first-of-type li:last-child {
+		float: right;
+		margin: 0;
+	}
+
+	button {
+		margin-top: 0;
+	}
+}
+
+select {
+	height: rem(27);
+}

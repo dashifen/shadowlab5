@@ -1,0 +1,1 @@
+form#log-in li.field-password{display:flex;flex-flow:column}form#log-in li.field-password label{order:1}form#log-in li.field-password input{order:2}form#log-in li.field-password p{font-size:85%;order:3}form#log-in input{width:20rem}

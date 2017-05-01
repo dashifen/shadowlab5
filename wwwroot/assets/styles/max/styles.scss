@@ -1,0 +1,93 @@
+@import "config";
+
+html {
+	box-sizing: border-box;
+	background: url("../../media/images/background-light.jpg") repeat;
+	font-size: 62.5%;
+	height: 100%;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+body {
+	font: rem(16)/1.33 $body-text;
+	height: 100%;
+	margin: 0 auto;
+	max-width: rem(1050);
+	overflow-x: hidden;
+	overflow-y: visible !important;
+	width: 90%;
+}
+
+a {
+	text-decoration: underline;
+	&:link, &:visited {
+		color: #900;
+	}
+	&:active, &:focus, &:hover {
+		color: #F00;
+	}
+}
+
+abbr span {
+	@include visuallyhidden;
+}
+
+em {
+	font-family: 'Droid Serif', serif;
+}
+
+.no-list {
+	list-style-type: none;
+	margin:  0;
+	padding: 0;
+}
+
+li:not(fieldset li) + li {
+	margin-top: rem(5);
+}
+
+.columns {
+	column-count: 2;
+	column-gap: 1rem;
+
+	&.three-columns {
+		column-count: 3;
+	}
+
+	&.four_columns {
+		column-count: 4;
+	}
+}
+
+ul, ol {
+	&.oxford {
+		@include oxford;
+	}
+}
+
+@import "sections/header";
+@import "sections/mainmenu";
+@import "sections/main";
+@import "sections/footer";
+@import "tags/table";
+@import "tags/form";
+@import "tags/lists";
+@import "atoms";
+
+.sweet-alert {
+	h2, p {
+		color: palette(mono, text);
+		text-align: left;
+	}
+
+	button {
+		background-color: palette(blue) !important;
+
+		&:active, &:focus, &:hover {
+			background-color: lighten(palette(blue), 25%) !important;
+		}
+	}
+}

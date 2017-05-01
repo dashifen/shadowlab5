@@ -1,0 +1,65 @@
+.mainmenu {
+	.menu,
+	.sub-menu {
+		list-style-type: none;
+		margin:  0;
+		padding: 0;
+	}
+	
+	.menu {
+		text-align: right;
+
+		& > li {
+			display: inline-block;
+			position: relative;
+
+			a {
+				color: palette(mono, white);
+				display: inline-block;
+				font-weight: bold;
+				height: rem(40);
+				letter-spacing: 0.05em;
+				line-height: rem(40);
+				padding: 0 rem(30);
+				text-transform: uppercase;
+			}
+
+			&:hover, > a:active, > a:focus, > a:hover {
+				background-color: palette(blue);
+			}
+
+			&.menu-overflow .sub-menu {
+				left: auto;
+				right: 0;
+				text-align: right;
+			}
+
+			&:hover .sub-menu {
+				display: block;
+			}
+		}
+	}
+
+	.sub-menu {
+		background-color: palette(blue);
+		display: none;
+		left: 0;
+		position: absolute;
+		text-align: left;
+		top: 100%;
+
+		a {
+			white-space: nowrap;
+
+			&:active, &:focus, &:hover {
+				background-color: lighten(palette(blue), 25%);
+				color: palette(mono, dark);
+				width: 100%;
+			}
+		}
+
+		li.incomplete a {
+			color: lighten(palette(blue), 35%);
+		}
+	}
+}

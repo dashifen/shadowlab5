@@ -1,0 +1,16 @@
+footer[role=contentinfo] {
+	color: #999;
+	font-size: rem(13);
+	margin:  rem(20) 0;
+	padding: 0 rem(40);
+	text-align: justify;
+	
+	a {
+		&:link, &:visited { color: #999; }
+		&:active, &:focus, &:hover { color: #900; }
+	}
+	
+	p {
+		display: inline;
+	}
+}

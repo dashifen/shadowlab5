@@ -1,0 +1,147 @@
+i.fa span {
+	@include visuallyhidden;
+}
+
+.icon {
+	width: 32px;
+}
+
+.small {
+	height: 5rem;
+}
+
+.medium {
+	height: 10rem;
+}
+
+.large {
+	height: 15rem;
+}
+
+.dib {
+	display: inline-block;
+}
+
+.relative {
+	position: relative;
+}
+
+.float-left {
+	float: left;
+
+	& + .float-left {
+		margin-left: .6rem;
+	}
+}
+
+.float-right {
+	float: right;
+}
+
+.sr-only {
+	@include visuallyhidden;
+}
+
+.clear {
+	clear: both;
+}
+
+.clear-left {
+	clear: left;
+}
+
+.clear-right {
+	clear: right;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.no-margin {
+	margin: 0 !important;
+}
+
+.no-padding {
+	padding: 0 !important;
+}
+
+.padded {
+	padding: 1.2rem;
+}
+
+.no-border {
+	border-style: none;
+}
+
+.error {
+	color: palette(red);
+}
+
+$sides: ('top', 'right', 'bottom', 'left');
+
+@each $side in $sides {
+	$abbr: str-slice($side, 1, 1);
+
+	.mar#{$abbr} {
+		margin-#{$side}: 1.2rem !important;
+	}
+
+	.mar-#{$abbr} {
+		margin-#{$side}: -1.2rem !important;
+	}
+
+	.pad#{$abbr} {
+		padding-#{$side}: 1.2rem !important;
+	}
+
+	.#{$abbr} {
+		border-#{$side}: 1px solid palette(mono);
+	}
+}
+
+@for $i from 1 through 20 {
+	$j: $i * 5;
+
+	.w#{$j} {
+		width: 0% + $j;
+	}
+}
+
+.flex {
+	display: flex;
+
+	&.columns {
+		flex-direction: column;
+	}
+
+	&.wrap {
+		flex-wrap: wrap;
+	}
+
+	&.around {
+		justify-content: space-around;
+	}
+
+	&.between {
+		justify-content: space-between;
+	}
+
+	@for $i from 1 through 20 {
+		.o#{$i} {
+			order: $i;
+		}
+
+		.f#{$i} {
+			flex: $i;
+		}
+	}
+}

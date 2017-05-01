@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "df845f63343449e46d6eed360c18d409",
+    "content-hash": "3eb6edbb914f686878b546d33898d846",
     "packages": [
         {
             "name": "aura/di",
@@ -239,16 +239,16 @@
         },
         {
             "name": "dashifen/action",
-            "version": "1.0.0",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/action.git",
-                "reference": "d71deaa49b7bad82c59344272a5ad031f2a8dfc0"
+                "reference": "25ec8a763be0d544cc1770fa216af69e34744764"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/action/zipball/d71deaa49b7bad82c59344272a5ad031f2a8dfc0",
-                "reference": "d71deaa49b7bad82c59344272a5ad031f2a8dfc0",
+                "url": "https://api.github.com/repos/dashifen/action/zipball/25ec8a763be0d544cc1770fa216af69e34744764",
+                "reference": "25ec8a763be0d544cc1770fa216af69e34744764",
                 "shasum": ""
             },
             "require": {
@@ -276,7 +276,7 @@
                 }
             ],
             "description": "an action object that handles a web request, interacts with a domain, and helps to emit a response",
-            "time": "2017-04-19T22:29:59+00:00"
+            "time": "2017-04-24T21:15:24+00:00"
         },
         {
             "name": "dashifen/database",
@@ -328,16 +328,16 @@
         },
         {
             "name": "dashifen/domain",
-            "version": "0.9.2",
+            "version": "0.9.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/domain.git",
-                "reference": "b2ec97d2b2c44b3d893d65eaa2f88ad38734314c"
+                "reference": "fd56129f2e79372e85f17f84aec561449c8dd253"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/domain/zipball/b2ec97d2b2c44b3d893d65eaa2f88ad38734314c",
-                "reference": "b2ec97d2b2c44b3d893d65eaa2f88ad38734314c",
+                "url": "https://api.github.com/repos/dashifen/domain/zipball/fd56129f2e79372e85f17f84aec561449c8dd253",
+                "reference": "fd56129f2e79372e85f17f84aec561449c8dd253",
                 "shasum": ""
             },
             "require": {
@@ -364,20 +364,60 @@
                 }
             ],
             "description": "interfaces and implementation for domains and payload delivery",
-            "time": "2017-04-19T17:15:11+00:00"
+            "time": "2017-04-26T23:02:03+00:00"
         },
         {
-            "name": "dashifen/request",
-            "version": "1.0.2",
+            "name": "dashifen/exceptionator",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/dashifen/request.git",
-                "reference": "2d765c0575fb48bc547af14d73cef2b77014a5fa"
+                "url": "https://github.com/dashifen/exceptionator.git",
+                "reference": "2b8515c530d2691c90cc2748c06a6cc58e093df8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/request/zipball/2d765c0575fb48bc547af14d73cef2b77014a5fa",
-                "reference": "2d765c0575fb48bc547af14d73cef2b77014a5fa",
+                "url": "https://api.github.com/repos/dashifen/exceptionator/zipball/2b8515c530d2691c90cc2748c06a6cc58e093df8",
+                "reference": "2b8515c530d2691c90cc2748c06a6cc58e093df8",
+                "shasum": ""
+            },
+            "require": {
+                "dashifen/database": "<2.0",
+                "dashifen/request": "^1.0",
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Exceptionator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "an error/exception handler that works just the way I like it",
+            "time": "2017-04-30T15:16:55+00:00"
+        },
+        {
+            "name": "dashifen/request",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/request.git",
+                "reference": "a77c03253c4036abb025503ad6da011a1375e727"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/request/zipball/a77c03253c4036abb025503ad6da011a1375e727",
+                "reference": "a77c03253c4036abb025503ad6da011a1375e727",
                 "shasum": ""
             },
             "require": {
@@ -404,20 +444,20 @@
                 }
             ],
             "description": "a basic encapsulation of an http request from a visitor to a website",
-            "time": "2017-04-15T21:51:15+00:00"
+            "time": "2017-04-30T14:22:26+00:00"
         },
         {
             "name": "dashifen/response",
-            "version": "0.9.0",
+            "version": "0.9.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/response.git",
-                "reference": "b07ad329d024f06a488daf25d41834861674ef98"
+                "reference": "279e39caa4963f108015500941bdd3f5316253bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/response/zipball/b07ad329d024f06a488daf25d41834861674ef98",
-                "reference": "b07ad329d024f06a488daf25d41834861674ef98",
+                "url": "https://api.github.com/repos/dashifen/response/zipball/279e39caa4963f108015500941bdd3f5316253bc",
+                "reference": "279e39caa4963f108015500941bdd3f5316253bc",
                 "shasum": ""
             },
             "require": {
@@ -443,7 +483,46 @@
                 }
             ],
             "description": "an encapsulation of a HTTP response",
-            "time": "2017-04-19T20:46:43+00:00"
+            "time": "2017-04-27T12:47:57+00:00"
+        },
+        {
+            "name": "dashifen/router",
+            "version": "1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/router.git",
+                "reference": "031af415dd6265e77752727da5c5b9c48cde4bcf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/router/zipball/031af415dd6265e77752727da5c5b9c48cde4bcf",
+                "reference": "031af415dd6265e77752727da5c5b9c48cde4bcf",
+                "shasum": ""
+            },
+            "require": {
+                "dashifen/request": "^1.0",
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Router\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "a PHP routing object",
+            "time": "2017-04-30T15:23:24+00:00"
         },
         {
             "name": "dashifen/session",
@@ -885,53 +964,7 @@
             "time": "2017-04-12 19:29:56"
         }
     ],
-    "packages-dev": [
-        {
-            "name": "league/booboo",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/booboo.git",
-                "reference": "50008c980c5f710599705cb6758723588e875133"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/booboo/zipball/50008c980c5f710599705cb6758723588e875133",
-                "reference": "50008c980c5f710599705cb6758723588e875133",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0",
-                "psr/log": "~1.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "~0.9",
-                "phpunit/phpunit": "~4.3",
-                "raven/raven": "0.10.0"
-            },
-            "suggest": {
-                "raven/raven": "Use Raven for passing errors to Sentry."
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "League\\BooBoo\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Brandon Savage",
-                    "homepage": "https://www.brandonsavage.net/"
-                }
-            ],
-            "description": "Provides an error handler for PHP that can execute a stack of handlers for various purposes.",
-            "time": "2015-02-25T19:12:30+00:00"
-        }
-    ],
+    "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {

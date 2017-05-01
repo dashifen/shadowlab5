@@ -1,0 +1,19 @@
+@import "../_config.scss";
+
+.clicker {
+	color: palette(red, mid-light);
+	cursor: pointer;
+	text-decoration: underline;
+
+	&:focus, &:hover {
+		color: palette(red, light);
+	}
+	
+	&::before,
+	&::after {
+		color: palette(mono, text);
+		cursor: default;
+		display: inline-block;
+		text-decoration: none;
+	}
+}
