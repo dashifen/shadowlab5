@@ -1,5 +1,7 @@
 <?php
 
+namespace Shadowlab\User\Login;
+
 use Shadowlab\Response\AbstractShadowlabResponse;
 
 class LoginResponse extends AbstractShadowlabResponse {
@@ -10,7 +12,7 @@ class LoginResponse extends AbstractShadowlabResponse {
 		// to do, really, other than set our data and load up the login
 		// form.
 		
-		$this->setContent("index.html");
+		$this->setContent("login.html");
 		$this->setData($data);
 	}
 	
@@ -19,7 +21,7 @@ class LoginResponse extends AbstractShadowlabResponse {
 		// perhaps oddly, the success and failure responses include the same
 		// content.  the information in our data is what's different.
 		
-		$this->setContent("index.html");
+		$this->setContent("login.html");
 		$this->setData($data);
 	}
 	
@@ -33,5 +35,4 @@ class LoginResponse extends AbstractShadowlabResponse {
 		$this->setContent("unauthorized.html");
 		$this->setData($data);
 	}
-	
 }

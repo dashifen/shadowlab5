@@ -1,8 +1,10 @@
 @import "config";
+@import "normalize";
+@import "main";
 
 html {
 	box-sizing: border-box;
-	background: url("../../media/images/background-light.jpg") repeat;
+	background: url("../media/images/background-light.jpg") repeat;
 	font-size: 62.5%;
 	height: 100%;
 }

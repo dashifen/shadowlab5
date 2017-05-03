@@ -17,7 +17,7 @@ class Actions extends ShadowlabContainerConfig {
 		// actions that we're loading.  Aura/Di can set the parent's parameter
 		// and then we can specify the differences for the children.
 		
-		$di->params['Dashifen\Action\AbstractAction']['request'] = $di->lazyGet("service");
+		$di->params['Dashifen\Action\AbstractAction']['request'] = $di->lazyGet("request");
 		
 		// because this object extends the Shadowlab's container configuration
 		// object, we can use the protected methods of that object to grab the
@@ -30,8 +30,8 @@ class Actions extends ShadowlabContainerConfig {
 			: $this->getHandlerCache();
 		
 		foreach ($handlers as $handler) {
-			$di->params[$handler->action]['domain'] = $handler->domain;
-			$di->params[$handler->action]['response'] = $handler->response;
+			$di->params[$handler->action]['domain'] = $di->lazyNew($handler->domain);
+			$di->params[$handler->action]['response'] = $di->lazyNew($handler->response);
 		}
 	}
 }

@@ -21,21 +21,21 @@ class Responses extends ContainerConfig {
 			'wwwroot'								// and down into wwwroot
 		]);
 		
-		$di->params['Dashifen\Response\View\View']["header"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "header.php"]);
-		$di->params['Dashifen\Response\View\View']["footer"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "footer.php"]);
+		$di->params['Shadowlab\View\View']["header"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "header.php"]);
+		$di->params['Shadowlab\View\View']["footer"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "footer.php"]);
 		
 		// for our responses, they're all constructed the same; only their
 		// implementation is different.  so, we can configure them as follows:
 		
-		$di->params['Dashifen\Response\Response']['view'] = $di->lazyNew('Dashifen\Response\View\View');
-		$di->params['Dashifen\Response\Response']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
-		$di->params['Dashifen\Response\Response']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
+		$di->params['Dashifen\Response\AbstractResponse']['view'] = $di->lazyNew('Shadowlab\View\View');
+		$di->params['Dashifen\Response\AbstractResponse']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
+		$di->params['Dashifen\Response\AbstractResponse']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
 		
 		// the final parameter to our response is the root path for the
 		// content that it needs to load.  for this app, that root is the
 		// wwwroot/views folder.  we have our path to wwwroot from the work
 		// we did above; now we just add our views folder.
 		
-		$di->params['Dashifen\Response\Response']['root_path'] = $path . DIRECTORY_SEPARATOR . "views";;
+		$di->params['Dashifen\Response\AbstractResponse']['root_path'] = $path . DIRECTORY_SEPARATOR . "views";;
 	}
 }

@@ -8,7 +8,7 @@ main {
 	position: relative;
 	
 	&:before {
-		background: url("../../media/images/bar.png") no-repeat;
+		background: url("../media/images/bar.png") no-repeat;
 		content: " ";
 		display: inline-block;
 		height: rem(100);
@@ -19,7 +19,7 @@ main {
 	}
 	
 	&:after {
-		background: url("../../media/images/bar.png") no-repeat;
+		background: url("../media/images/bar.png") no-repeat;
 		bottom: rem(-20);
 		content: " ";
 		display: inline-block;

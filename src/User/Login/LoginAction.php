@@ -23,24 +23,6 @@ class LoginAction extends AbstractAction {
 	/**
 	 * @return ResponseInterface
 	 */
-	protected function doLogin() {
-		
-		// there isn't a failure case with respect to a simple login,
-		// so we can just handle success here.  since we've not done
-		// anything yet, there's no errors and
-		
-		$this->response->handleSuccess([
-			"email"       => $this->request->getCookieVar("email"),
-			"redirect_to" => $this->request->getSessionVar("redirect_to"),
-			"errors"      => [],
-		]);
-		
-		return $this->response;
-	}
-	
-	/**
-	 * @return ResponseInterface
-	 */
 	protected function doAuthentication() {
 		
 		// to authenticate, we'll get the posted username and password
@@ -84,8 +66,11 @@ class LoginAction extends AbstractAction {
 				// to which they want to go after logging in.
 				
 				$this->response->handleFailure([
+					"title"       => "Login Failed",
+					"menu"        => "",
 					"email"       => $email,
 					"redirect_to" => $this->request->getPostVar("redirect_to"),
+					"honeypot"    => $this->request->getPostVar("honeypot"),
 					"errors"      => $payload->getDatum("errors"),
 				]);
 			}
@@ -132,5 +117,26 @@ class LoginAction extends AbstractAction {
 		
 		$session->set("login_attempts", $attempts);
 		return false;
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function doLogin() {
+		
+		// there isn't a failure case with respect to a simple login,
+		// so we can just handle success here.  since we've not done
+		// anything yet, there's no errors and
+		
+		$this->response->handleSuccess([
+			"title"       => "Login",
+			"menu"        => "",
+			"email"       => $this->request->getCookieVar("email"),
+			"redirect_to" => $this->request->getSessionVar("redirect_to"),
+			"honeypot"    => "",
+			"errors"      => [],
+		]);
+		
+		return $this->response;
 	}
 }

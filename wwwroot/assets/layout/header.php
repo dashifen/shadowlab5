@@ -25,23 +25,24 @@
 	<link rel="manifest" href="/assets/media/favicons/manifest.json">
 
 	<link href="//fonts.googleapis.com/css?family=Iceland:400,700|Droid+Sans:400,700|Droid+Serif:400italic,700italic" rel="stylesheet" type="text/css">
-	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-	<link href="/assets/styles/min/third-party/sweetalert.min.css" rel="stylesheet" type="text/css">
 	<link href="/assets/styles/shadowlab.min.css" rel="stylesheet" type="text/css">
-
+	<script src="https://use.fontawesome.com/e1cf9918af.js"></script>
+	<script src="https://unpkg.com/vue"></script>
+	
 	<!--[if gte IE 9]> <style type="text/css"> .gradient { filter: none; } </style> <![endif]-->
 
-	<title>$title</title>
+	<title>The Shadowlab by Dashifen</title>
 </head>
 <body>
-<header role="banner">
-	<a href="/"><h1>The<br>ShadowLab</h1></a>
-
-	<nav role="navigation" class="menu mainmenu gradient">
-		<h2 class="visuallyhidden">Main Menu</h2>
-		$menu
-	</nav>
-</header>
-
-<main role="main">
-	<h2>$heading</h2>
+	<div id="shadowlab">
+		<header role="banner">
+			<a href="/"><h1>The<br>ShadowLab</h1></a>
+		
+			<nav role="navigation" class="menu mainmenu gradient">
+				<h2 class="visuallyhidden">Main Menu</h2>
+				{{ menu }}
+			</nav>
+		</header>
+		
+		<main role="main">
+			<h2>{{ heading }}</h2>
