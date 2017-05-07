@@ -1,8 +1,14 @@
 <p>Welcome to the Shadowlab!</p>
 
-<form method="post" action="/authenticate">
-<input type="hidden" name="redirect_to" v-bind:value="redirect_to">
+<template v-if="error">
+	<section class="notice notice-error" :data-attempts="attempts">
+		<header><h3>Unable to Log In</h3></header>
+		<p>{{ error }}</p>
+	</section>
+</template>
 
+<form method="post" action="/authenticate">
+<input type="hidden" name="redirect_to" :value="redirect_to">
 
 <fieldset>
 	<legend>
@@ -12,7 +18,7 @@
 	<ol>
 		<li>
 			<label for="email">Email Address:</label>
-			<input type="email" id="email" name="email" v-bind:value="email">
+			<input type="email" id="email" name="email" :value="email">
 		</li>
 		<li>
 			<label for="password">Password:</label>
@@ -23,7 +29,7 @@
 			<p>Our apologies if you're reading or hearing about this field.  It's
 			to try and catch bots that might try to log in here.  It has to be
 			blank or we'll automatically reject your attempt to log in.</p>
-			<input type="text" id="honeypot" name="honeypot" v-bind:value="honeypot">
+			<input type="text" id="honeypot" name="honeypot" :value="honeypot">
 		</li>
 		<li>
 			<button type="submit">

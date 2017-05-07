@@ -1,0 +1,29 @@
+<table id="collection">
+<caption v-if="table.caption" v-html="table.caption"></caption>
+<thead>
+	<tr>
+		<th v-for="th in table.headers" :class="th.classes" :id="th.id" scope="col">
+			{{ th.display | capitalize }}
+		</th>
+	</tr>
+</thead>
+<tbody v-for="body in table.bodies" :data-id="body.tbody_id">
+	<tr class="data">
+		<td v-for="(cell, index) in body.data" :headers="cell.column" :class="table.headers[index].classes" v-html="cell.html"></td>
+	</tr>
+	<tr v-if="body.description.description" class="description">
+		<td :colspan="body.data.count">
+			<section>
+				<p>{{ body.description.description | nl2br }}</p>
+				
+				<footer v-if="body.description.reference">
+					p. {{ body.description.reference.page }},
+					   {{ body.description.reference.abbr }}
+				</footer>
+			</section>
+		</td>
+	</tr>
+</tbody>
+</table>
+		
+		

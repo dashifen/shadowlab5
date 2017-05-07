@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "abea9809015aeab77817cd52d83279e5",
+    "content-hash": "33b397aa449e9dea37c89f8d305d4067",
     "packages": [
         {
             "name": "aura/di",
@@ -239,22 +239,22 @@
         },
         {
             "name": "dashifen/action",
-            "version": "1.0.3",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/action.git",
-                "reference": "25ec8a763be0d544cc1770fa216af69e34744764"
+                "reference": "7051205be9325d3fe2954c7e3c4c55490872c54a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/action/zipball/25ec8a763be0d544cc1770fa216af69e34744764",
-                "reference": "25ec8a763be0d544cc1770fa216af69e34744764",
+                "url": "https://api.github.com/repos/dashifen/action/zipball/7051205be9325d3fe2954c7e3c4c55490872c54a",
+                "reference": "7051205be9325d3fe2954c7e3c4c55490872c54a",
                 "shasum": ""
             },
             "require": {
-                "dashifen/domain": "<2.0",
-                "dashifen/request": "^1.0",
-                "dashifen/response": "<2.0",
+                "dashifen/domain": "^2",
+                "dashifen/request": "^1",
+                "dashifen/response": "^1",
                 "php": "^7.1"
             },
             "type": "library",
@@ -276,20 +276,20 @@
                 }
             ],
             "description": "an action object that handles a web request, interacts with a domain, and helps to emit a response",
-            "time": "2017-04-24T21:15:24+00:00"
+            "time": "2017-05-05T12:34:19+00:00"
         },
         {
             "name": "dashifen/database",
-            "version": "1.0.6",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "6256dede61680a023669b32b2ab6f7c0b07c6700"
+                "reference": "791c028c4af6d8fda711a995967e46c5c3e17a2a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/6256dede61680a023669b32b2ab6f7c0b07c6700",
-                "reference": "6256dede61680a023669b32b2ab6f7c0b07c6700",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/791c028c4af6d8fda711a995967e46c5c3e17a2a",
+                "reference": "791c028c4af6d8fda711a995967e46c5c3e17a2a",
                 "shasum": ""
             },
             "require": {
@@ -324,20 +324,20 @@
                 "database",
                 "pdo"
             ],
-            "time": "2017-04-18T14:26:29+00:00"
+            "time": "2017-05-04T18:32:08+00:00"
         },
         {
             "name": "dashifen/domain",
-            "version": "0.9.13",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/domain.git",
-                "reference": "eafba4649af22b1b7d998bbebed749cc725c7487"
+                "reference": "5436144ecf050ad67d18ca15ba109a2b664c842d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/domain/zipball/eafba4649af22b1b7d998bbebed749cc725c7487",
-                "reference": "eafba4649af22b1b7d998bbebed749cc725c7487",
+                "url": "https://api.github.com/repos/dashifen/domain/zipball/5436144ecf050ad67d18ca15ba109a2b664c842d",
+                "reference": "5436144ecf050ad67d18ca15ba109a2b664c842d",
                 "shasum": ""
             },
             "require": {
@@ -364,7 +364,7 @@
                 }
             ],
             "description": "interfaces and implementation for domains and payload delivery",
-            "time": "2017-05-01T19:50:23+00:00"
+            "time": "2017-05-05T12:45:51+00:00"
         },
         {
             "name": "dashifen/exceptionator",
@@ -448,16 +448,16 @@
         },
         {
             "name": "dashifen/response",
-            "version": "1.1.1",
+            "version": "1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/response.git",
-                "reference": "0e795e635a2fea1ce786b28dc0dd3c0bd8c898bd"
+                "reference": "3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/response/zipball/0e795e635a2fea1ce786b28dc0dd3c0bd8c898bd",
-                "reference": "0e795e635a2fea1ce786b28dc0dd3c0bd8c898bd",
+                "url": "https://api.github.com/repos/dashifen/response/zipball/3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc",
+                "reference": "3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc",
                 "shasum": ""
             },
             "require": {
@@ -483,20 +483,20 @@
                 }
             ],
             "description": "an encapsulation of a HTTP response",
-            "time": "2017-05-02T23:17:44+00:00"
+            "time": "2017-05-04T23:31:27+00:00"
         },
         {
             "name": "dashifen/router",
-            "version": "1.0.7",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/router.git",
-                "reference": "031af415dd6265e77752727da5c5b9c48cde4bcf"
+                "reference": "f007dcbdbcf54f5b4a87916d8d929988bbb56ad1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/router/zipball/031af415dd6265e77752727da5c5b9c48cde4bcf",
-                "reference": "031af415dd6265e77752727da5c5b9c48cde4bcf",
+                "url": "https://api.github.com/repos/dashifen/router/zipball/f007dcbdbcf54f5b4a87916d8d929988bbb56ad1",
+                "reference": "f007dcbdbcf54f5b4a87916d8d929988bbb56ad1",
                 "shasum": ""
             },
             "require": {
@@ -522,20 +522,20 @@
                 }
             ],
             "description": "a PHP routing object",
-            "time": "2017-04-30T15:23:24+00:00"
+            "time": "2017-05-05T18:54:32+00:00"
         },
         {
             "name": "dashifen/session",
-            "version": "1.0.3",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/session.git",
-                "reference": "83af55e55853fb50511ad1ebcf690732e41b1e11"
+                "reference": "5e5d8455afc5c4d854e96be94c17807bb52cf99a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/session/zipball/83af55e55853fb50511ad1ebcf690732e41b1e11",
-                "reference": "83af55e55853fb50511ad1ebcf690732e41b1e11",
+                "url": "https://api.github.com/repos/dashifen/session/zipball/5e5d8455afc5c4d854e96be94c17807bb52cf99a",
+                "reference": "5e5d8455afc5c4d854e96be94c17807bb52cf99a",
                 "shasum": ""
             },
             "require": {
@@ -563,7 +563,7 @@
             "keywords": [
                 "session"
             ],
-            "time": "2017-04-21T15:49:39+00:00"
+            "time": "2017-05-03T18:17:47+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

@@ -8,7 +8,7 @@ use Aura\Di\ContainerConfig;
 class Responses extends ContainerConfig {
 	public function define(Container $di) {
 		
-		// for our objects here, we need to know where our wwwroot folder
+		// for our objects here, we need to know where our views folder
 		// is compared to this one.  the following will build us a path to
 		// that folder which we then use to configure our views and our
 		// response.
@@ -18,24 +18,23 @@ class Responses extends ContainerConfig {
 			'..', 								 	// move up
 			'..', 								 	// three folders
 			'..', 									// to shadowlab's root
-			'wwwroot'								// and down into wwwroot
+			'views'									// and down into views
 		]);
 		
-		$di->params['Shadowlab\View\View']["header"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "header.php"]);
-		$di->params['Shadowlab\View\View']["footer"] = join(DIRECTORY_SEPARATOR, [$path, "assets", "layout", "footer.php"]);
+		$di->params['Shadowlab\Framework\View\View']["header"] = join(DIRECTORY_SEPARATOR, [$path, "__layout", "header.html"]);
+		$di->params['Shadowlab\Framework\View\View']["footer"] = join(DIRECTORY_SEPARATOR, [$path, "__layout", "footer.html"]);
 		
 		// for our responses, they're all constructed the same; only their
 		// implementation is different.  so, we can configure them as follows:
 		
-		$di->params['Dashifen\Response\AbstractResponse']['view'] = $di->lazyNew('Shadowlab\View\View');
-		$di->params['Dashifen\Response\AbstractResponse']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
-		$di->params['Dashifen\Response\AbstractResponse']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
+		$di->params['Shadowlab\Framework\Response\Response']['view'] = $di->lazyNew('Shadowlab\Framework\View\View');
+		$di->params['Shadowlab\Framework\Response\Response']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
+		$di->params['Shadowlab\Framework\Response\Response']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
 		
 		// the final parameter to our response is the root path for the
-		// content that it needs to load.  for this app, that root is the
-		// wwwroot/views folder.  we have our path to wwwroot from the work
-		// we did above; now we just add our views folder.
+		// content that it needs to load.  that root is the same views folder
+		// we identified above.  we can pass that along as follows:
 		
-		$di->params['Dashifen\Response\AbstractResponse']['root_path'] = $path . DIRECTORY_SEPARATOR . "views";;
+		$di->params['Shadowlab\Framework\Response\Response']['root_path'] = $path;
 	}
 }

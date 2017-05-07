@@ -2,9 +2,9 @@
 
 namespace Shadowlab\User\Login;
 
-use Shadowlab\Response\AbstractShadowlabResponse;
+use Shadowlab\Framework\Response\ShadowlabResponse;
 
-class LoginResponse extends AbstractShadowlabResponse {
+class LoginResponse extends ShadowlabResponse {
 	public function handleSuccess(array $data = []): void {
 		
 		// handleSuccess is not actually a successful login in this case.

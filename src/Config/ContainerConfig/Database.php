@@ -7,6 +7,6 @@ use Aura\Di\ContainerConfig;
 
 class Database extends ContainerConfig {
 	public function define(Container $di) {
-		$di->set('database', $di->lazyNew('Shadowlab\Database\ShadowlabDatabase'));
+		$di->set('database', $di->lazyNew('Shadowlab\Framework\Database\Database'));
 	}
 }

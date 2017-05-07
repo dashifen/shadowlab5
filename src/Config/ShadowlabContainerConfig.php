@@ -3,7 +3,6 @@
 namespace Shadowlab\Config;
 
 use Aura\Di\ContainerConfig;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class ShadowlabContainerConfig
@@ -20,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class ShadowlabContainerConfig extends ContainerConfig {
 	protected const HANDLERS_CACHED = "shadowlab-handlers-cached-on";
 	protected const HANDLERS = "shadowlab-handlers";
-	protected const EXPIRATION = 2147483647;
+	protected const EXPIRATION = 2147483647;			// 1/19/2038
 	
 	protected function getHandlerPath(): string {
 		
@@ -28,7 +27,7 @@ class ShadowlabContainerConfig extends ContainerConfig {
 		// same directory as this file.
 		
 		$path = pathinfo(__FILE__, PATHINFO_DIRNAME);
-		return $path . DIRECTORY_SEPARATOR . "handlers.php";
+		return $path . DIRECTORY_SEPARATOR . "ShadowlabHandlers.php";
 	}
 	
 	protected function isHandlerCacheValid(string $handlerPath): bool {

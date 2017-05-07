@@ -12,7 +12,7 @@ use Shadowlab\Config\ShadowlabContainerConfig;
 class Actions extends ShadowlabContainerConfig {
 	public function define(Container $di) {
 		
-		// the first parameter to all ActionInterface objects is the request.
+		// the first parameter to all Action objects is the request.
 		// then the second and third parameters are related to the specific
 		// actions that we're loading.  Aura/Di can set the parent's parameter
 		// and then we can specify the differences for the children.

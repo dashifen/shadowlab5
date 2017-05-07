@@ -2,10 +2,10 @@
 
 namespace Shadowlab\User\Login;
 
-use Dashifen\Domain\AbstractMysqlDomain;
+use Shadowlab\Framework\Domain\Domain;
 use Dashifen\Domain\Payload\PayloadInterface;
 
-class LoginDomain extends AbstractMysqlDomain {
+class LoginDomain extends Domain {
 	public function read(array $data = []): PayloadInterface {
 		if ($this->validator->validateRead($data)) {
 			
@@ -17,6 +17,7 @@ class LoginDomain extends AbstractMysqlDomain {
 			
 			$sql = "SELECT user_id, password AS hashed FROM users WHERE email=:email";
 			$results = $this->db->getRow($sql, ["email" => $data["email"]]);
+			
 			if (sizeof($results) !== 0) {
 				
 				// if we received a result, then the account exists.  so,
@@ -39,7 +40,7 @@ class LoginDomain extends AbstractMysqlDomain {
 		// payload with an error message.  that message is intentionally vague
 		// to help avoid cluing a hacker into what might have happened here.
 		
-		$results["errors"] = "We were unable to log you in.  Please try again.";
+		$results["error"] = "We were unable to log you in.  Please try again.";
 		return $this->payloadFactory->newReadPayload(false, $results);
 	}
 	
@@ -58,7 +59,7 @@ class LoginDomain extends AbstractMysqlDomain {
 			// we'll start that process now.
 			
 			$values = ["user_id" => $data["user_id"]];
-			$sql = "UPDATE users SET last_login = UNIX_TIMESTAMP()";
+			$sql = "UPDATE users SET last_login = NOW()";
 			if (password_needs_rehash($data["hashed"], PASSWORD_DEFAULT)) {
 				
 				// if we're in here, then we also need to update this person's
@@ -78,19 +79,5 @@ class LoginDomain extends AbstractMysqlDomain {
 		}
 		
 		return $this->payloadFactory->newUpdatePayload($success);
-	}
-	
-	// the LoginAction neither creates nor deletes, so these two methods
-	// will be stubbed to return empty payloads.  it might be arguably better
-	// to throw and exception for misuse of a domain, but for now we'll hope
-	// that the action will know what to do with an empty payload if someone
-	// tries something strange here.
-	
-	public function create(array $data): PayloadInterface {
-		return $this->payloadFactory->newEmptyPayload();
-	}
-	
-	public function delete(array $data): PayloadInterface {
-		return $this->payloadFactory->newEmptyPayload();
 	}
 }

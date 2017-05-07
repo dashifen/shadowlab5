@@ -20,6 +20,7 @@ class Request extends ContainerConfig {
 		// normally, but this feels more appropriate considering what a session
 		// is.
 		
+		$di->params['Dashifen\Session\Session']['index'] = 'ShadowlabSession';
 		$di->set("session", $di->lazyNew('Dashifen\Session\Session'));
 		
 		$di->params['Dashifen\Request\Request']['request'] = ServerRequestFactory::fromGlobals();

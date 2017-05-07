@@ -30,9 +30,10 @@ class Domains extends ShadowlabContainerConfig {
 		
 		foreach ($handlers as $handler) {
 			$di->params[$handler->domain]["validator"] = $di->lazyNew($handler->validator);
+			$di->params[$handler->domain]["transformer"] = $di->lazyNew($handler->transformer);
 			
 			// the domain doesn't need an instance of an entity object, but
-			// it does need to know which entity with which it's going to be
+			// it does need to know the entity with which it's going to be
 			// working.  we can call it's setEntityType method as follows
 			// and send it the name of the entity as defined by our handler.
 			

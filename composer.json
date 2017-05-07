@@ -19,12 +19,13 @@
 	},
 	"require": {
 		"dashifen/database": "^1",
-		"dashifen/request": "^1",
 		"dashifen/session": "^1",
-		"dashifen/router": "^1",
-		"dashifen/response": "^1",
-		"dashifen/action": "^1",
 		"dashifen/exceptionator": "^1",
+		"dashifen/request": "^1",
+		"dashifen/router": "^2",
+		"dashifen/action": "^1",
+		"dashifen/domain": "^2",
+		"dashifen/response": "^1",
 		"aura/di": "3.x-dev",
 		"authy/php": "2.*",
 		"aura/router": "3.x-dev"

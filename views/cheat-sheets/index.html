@@ -1,0 +1,10 @@
+<div id="cheatsheets" :data-parameter="parameter">
+	<div v-for="sheet in sheets" class="sheet">
+		<h3>{{ sheet.type | capitalize }}</h3>
+		<ol>
+			<li v-for="link in sheet.links">
+				<a :href="link.href">{{ link.text }}</a>
+			</li>
+		</ol>
+	</div>
+</div>

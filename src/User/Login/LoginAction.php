@@ -2,7 +2,7 @@
 
 namespace Shadowlab\User\Login;
 
-use Dashifen\Action\AbstractAction;
+use Shadowlab\Framework\Action\AbstractAction;
 use Dashifen\Response\ResponseInterface;
 
 /**
@@ -12,18 +12,49 @@ use Dashifen\Response\ResponseInterface;
  */
 class LoginAction extends AbstractAction {
 	/**
+	 * @param string $parameter
+	 *
 	 * @return ResponseInterface
 	 */
-	public function execute(): ResponseInterface {
-		return $this->request->getServerVar("REQUEST_METHOD") === "POST"
-			? $this->doAuthentication()
-			: $this->doLogin();
+	public function execute(string $parameter = ""): ResponseInterface {
+		if ($this->request->getSessionObj()->isAuthenticated()) {
+			
+			// if we're here but already authentic, we can just go to
+			// our sheets without worrying about anything else.
+			
+			$this->redirectToSheets();
+		} else {
+			
+			// otherwise, we'll have to either process the visitor's
+			// credentials or simply request that they provide them to
+			// us based on the method that brought us here.
+			
+			$this->request->getServerVar("REQUEST_METHOD") === "POST"
+				? $this->doAuthentication()
+				: $this->doLogin();
+		}
+		
+		return $this->response;
 	}
 	
 	/**
-	 * @return ResponseInterface
+	 * @return void
 	 */
-	protected function doAuthentication() {
+	protected function redirectToSheets(): void {
+		
+		// to redirect to our cheat sheets, we need to know which host
+		// we're currently using.  then, we can just tell our response
+		// that it's a redirection to that host at the /cheat-sheets
+		// route.
+		
+		$host = $this->request->getServerVar("HTTP_HOST");
+		$this->response->redirect("http://$host/cheat-sheets");
+	}
+	
+	/**
+	 * @return void
+	 */
+	protected function doAuthentication(): void {
 		
 		// to authenticate, we'll get the posted username and password
 		// and send them to our domain.  the domain will then send back
@@ -38,13 +69,12 @@ class LoginAction extends AbstractAction {
 		]);
 		
 		if ($payload->getSuccess()) {
+			
+			// now that we're authenticated, we want to record our log in
+			// and then redirect to our sheets.
+			
 			$this->recordLogin($email, $payload->getDatum("user_id"));
-			
-			// when we successfully login, we want to redirect to the
-			// index of our cheat sheets as follows.
-			
-			$host = $this->request->getServerVar("HTTP_HOST");
-			$this->response->redirect("http://$host/cheat-sheets");
+			$this->redirectToSheets();
 		} else {
 			
 			// if we were unsuccessful, then we need to see if this person
@@ -57,7 +87,9 @@ class LoginAction extends AbstractAction {
 				// bad password, etc.) but those are handled in the else
 				// below.
 				
-				$this->response->handleError();
+				$this->handleError([
+					"title" => "Unauthorized Access",
+				]);
 			} else {
 				
 				// the payload has an error value that we'll simply pass
@@ -65,18 +97,16 @@ class LoginAction extends AbstractAction {
 				// want to be sure that we "remember" the email and the URL
 				// to which they want to go after logging in.
 				
-				$this->response->handleFailure([
+				$this->handleFailure([
 					"title"       => "Login Failed",
-					"menu"        => "",
 					"email"       => $email,
 					"redirect_to" => $this->request->getPostVar("redirect_to"),
 					"honeypot"    => $this->request->getPostVar("honeypot"),
-					"errors"      => $payload->getDatum("errors"),
+					"attempts"    => $this->request->getSessionVar("login_attempts"),
+					"error"       => $payload->getDatum("error"),
 				]);
 			}
 		}
-		
-		return $this->response;
 	}
 	
 	/**
@@ -85,7 +115,7 @@ class LoginAction extends AbstractAction {
 	 *
 	 * @return void
 	 */
-	protected function recordLogin(string $email, string $user_id) {
+	protected function recordLogin(string $email, string $user_id): void {
 		
 		// to record the fact that this person has logged in, we're going
 		// to get the session object from our request and then call its login
@@ -104,6 +134,7 @@ class LoginAction extends AbstractAction {
 		$session = $this->request->getSessionObj();
 		$attempts = $session->get("login_attempts", 0);
 		
+		
 		// we'll increment our attempts and then see if they've tried
 		// at least 5 times.  if so, we simply return true; they've
 		// exceeded the limit.
@@ -120,23 +151,20 @@ class LoginAction extends AbstractAction {
 	}
 	
 	/**
-	 * @return ResponseInterface
+	 * @return void
 	 */
-	protected function doLogin() {
+	protected function doLogin(): void {
 		
 		// there isn't a failure case with respect to a simple login,
 		// so we can just handle success here.  since we've not done
 		// anything yet, there's no errors and
 		
-		$this->response->handleSuccess([
+		$this->handleSuccess([
 			"title"       => "Login",
-			"menu"        => "",
 			"email"       => $this->request->getCookieVar("email"),
 			"redirect_to" => $this->request->getSessionVar("redirect_to"),
+			"attempts"    => $this->request->getSessionVar("login_attempts", 0),
 			"honeypot"    => "",
-			"errors"      => [],
 		]);
-		
-		return $this->response;
 	}
 }

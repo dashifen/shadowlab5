@@ -68,7 +68,7 @@ gulp.task("build-js", function() {
 
 gulp.task("watch", function() {
 	gulp.watch([files.css.sass], ["build-css"]);
-	gulp.watch([files.js.js], ["build-js"]);
+	//gulp.watch([files.js.js], ["build-js"]);
 });
 
 gulp.task("default", ["watch"]);
