@@ -2,11 +2,12 @@
 
 namespace Shadowlab\CheatSheets;
 
+use Interop\Container\ContainerInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Dashifen\Response\ResponseInterface;
 
 class CheatSheetsAction extends AbstractAction {
-	public function execute(string $parameter = ""): ResponseInterface {
+	public function execute(string $parameter = "", ContainerInterface $container = null): ResponseInterface {
 		$payload = $this->domain->read(["sheet_type" => $parameter]);
 		
 		if ($payload->getSuccess()) {

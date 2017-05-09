@@ -3,10 +3,12 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Response\ResponseInterface;
+use Dashifen\Searchbar\SearchbarInterface;
+use Interop\Container\ContainerInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 
 class BooksAction extends AbstractAction {
-	public function execute(string $parameter = ""): ResponseInterface {
+	public function execute(string $parameter = "", ContainerInterface $container = null): ResponseInterface {
 		
 		// if our $parameter is not empty, then we're loading a specific
 		// book rather than all of the books.  luckily, the domain will
@@ -19,10 +21,32 @@ class BooksAction extends AbstractAction {
 		$payload = $this->domain->read(["abbr" => strtoupper($parameter)]);
 		
 		if ($payload->getSuccess()) {
+			$books = $payload->getDatum("books");
+			$searchbar = "";
+			
+			if (empty($parameter)) {
+				
+				// if we were selecting multiple books, then we need to make
+				// the collection view's searchbar.  we can do so as follows,
+				// utilizing that object's parse method.
+				
+				/** @var \Aura\Di\Container $container */
+				/** @var SearchbarInterface $searchbar */
+				
+				$searchbar = $container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
+				$searchbar = $searchbar->parse($books);
+			}
+			
 			$this->handleSuccess([
-				"title" => $payload->getDatum("title"),
-				"table" => $payload->getDatum("books"),
-				"count" => $payload->getDatum("count"),
+				"table"     => $books,
+				"searchbar" => $searchbar,
+				"title"     => $payload->getDatum("title"),
+				"count"     => $payload->getDatum("count"),
+				"caption"   => "The following are the SR books in this application.
+					They're not all the published books for SR5; only those with
+					quantifiable rules and stats are here.  Some, mostly the German
+					content, are not included, i.e. you won't find their data
+					elsewhere in the Shadowlab."
 			]);
 		} else {
 			$this->handleFailure([

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "33b397aa449e9dea37c89f8d305d4067",
+    "content-hash": "a0e7637d1731b0a18aafb43075fe863d",
     "packages": [
         {
             "name": "aura/di",
@@ -239,19 +239,20 @@
         },
         {
             "name": "dashifen/action",
-            "version": "1.1.1",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/action.git",
-                "reference": "7051205be9325d3fe2954c7e3c4c55490872c54a"
+                "reference": "bbe482dc84e706788eea9378b71802b9c4c279fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/action/zipball/7051205be9325d3fe2954c7e3c4c55490872c54a",
-                "reference": "7051205be9325d3fe2954c7e3c4c55490872c54a",
+                "url": "https://api.github.com/repos/dashifen/action/zipball/bbe482dc84e706788eea9378b71802b9c4c279fc",
+                "reference": "bbe482dc84e706788eea9378b71802b9c4c279fc",
                 "shasum": ""
             },
             "require": {
+                "aura/di": "3.x-dev",
                 "dashifen/domain": "^2",
                 "dashifen/request": "^1",
                 "dashifen/response": "^1",
@@ -276,7 +277,7 @@
                 }
             ],
             "description": "an action object that handles a web request, interacts with a domain, and helps to emit a response",
-            "time": "2017-05-05T12:34:19+00:00"
+            "time": "2017-05-07T15:24:41+00:00"
         },
         {
             "name": "dashifen/database",
@@ -523,6 +524,44 @@
             ],
             "description": "a PHP routing object",
             "time": "2017-05-05T18:54:32+00:00"
+        },
+        {
+            "name": "dashifen/searchbar",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dashifen/searchbar.git",
+                "reference": "c598c05ec0dca47b762f3379da7cf13d73e7fb51"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/c598c05ec0dca47b762f3379da7cf13d73e7fb51",
+                "reference": "c598c05ec0dca47b762f3379da7cf13d73e7fb51",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dashifen\\Searchbar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Dashifen Kees",
+                    "email": "dashifen@dashifen.com",
+                    "homepage": "https://dashifen.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "a class which produces a search bar to search within on-screen data",
+            "time": "2017-05-09T19:54:48+00:00"
         },
         {
             "name": "dashifen/session",
@@ -871,12 +910,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053"
+                "reference": "ec953894782a0366a5533677c68972eea848d848"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/62785ae604c8d69725d693eb370e1d67e94c4053",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/ec953894782a0366a5533677c68972eea848d848",
+                "reference": "ec953894782a0366a5533677c68972eea848d848",
                 "shasum": ""
             },
             "require": {
@@ -909,7 +948,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2017-03-25 12:08:31"
+            "time": "2017-05-08 18:49:20"
         },
         {
             "name": "zendframework/zend-diactoros",

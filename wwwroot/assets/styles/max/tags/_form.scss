@@ -122,6 +122,11 @@ form.searchbar {
 		border-color: #fc0;
 	}
 
+	label span,
+	legend label {
+		@include visuallyhidden;
+	}
+
 	label {
 		display: inline-block;
 

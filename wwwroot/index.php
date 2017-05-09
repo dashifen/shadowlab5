@@ -45,7 +45,7 @@ try {
 	// default to the empty string when not in use.
 	
 	$action = $app->newInstance($route->getAction());
-	$response = $action->execute($route->getActionParameter());
+	$response = $action->execute($route->getActionParameter(), $app);
 	$response->send();
 } catch (RouterException $e) {
 	

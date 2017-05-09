@@ -1,5 +1,7 @@
+<div v-if="searchbar" v-html="searchbar"></div>
+
 <table id="collection">
-<caption v-if="table.caption" v-html="table.caption"></caption>
+<caption v-if="caption" v-html="caption"></caption>
 <thead>
 	<tr>
 		<th v-for="th in table.headers" :class="th.classes" :id="th.id" scope="col">
@@ -9,7 +11,7 @@
 </thead>
 <tbody v-for="body in table.bodies" :data-id="body.tbody_id">
 	<tr class="data">
-		<td v-for="(cell, index) in body.data" :headers="cell.column" :class="table.headers[index].classes" v-html="cell.html"></td>
+		<td v-for="(cell, index) in body.data" :headers="cell.column" :class="table.headers[index].classes" v-html="cell.html" :data-searchbar-value="cell.searchbarValue || cell.html"></td>
 	</tr>
 	<tr v-if="body.description.description" class="description">
 		<td :colspan="body.data.count">

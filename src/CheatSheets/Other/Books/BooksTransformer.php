@@ -28,7 +28,7 @@ class BooksTransformer extends Transformer {
 		// one book to transform or we wouldn't be here, so for our header
 		// we can focus on that book and begin our work.
 		
-		$header = [];
+		$headers = [];
 		foreach (array_keys($books[0]) as $column) {
 			$classes = "";
 			
@@ -37,16 +37,20 @@ class BooksTransformer extends Transformer {
 			}
 			
 			switch ($column) {
+				case "book":
+					$classes = "search";
+					break;
+				
 				case "abbr":
 					$classes = "w10";
 					break;
 				
 				case "included":
-					$classes = "icon text-center filtered";
+					$classes = "icon text-center filter";
 					break;
 			}
 			
-			$header[] = [
+			$headers[] = [
 				"id"      => $this->sanitizeId($column),
 				"classes" => $classes,
 				"display" => $column,
@@ -59,7 +63,7 @@ class BooksTransformer extends Transformer {
 		// each individual $book in our array needs to be split into these
 		// two rows.  luckily, our parent can handle a lot of that for us.
 		
-		$body = [];
+		$bodies = [];
 		foreach ($books as $book) {
 			
 			// we very carefully arrange our queries such that the first
@@ -68,20 +72,38 @@ class BooksTransformer extends Transformer {
 			// that datum from the array and allows our parent to handle the
 			// rest of it.
 			
-			$rows["tbody_id"] = array_shift($book);
+			$rows["tbodyId"] = array_shift($book);
 			$rows["description"] = $this->extractDescription($book);
 			$rows["data"] = $this->extractData($book);
-			$body[] = $rows;
+			
+			// there's a little bit more work we want to do with our data to
+			// make it more understandable with respect to our searchbar.
+			// we'll iterate through the array and make the necessary changes
+			// now.
+			
+			foreach ($rows["data"] as $i => &$datum) {
+				if ($datum["column"] === "included") {
+					$datum["searchbarValue"] = $datum["html"] === "Y" ? "included" : "excluded";
+					$headers[$i]["searchbarValues"][] = $datum["searchbarValue"];
+				}
+			}
+			
+			// finally, we want to make sure that our header's searchbar values
+			// are unique and sorted alphabetically.
+			
+			foreach ($headers as &$header) {
+				if (isset($header["searchbarValues"])) {
+					$header["searchbarValues"] = array_unique($header["searchbarValues"]);
+					sort($header["searchbarValues"]);
+				}
+			}
+			
+			$bodies[] = $rows;
 		}
 		
 		return [
-			"headers" => $header,
-			"bodies"  => $body,
-			"caption" => "The following are the SR books in this application.
-				They're not all the published books for SR5; only those with
-				quantifiable rules and stats are here.  Some, mostly the German
-				content, are not included, i.e. you won't find their data
-				elsewhere in the Shadowlab."
+			"headers" => $headers,
+			"bodies"  => $bodies
 		];
 	}
 
