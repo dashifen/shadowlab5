@@ -114,6 +114,12 @@ form {
 		position: relative;
 		top: -1px;
 	}
+
+	input,
+	textarea,
+	select {
+		font: inherit;
+	}
 }
 
 form.searchbar {
@@ -173,6 +179,7 @@ form.searchbar {
 
 	button {
 		margin-top: 0;
+		min-height: rem(27.2833);		/* height of other inputs in Firefox */
 	}
 }
 

@@ -20,6 +20,11 @@ class Searchbar extends AbstractSearchbar {
 			$classes = explode(" ", $header["classes"] ?? "");
 			
 			if (in_array("addRow", $classes)) {
+				
+				if ($this->index === 0) {
+					$this->addReset();
+				}
+				
 				$this->addRow();
 			}
 			
@@ -36,7 +41,8 @@ class Searchbar extends AbstractSearchbar {
 						break;
 					
 					case "filter":
-						$this->addFilter($header["display"], $header["id"], $header["searchbarValues"]);
+						$defaultText = $header["defaultText"] ?? "";
+						$this->addFilter($header["display"], $header["id"], $header["searchbarValues"], "", $defaultText);
 						break;
 				}
 			} catch (SearchbarException $e) {
@@ -46,7 +52,15 @@ class Searchbar extends AbstractSearchbar {
 			}
 		}
 		
+		if ($this->index === 0) {
+			$this->addReset();
+		}
+		
 		return $this->getBar();
+	}
+	
+	public function addReset(string $label = '<i class="fa fa-fw fa-undo" aria-hidden="true" title="Reset"></i>') {
+		parent::addReset($label);
 	}
 	
 	protected function getElementType(array $classes): string {

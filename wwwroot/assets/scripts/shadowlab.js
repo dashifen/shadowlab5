@@ -1,5 +1,3 @@
-
-
 var Shadowlab = new Vue({
 	data: vueData,
 	el: "#shadowlab",
@@ -13,16 +11,16 @@ var Shadowlab = new Vue({
 	},
 
 	filters: {
-		capitalize: function (str) {
+		capitalize: function(str) {
 
 			// source: http://locutus.io/php/strings/ucwords/
 
-			return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function ($1) {
+			return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function($1) {
 				return $1.toUpperCase()
 			})
 		},
 
-		nl2br: function (str) {
+		nl2br: function(str) {
 
 			// source: http://locutus.io/php/strings/nl2br/
 
@@ -35,5 +33,12 @@ var Shadowlab = new Vue({
 
 			return (str + '').replace(/(\r\n|\n\r|\r|\n)/g, '<br>' + '$1')
 		}
+	}
+});
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	var element = document.querySelector(".focus-me");
+	if (element) {
+		element.focus();
 	}
 });

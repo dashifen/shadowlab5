@@ -527,16 +527,16 @@
         },
         {
             "name": "dashifen/searchbar",
-            "version": "0.2.0",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/searchbar.git",
-                "reference": "c598c05ec0dca47b762f3379da7cf13d73e7fb51"
+                "reference": "0ed77c8e37db5fb208670849555ddc92f513eb13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/c598c05ec0dca47b762f3379da7cf13d73e7fb51",
-                "reference": "c598c05ec0dca47b762f3379da7cf13d73e7fb51",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/0ed77c8e37db5fb208670849555ddc92f513eb13",
+                "reference": "0ed77c8e37db5fb208670849555ddc92f513eb13",
                 "shasum": ""
             },
             "require": {
@@ -561,7 +561,7 @@
                 }
             ],
             "description": "a class which produces a search bar to search within on-screen data",
-            "time": "2017-05-09T19:54:48+00:00"
+            "time": "2017-05-11T19:15:38+00:00"
         },
         {
             "name": "dashifen/session",

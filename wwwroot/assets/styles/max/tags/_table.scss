@@ -1,11 +1,16 @@
 table {
-	border: 1px solid palette(mono, dark);
+	border: 1px solid palette(mono, black);
+	border-bottom-style: none;
 	border-collapse: collapse;
 	width: 100%;
 
 	caption {
 		padding-bottom: rem(12);
 		text-align: left;
+	}
+
+	tr {
+		border-bottom: 1px solid palette(mono, black);
 	}
 
 	td, th {
@@ -29,24 +34,14 @@ table {
 		font-weight: bold;
 	}
 
-	tbody tr {
-		border-bottom: 1px solid palette(mono, dark);
+	tbody tr.searchable-row-hidden {
+		position: absolute;
+		top: -50000000px;
 	}
 
 	&.summarized {
 		tbody:not(.clicked) .description {
 			display: none;
-		}
-
-		tbody.clicked {
-			.summary {
-				border-bottom-style: none;
-			}
-
-			.summary,
-			.description {
-				background-color: palette(mono, white) !important;
-			}
 		}
 	}
 
@@ -59,7 +54,5 @@ table {
 		tbody tr:first-child td {
 			text-align: center;
 		}
-
-
 	}
 }

@@ -84,17 +84,26 @@ class BooksTransformer extends Transformer {
 			foreach ($rows["data"] as $i => &$datum) {
 				if ($datum["column"] === "included") {
 					$datum["searchbarValue"] = $datum["html"] === "Y" ? "included" : "excluded";
-					$headers[$i]["searchbarValues"][] = $datum["searchbarValue"];
+					$headers[$i]["searchbarValues"][$datum["searchbarValue"]] = ucfirst($datum["searchbarValue"]);
 				}
 			}
 			
-			// finally, we want to make sure that our header's searchbar values
+			// next, we want to make sure that our header's searchbar values
 			// are unique and sorted alphabetically.
 			
 			foreach ($headers as &$header) {
 				if (isset($header["searchbarValues"])) {
+					array_walk($header["searchbarValues"], function(&$x) { $x = trim($x); });
 					$header["searchbarValues"] = array_unique($header["searchbarValues"]);
-					sort($header["searchbarValues"]);
+					asort($header["searchbarValues"]);
+				}
+				
+				// we also want to add some default text to the books-included
+				// filter.  if we've found that header, then we'll add some
+				// information to it.
+				
+				if ($header["id"] == "included") {
+					$header["defaultText"] = "Both included and excluded";
 				}
 			}
 			

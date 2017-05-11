@@ -25,8 +25,11 @@ var gulp = require("gulp"),
 		},
 
 		js: {
-			dest: "./wwwroot/assets/scripts/min/",
-			js:   "./wwwroot/assets/scripts/max/**/*.js"
+			dest: "./wwwroot/assets/scripts/",
+			js:   [
+				"./vendor/dashifen/searchbar/web/scripts/searchbar.js",
+				"./wwwroot/assets/scripts/shadowlab.js"
+			]
 		}
 	};
 
@@ -56,13 +59,10 @@ gulp.task("build-js", function() {
 	gulp.src(files.js.js)
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
-		.pipe(concat("technopagan.js"))
-		.pipe(sourcemaps.write())
+		.pipe(concat("shadowlab.js"))
 		.pipe(uglify())
-		.pipe(rename({ suffix: ".min" }))
-		.pipe(add_src.prepend(files.framework.js))
-		.pipe(concat("technopagan.min.js"))
 		.pipe(sourcemaps.write())
+		.pipe(rename({ suffix: ".min" }))
 		.pipe(gulp.dest(files.js.dest));
 });
 
