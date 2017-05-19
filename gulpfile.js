@@ -27,7 +27,11 @@ var gulp = require("gulp"),
 		js: {
 			dest: "./wwwroot/assets/scripts/",
 			js:   [
+				"./wwwroot/assets/scripts/module-stub.js",
+				"./node_modules/class.extend/lib/class.js",
 				"./vendor/dashifen/searchbar/web/scripts/searchbar.js",
+				"./wwwroot/assets/scripts/focuser.js",
+				"./wwwroot/assets/scripts/summarizer.js",
 				"./wwwroot/assets/scripts/shadowlab.js"
 			]
 		}
@@ -68,7 +72,7 @@ gulp.task("build-js", function() {
 
 gulp.task("watch", function() {
 	gulp.watch([files.css.sass], ["build-css"]);
-	//gulp.watch([files.js.js], ["build-js"]);
+	gulp.watch([files.js.js], ["build-js"]);
 });
 
 gulp.task("default", ["watch"]);

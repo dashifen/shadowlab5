@@ -2,6 +2,7 @@
 
 namespace Shadowlab\User\Login;
 
+use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
 use Interop\Container\ContainerInterface;
 use Shadowlab\Framework\Action\AbstractAction;
@@ -13,12 +14,12 @@ use Shadowlab\Framework\Action\AbstractAction;
  */
 class LoginAction extends AbstractAction {
 	/**
-	 * @param string             $parameter
+	 * @param array             $parameter
 	 * @param ContainerInterface $container
 	 *
 	 * @return ResponseInterface
 	 */
-	public function execute(string $parameter = "", ContainerInterface $container = null): ResponseInterface {
+	public function execute(array $parameter = [], ContainerInterface $container = null): ResponseInterface {
 		if ($this->request->getSessionObj()->isAuthenticated()) {
 			
 			// if we're here but already authentic, we can just go to
@@ -75,7 +76,7 @@ class LoginAction extends AbstractAction {
 			// now that we're authenticated, we want to record our log in
 			// and then redirect to our sheets.
 			
-			$this->recordLogin($email, $payload->getDatum("user_id"));
+			$this->recordLogin($payload);
 			$this->redirectToSheets();
 		} else {
 			
@@ -112,12 +113,11 @@ class LoginAction extends AbstractAction {
 	}
 	
 	/**
-	 * @param string $email
-	 * @param string $user_id
+	 * @param PayloadInterface $payload
 	 *
 	 * @return void
 	 */
-	protected function recordLogin(string $email, string $user_id): void {
+	protected function recordLogin(PayloadInterface $payload): void {
 		
 		// to record the fact that this person has logged in, we're going
 		// to get the session object from our request and then call its login
@@ -126,7 +126,11 @@ class LoginAction extends AbstractAction {
 		// their activities within the application later.
 		
 		$session = $this->request->getSessionObj();
-		$session->login($email, ["user_id" => $user_id]);
+		$session->login($payload->getDatum("email"), [
+			"user_id"      => $payload->getDatum("user_id"),
+			"capabilities" => $payload->getDatum("capabilities"),
+			"role"         => $payload->getDatum("role"),
+		]);
 	}
 	
 	/**

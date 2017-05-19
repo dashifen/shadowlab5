@@ -170,6 +170,10 @@ form.searchbar {
 		& + li {
 			margin-left: rem(10);
 		}
+
+		&.filter + .filter label {
+			@include visuallyhidden;
+		}
 	}
 
 	ol:first-of-type li:last-child {

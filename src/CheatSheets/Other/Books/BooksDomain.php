@@ -12,8 +12,8 @@ class BooksDomain extends Domain {
 		// abbreviation for a book.  so, we'll get the list of abbreviations
 		// from the database and pass it all to the validator.
 		
-		$abbrs = $this->db->getCol("SELECT abbr FROM books");
-		$validation_data = array_merge($data, ["abbrs"=>$abbrs]);
+		$books = $this->db->getCol("SELECT book_id FROM books");
+		$validation_data = array_merge($data, ["books"=>$books]);
 		if ($this->validator->validateRead($validation_data)) {
 			
 			// since we have one of two queries to run -- either for a specific
@@ -70,10 +70,11 @@ class BooksDomain extends Domain {
 		// success here is simply selecting anything, and our title should
 		// be more general than the one above.
 		
-		return $this->payloadFactory->newReadPayload(sizeof($books) > 0, [
+		$count = sizeof($books);
+		return $this->payloadFactory->newReadPayload($count > 0, [
 			"title" => "Shadowrun Fifth Edition Books",
 			"books" => $books,
-			"count" => sizeof($books),
+			"count" => $count,
 		]);
 	}
 }

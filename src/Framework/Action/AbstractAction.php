@@ -7,14 +7,62 @@ use Dashifen\Action\AbstractAction as DashifenAbstractAction;
 /**
  * Class Action
  *
- * This is a default action class for the app.  It's still abstract because
- * it can't know how to execute the other, more specific actions.  But, what
- * it can do is ensure that required data can be passed to our response for
- * all of its children.
- *
  * @package Shadowlab\Action
  */
 abstract class AbstractAction extends DashifenAbstractAction {
+	/**
+	 * @var string $action
+	 */
+	protected $action = "read";
+	
+	/**
+	 * @var int $recordId
+	 */
+	protected $recordId = 0;
+	
+	/**
+	 * @param array $parameter
+	 */
+	protected function processParameter(array $parameter = []) {
+		if (sizeof($parameter) > 0) {
+			
+			// if we have information to process, then we want to
+			// remove the empty values.  we're then left with our
+			// action and record ID number.
+			
+			$parameter = array_filter($parameter);
+			$this->setAction(array_shift($parameter));
+			
+			if (sizeof($parameter) > 0) {
+				$this->setRecordId(array_shift($parameter));
+			}
+		}
+	}
+	
+	/**
+	 * @param string $action
+	 *
+	 * @return void
+	 * @throws ActionException
+	 */
+	protected function setAction(string $action): void {
+		if (in_array($action, ["create", "read", "update", "delete"])) {
+			$this->action = $action;
+			return;
+		}
+		
+		throw new ActionException("Unknown action: $action.");
+	}
+	
+	/**
+	 * @param int $recordId
+	 *
+	 * @return void
+	 */
+	protected function setRecordId(int $recordId) {
+		$this->recordId = $recordId;
+	}
+	
 	/**
 	 * @param array $data
 	 *

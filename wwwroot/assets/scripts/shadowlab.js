@@ -32,13 +32,16 @@ var Shadowlab = new Vue({
 			// version of the break tag.
 
 			return (str + '').replace(/(\r\n|\n\r|\r|\n)/g, '<br>' + '$1')
+		},
+
+		makeUpdateLink: function(id) {
+			return window.location.href + '/update/' + id;
 		}
 	}
 });
 
-document.addEventListener("DOMContentLoaded", function(event) {
-	var element = document.querySelector(".focus-me");
-	if (element) {
-		element.focus();
-	}
+document.addEventListener("DOMContentLoaded", function() {
+	new Searchbar();
+	new Summarizer();
+	new Focuser();
 });

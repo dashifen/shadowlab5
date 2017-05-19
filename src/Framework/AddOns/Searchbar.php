@@ -6,54 +6,34 @@ use Dashifen\Searchbar\AbstractSearchbar;
 use Dashifen\Searchbar\SearchbarException;
 
 class Searchbar extends AbstractSearchbar {
-	public function parse(array $data): string {
+	public function parse(array $searchbarData): string {
 		
-		// echo "<pre>" . print_r($data, true) . "</pre>";
+		//echo "<pre>" . print_r($searchbarData, true) . "</pre>";
 		
-		// we expect a headers index within our $data which contains
-		// information about our searchbar.  but, if we don't have one,
-		// we'll just skip everything herein and end up with an empty
-		// bar
-		
-		$headers = $data["headers"] ?? [];
-		foreach ($headers as $header) {
-			$classes = explode(" ", $header["classes"] ?? "");
-			
-			if (in_array("addRow", $classes)) {
-				
-				if ($this->index === 0) {
-					$this->addReset();
-				}
-				
+		foreach ($searchbarData as $i => $rows) {
+			if ($i !== 0) {
 				$this->addRow();
 			}
 			
-			try {
-				$type = $this->getElementType($classes);
-				
-				switch ($type) {
+			foreach ($rows as $element) {
+				switch($element["type"]) {
 					case "search":
-						$this->addSearch($header["display"], $header["id"]);
+						$this->addSearch($element["label"], $element["for"]);
+						break;
+						
+					case "filter":
+						$this->addFilter($element["label"], $element["for"], $element["searchbarValues"], "", $element["defaultText"]);
 						break;
 					
 					case "toggle":
-						$this->addToggle($header["display"], $header["id"]);
+						$this->addToggle($element["label"], $element["for"], "");
 						break;
-					
-					case "filter":
-						$defaultText = $header["defaultText"] ?? "";
-						$this->addFilter($header["display"], $header["id"], $header["searchbarValues"], "", $defaultText);
-						break;
-				}
-			} catch (SearchbarException $e) {
-				if ($e->getCode() !== 0) {
-					throw $e;
 				}
 			}
-		}
-		
-		if ($this->index === 0) {
-			$this->addReset();
+			
+			if ($i === 0) {
+				$this->addReset();
+			}
 		}
 		
 		return $this->getBar();

@@ -24,38 +24,67 @@ class BooksTransformer extends Transformer {
 		
 		// our collection view expects a data structure that defines the
 		// table that it displays.  so we need to make a header and body
-		// out of our array of book information.  we know we have at least
-		// one book to transform or we wouldn't be here, so for our header
-		// we can focus on that book and begin our work.
+		// out of our array of book information.
 		
+		$headers = $this->constructHeaders($books);
+		$bodies = $this->constructBodies($books);
+		
+		// even though our searchbar isn't a specifically a transformation
+		// of the data, it relies on that data to construct the bar.  thus,
+		// we'll put it here so that it doesn't have to be in the domain
+		// which is more about gathering the data rather than messing with
+		// it.
+		
+		$searchbar = $this->constructSearchbar($books);
+		
+		return [
+			"headers"   => $headers,
+			"bodies"    => $bodies,
+			"searchbar" => $searchbar,
+		];
+	}
+	
+	protected function constructHeaders(array $books): array {
 		$headers = [];
-		foreach (array_keys($books[0]) as $column) {
+		
+		// our parent object has a function that identifies the headers
+		// we want to work with here.  that'll remove the book_id and
+		// description column from our working set of columns.  the only
+		// data we want removed from our headers, in this case, is the
+		// description, so we'll send only that to our parent's method.
+		
+		$columns = $this->extractHeaders($books, ["description"]);
+		
+		foreach ($columns as $column) {
+			$abbreviation = "";
+			$display = $column;
 			$classes = "";
 			
-			if ($column === "book_id" || $column === "description") {
-				continue;
-			}
-			
 			switch ($column) {
-				case "book":
-					$classes = "search";
-					break;
-				
 				case "abbr":
+					$abbreviation = strtoupper($column);
+					$display = "Abbreviation";
 					$classes = "w10";
 					break;
 				
 				case "included":
-					$classes = "icon text-center filter";
+					$classes = "icon text-center";
 					break;
 			}
 			
 			$headers[] = [
-				"id"      => $this->sanitizeId($column),
-				"classes" => $classes,
-				"display" => $column,
+				"id"           => $this->sanitize($column),
+				"classes"      => $classes,
+				"abbreviation" => $abbreviation,
+				"display"      => $display,
 			];
 		}
+		
+		return $headers;
+	}
+	
+	protected function constructBodies(array $books): array {
+		$bodies = [];
 		
 		// and now, we'll build our table's body.  this is a little harder
 		// since it's made up of multiple <tbody> tags each with two rows.
@@ -63,7 +92,6 @@ class BooksTransformer extends Transformer {
 		// each individual $book in our array needs to be split into these
 		// two rows.  luckily, our parent can handle a lot of that for us.
 		
-		$bodies = [];
 		foreach ($books as $book) {
 			
 			// we very carefully arrange our queries such that the first
@@ -72,50 +100,15 @@ class BooksTransformer extends Transformer {
 			// that datum from the array and allows our parent to handle the
 			// rest of it.
 			
-			$rows["tbodyId"] = array_shift($book);
-			$rows["description"] = $this->extractDescription($book);
-			$rows["data"] = $this->extractData($book);
-			
-			// there's a little bit more work we want to do with our data to
-			// make it more understandable with respect to our searchbar.
-			// we'll iterate through the array and make the necessary changes
-			// now.
-			
-			foreach ($rows["data"] as $i => &$datum) {
-				if ($datum["column"] === "included") {
-					$datum["searchbarValue"] = $datum["html"] === "Y" ? "included" : "excluded";
-					$headers[$i]["searchbarValues"][$datum["searchbarValue"]] = ucfirst($datum["searchbarValue"]);
-				}
-			}
-			
-			// next, we want to make sure that our header's searchbar values
-			// are unique and sorted alphabetically.
-			
-			foreach ($headers as &$header) {
-				if (isset($header["searchbarValues"])) {
-					array_walk($header["searchbarValues"], function(&$x) { $x = trim($x); });
-					$header["searchbarValues"] = array_unique($header["searchbarValues"]);
-					asort($header["searchbarValues"]);
-				}
-				
-				// we also want to add some default text to the books-included
-				// filter.  if we've found that header, then we'll add some
-				// information to it.
-				
-				if ($header["id"] == "included") {
-					$header["defaultText"] = "Both included and excluded";
-				}
-			}
-			
-			$bodies[] = $rows;
+			$temp["recordId"] = array_shift($book);
+			$temp["description"] = $this->extractDescription($book);
+			$temp["data"] = $this->extractData($book);
+			$bodies[] = $temp;
 		}
 		
-		return [
-			"headers" => $headers,
-			"bodies"  => $bodies
-		];
+		return $bodies;
 	}
-
+	
 	protected function extractDescription(array $record, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
 		
 		// the default behavior of our parent's method is to include the abbr
@@ -126,14 +119,68 @@ class BooksTransformer extends Transformer {
 		return parent::extractDescription($record, ["description"]);
 	}
 	
-	protected function extractData(array $record, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractData(array $spell, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
 		
 		// like above, the parent would normally remove the abbr from our data
 		// in favor of keeping it as a part of the description.  we'll want to
 		// send the same list of descriptive keys here as we did above to avoid
 		// this.
 		
-		return parent::extractData($record, ["description"]);
+		$data = parent::extractData($spell, ["description"]);
+		
+		// now that we have our data, there's one thing we need to do to it.
+		// the included column should display Y and N (as an answer to the
+		// question: is this book included?), but we want the searchbar to
+		// use "included" and "excluded" as its matching terms.  while the
+		// rest of our searchbar work happens below, since this is about the
+		// way our table's body is constructed, we'll do this work here.
+		
+		foreach ($data as &$datum) {
+			switch ($datum["column"]) {
+				case "book":
+					$datum["searchbarValue"] = strip_tags($datum["html"]);
+					$datum["html"] = sprintf('<a href="#">%s</a>', $datum["html"]);
+					break;
+				
+				case "included":
+					$datum["searchbarValue"] = $datum["html"] === "Y"
+						? "included"
+						: "excluded";
+			}
+		}
+		
+		return $data;
+	}
+	
+	protected function constructSearchbar(array $books): array {
+		
+		// our searchbar should offer a way to search within a book's
+		// name as well as a way to filter by those books which are or
+		// are not included in the rest of the Shadowlab app.  luckily,
+		// the construction of this bar doesn't require sifting through
+		// our data since we know the only values for our included
+		// column are "included" and "excluded" (see above).
+		
+		$searchbar = [
+			[
+				[
+					"type"  => "search",
+					"label" => "Books",
+					"for"   => "book",
+				], [
+				"type"            => "filter",
+				"label"           => "Included",
+				"for"             => "included",
+				"defaultText"     => "Both included and excluded",
+				"searchbarValues" => [
+					"included" => "Included",
+					"excluded" => "Excluded",
+				],
+			],
+			],
+		];
+		
+		return $searchbar;
 	}
 	
 	protected function transformOne(array $books): array {

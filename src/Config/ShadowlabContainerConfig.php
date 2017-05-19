@@ -31,6 +31,7 @@ class ShadowlabContainerConfig extends ContainerConfig {
 	}
 	
 	protected function isHandlerCacheValid(string $handlerPath): bool {
+		return false;
 		
 		// our cache is valid if the date on which our file was last
 		// modified is less than or equal to the cached data.  if it's
@@ -55,6 +56,7 @@ class ShadowlabContainerConfig extends ContainerConfig {
 	}
 	
 	protected function cacheHandlers(array $handlers): void {
+		return;
 		
 		// here we simply set two cookies:  the date on which we created
 		// this handler cache and the handlers themselves:

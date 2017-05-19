@@ -4,6 +4,7 @@ namespace Shadowlab\User\Login;
 
 use Shadowlab\Framework\Domain\Domain;
 use Dashifen\Domain\Payload\PayloadInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class LoginDomain extends Domain {
 	public function read(array $data = []): PayloadInterface {
@@ -15,7 +16,9 @@ class LoginDomain extends Domain {
 			// user ID and the password in our database and then we can
 			// verify that the passwords match.
 			
-			$sql = "SELECT user_id, password AS hashed FROM users WHERE email=:email";
+			$sql = "SELECT user_id, password AS hashed, email, role
+				FROM users WHERE email=:email";
+			
 			$results = $this->db->getRow($sql, ["email" => $data["email"]]);
 			
 			if (sizeof($results) !== 0) {
@@ -30,6 +33,7 @@ class LoginDomain extends Domain {
 					// method will handle that for us.
 					
 					$this->update(array_merge($data, $results));
+					$results["capabilities"] = $this->getCapabilities($results);
 					return $this->payloadFactory->newReadPayload(true, $results);
 				}
 			}
@@ -42,6 +46,40 @@ class LoginDomain extends Domain {
 		
 		$results["error"] = "We were unable to log you in.  Please try again.";
 		return $this->payloadFactory->newReadPayload(false, $results);
+	}
+	
+	protected function getCapabilities(array $results): array {
+		
+		// there are various roles within the system starting with the
+		// "johnson" role and going down to "goon" (e.g. administrator
+		// to guest).  anyone has the capability of their role and the
+		// ones below it.  here, we want to return a map of the roles
+		// that this person can play:
+		
+		$roles = $this->db->getEnumValues("users", "role");
+		
+		$foundRole = false;
+		$capabilities = [];
+		foreach ($roles as $role) {
+			if ($role === $results["role"]) {
+				
+				// once we find the match for this visitor's role, we'll
+				// set our flag.
+				
+				$foundRole = true;
+			}
+			
+			// then, for that matching role and all subsequent ones (the
+			// ENUM field's values are enumerated in descending order of
+			// significance), the set flag will indicate that the visitor
+			// can act at certain capability levels.  prior to the match,
+			// our unset flag will ensure that a visitor doesn't have the
+			// capabilities of our roles.
+			
+			$capabilities[$role] = $foundRole;
+		}
+		
+		return $capabilities;
 	}
 	
 	public function update(array $data): PayloadInterface {

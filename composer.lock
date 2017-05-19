@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0e7637d1731b0a18aafb43075fe863d",
+    "content-hash": "a095ebcbb0e2f4fdc0f192a7a1d72042",
     "packages": [
         {
             "name": "aura/di",
@@ -239,16 +239,16 @@
         },
         {
             "name": "dashifen/action",
-            "version": "1.2.1",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/action.git",
-                "reference": "bbe482dc84e706788eea9378b71802b9c4c279fc"
+                "reference": "6f9949fc738a1358c626650017382dc802a05428"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/action/zipball/bbe482dc84e706788eea9378b71802b9c4c279fc",
-                "reference": "bbe482dc84e706788eea9378b71802b9c4c279fc",
+                "url": "https://api.github.com/repos/dashifen/action/zipball/6f9949fc738a1358c626650017382dc802a05428",
+                "reference": "6f9949fc738a1358c626650017382dc802a05428",
                 "shasum": ""
             },
             "require": {
@@ -277,7 +277,7 @@
                 }
             ],
             "description": "an action object that handles a web request, interacts with a domain, and helps to emit a response",
-            "time": "2017-05-07T15:24:41+00:00"
+            "time": "2017-05-19T22:30:58+00:00"
         },
         {
             "name": "dashifen/database",
@@ -488,16 +488,16 @@
         },
         {
             "name": "dashifen/router",
-            "version": "2.0.1",
+            "version": "3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/router.git",
-                "reference": "f007dcbdbcf54f5b4a87916d8d929988bbb56ad1"
+                "reference": "de1c892f6862c3ade1d4896f96ce755680e8c849"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/router/zipball/f007dcbdbcf54f5b4a87916d8d929988bbb56ad1",
-                "reference": "f007dcbdbcf54f5b4a87916d8d929988bbb56ad1",
+                "url": "https://api.github.com/repos/dashifen/router/zipball/de1c892f6862c3ade1d4896f96ce755680e8c849",
+                "reference": "de1c892f6862c3ade1d4896f96ce755680e8c849",
                 "shasum": ""
             },
             "require": {
@@ -523,20 +523,20 @@
                 }
             ],
             "description": "a PHP routing object",
-            "time": "2017-05-05T18:54:32+00:00"
+            "time": "2017-05-19T22:01:19+00:00"
         },
         {
             "name": "dashifen/searchbar",
-            "version": "1.0.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/searchbar.git",
-                "reference": "0ed77c8e37db5fb208670849555ddc92f513eb13"
+                "reference": "3240f00856ae63e28cc7ed0c1e43d20b82c9ee42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/0ed77c8e37db5fb208670849555ddc92f513eb13",
-                "reference": "0ed77c8e37db5fb208670849555ddc92f513eb13",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/3240f00856ae63e28cc7ed0c1e43d20b82c9ee42",
+                "reference": "3240f00856ae63e28cc7ed0c1e43d20b82c9ee42",
                 "shasum": ""
             },
             "require": {
@@ -561,7 +561,7 @@
                 }
             ],
             "description": "a class which produces a search bar to search within on-screen data",
-            "time": "2017-05-11T19:15:38+00:00"
+            "time": "2017-05-18T18:57:59+00:00"
         },
         {
             "name": "dashifen/session",

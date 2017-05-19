@@ -12,10 +12,10 @@ class BooksValidator extends Validator {
 		// book the visitor requested.  either (a) we need to not have such
 		// a requested abbreviation or (b) it must be in the list.
 		
-		$valid = empty($data["abbr"]) || in_array($data["abbr"], $data["abbrs"]);
+		$valid = empty($data["book_id"]) || in_array($data["book_id"], $data["books"]);
 		
 		if (!$valid) {
-			$this->validationErrors["abbr"] = "Unable to find abbreviation in database.";
+			$this->validationErrors["book_id"] = "Unable to find abbreviation in database.";
 		}
 		
 		return $valid;

@@ -2,51 +2,41 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
+use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
-use Interop\Container\ContainerInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 
 class BooksAction extends AbstractAction {
-	public function execute(string $parameter = "", ContainerInterface $container = null): ResponseInterface {
+	public function execute(array $parameter = []): ResponseInterface {
+		$this->processParameter($parameter);
 		
-		// if our $parameter is not empty, then we're loading a specific
-		// book rather than all of the books.  luckily, the domain will
-		// know how to limit the SQL statement it uses based on the state
-		// of what we send it.  we expect the parameter to be a book's
-		// abbreviation (e.g. SR5) so that's how we name it for our domain.
-		// note: the abbreviations in the database are in all caps, so
-		// we'll be sure to send that information here.
+		// our processParameter() method will set our action and recordId
+		// properties when it can.  if it can't, then our action property
+		// will be "read" by default.  we can call one of our methods below
+		// using that property as follows; they'll handle the rest.
 		
-		$payload = $this->domain->read(["abbr" => strtoupper($parameter)]);
+		return $this->{$this->action}();
+	}
+	
+	protected function read() {
+		$payload = $this->domain->read(["book_id" => $this->recordId]);
 		
 		if ($payload->getSuccess()) {
 			$books = $payload->getDatum("books");
-			$searchbar = "";
 			
-			if (empty($parameter)) {
-				
-				// if we were selecting multiple books, then we need to make
-				// the collection view's searchbar.  we can do so as follows,
-				// utilizing that object's parse method.
-				
-				/** @var \Aura\Di\Container $container */
-				/** @var SearchbarInterface $searchbar */
-				
-				$searchbar = $container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
-				$searchbar = $searchbar->parse($books);
-			}
 			
 			$this->handleSuccess([
-				"table"     => $books,
-				"searchbar" => $searchbar,
-				"title"     => $payload->getDatum("title"),
-				"count"     => $payload->getDatum("count"),
-				"caption"   => "The following are the SR books in this application.
+				"table"        => $books,
+				"searchbar"    => $this->getSearchbar($payload),
+				"title"        => $payload->getDatum("title"),
+				"count"        => $payload->getDatum("count"),
+				"capabilities" => $this->request->getSessionVar("capabilities"),
+				"caption"      => "The following are the SR books in this application.
 					They're not all the published books for SR5; only those with
 					quantifiable rules and stats are here.  Some, mostly the German
 					content, are not included, i.e. you won't find their data
-					elsewhere in the Shadowlab."
+					elsewhere in the Shadowlab.",
 			]);
 		} else {
 			$this->handleFailure([
@@ -56,5 +46,23 @@ class BooksAction extends AbstractAction {
 		}
 		
 		return $this->response;
+	}
+	
+	protected function getSearchbar(PayloadInterface $payload): string {
+		$searchbar = "";
+		
+		if ($payload->getDatum("count") > 1) {
+			
+			// if we're displaying more than one book, then we want a
+			// searchbar to help the visitor find the one they're looking
+			// for.
+			
+			/** @var SearchbarInterface $searchbar */
+			
+			$searchbar = $this->container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
+			$searchbar = $searchbar->parse($payload->getDatum("books")["searchbar"]);
+		}
+		
+		return $searchbar;
 	}
 }

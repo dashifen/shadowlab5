@@ -36,8 +36,11 @@ class Domains extends ShadowlabContainerConfig {
 			// it does need to know the entity with which it's going to be
 			// working.  we can call it's setEntityType method as follows
 			// and send it the name of the entity as defined by our handler.
+			// for now, we're not entirely sure that we need Entities within
+			// this framework (or maybe just within this app) so we're
+			// essentially stubbing them by using the same Entity throughout.
 			
-			$di->setters[$handler->domain]["setEntityType"] = $handler->entity;
+			$di->setters[$handler->domain]["setEntityType"] = 'Shadowlab\Framework\Domain\Entity';
 		}
 	}
 }

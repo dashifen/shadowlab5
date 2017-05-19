@@ -17,6 +17,10 @@ table {
 		padding: rem(5);
 		text-align: left;
 		vertical-align: top;
+
+		&.nowrap {
+			white-space: nowrap;
+		}
 	}
 
 	thead th {
@@ -24,24 +28,45 @@ table {
 		color: #fff;
 		text-align: left;
 		vertical-align: bottom;
-
-		span {
-			@include visuallyhidden;
-		}
 	}
 
 	th {
 		font-weight: bold;
 	}
 
-	tbody tr.searchable-row-hidden {
-		position: absolute;
-		top: -50000000px;
+	tbody {
+		&.searchable-row-hidden {
+			display: none;
+		}
+
+		tr:hover {
+			background-color: palette(yellow);
+		}
 	}
 
 	&.summarized {
 		tbody:not(.clicked) .description {
 			display: none;
+		}
+
+		.description {
+			p:empty {
+				margin: 0;
+			}
+
+			section {
+				display: flex;
+
+				div {
+					flex: 1;
+				}
+
+				p.controls {
+					display: flex;
+					flex-direction: column;
+					margin: 0;
+				}
+			}
 		}
 	}
 

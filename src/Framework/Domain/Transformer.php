@@ -16,7 +16,7 @@ use Dashifen\Domain\Transformer\TransformerInterface;
  *
  * @package Shadowlab\Framework\Domain
  */
-class Transformer implements TransformerInterface {
+class Transformer implements TransformerInterface, ShadowlabTransformationsInterface {
 	public const DESCRIPTIVE_KEYS = ["description", "abbr", "page"];
 	
 	/**
@@ -55,7 +55,19 @@ class Transformer implements TransformerInterface {
 		return $payload;
 	}
 	
-	protected function sanitizeId(string $unsanitary): string {
+	public function abbreviate(string $string): string {
+		
+		// it's common that we want to abbreviate information that we
+		// display in table headers using our collection view.  this
+		// method uses a regex to identify the first character of
+		// $string as well as any character after an underscore. so,
+		// drain_value would be come DV and type would become T.
+		
+		preg_match_all("/(?:^|_)([a-z])/", $string, $matches);
+		return strtoupper(join("", $matches[1]));
+	}
+	
+	public function sanitize(string $unsanitary): string {
 		
 		// we take this essentially from WordPress to produce ID attribute
 		// values from some other sort of string during our transformation.
@@ -63,7 +75,8 @@ class Transformer implements TransformerInterface {
 		// attributes.  we could do this as a Vue filter, but the client-side
 		// does enough work.
 		
-		$sanitary = strtolower(preg_replace("/\W+/", "-", $unsanitary));
+		$sanitary = str_replace("'", "", $unsanitary);
+		$sanitary = strtolower(preg_replace("/[\W_]+/", "-", $sanitary));
 		
 		if (substr($sanitary, -1, 1) == "-") {
 			$sanitary = substr($sanitary, 0, strlen($sanitary) - 1);
@@ -72,7 +85,70 @@ class Transformer implements TransformerInterface {
 		return $sanitary;
 	}
 	
-	protected function extractData(array $record, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	public function unsanitize(string $sanitary): string {
+		
+		// this is the opposite of the above sanitize action.  here we
+		// identify things that don't look like letters or numbers and
+		// convert them to spaces usually for display on-screen.  so,
+		// for example, spell-category becomes spell category.
+		
+		return preg_replace("/[\W-_]+/", " ", $sanitary);
+	}
+	
+	public function deduplicate(array $data, bool $sort = false): array {
+		
+		// the $data array is assumed to be non-unique.  so, we want to
+		// make it so by removing duplicates.  we'll also trim values to
+		// avoid "foo " and "foo" being different.
+		
+		$data = array_filter($data, function($datum) { return trim($datum); });
+		$data = array_unique($data);
+		
+		// if our sort flag is set, then we'll also perform an associative
+		// sort on our $data.
+		
+		if ($sort) {
+			asort($data);
+		}
+		
+		return $data;
+	}
+	
+	public function deduplicateAndSort(array $data): array {
+		return $this->deduplicate($data, true);
+	}
+	
+
+	protected function extractHeaders(array $data, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+		
+		// our $data is a set of data selected from the database.  if we're
+		// transforming it, then we've already confirmed that there's at least
+		// one datum in our array, and we can use it to work with its indices.
+		
+		$indices = array_keys($data[0]);
+		
+		// the data we want to filter and remove from our array are any
+		// of our descriptive keys in the constant above, the sanitized
+		// column usually used for URL matching, and any column ending in
+		// "_id" to skip numeric keys in the database.  we'll make our
+		// regex here and the use it via closure in the anonymous
+		// function below.
+		
+		$keys = array_merge($descriptiveKeys, ["sanitized", ".+_id$"]);
+		
+		$regex = "/" . join("|", $keys) . "/";
+		return array_filter($indices, function($index) use ($regex) {
+			
+			// if we did not find a match against our $regex here, then
+			// this index should stay in.  to return true, we want to see
+			// that our count of matches is exactly zero.
+			
+			$matches = preg_match($regex, $index);
+			return $matches === 0;
+		});
+	}
+	
+	protected function extractData(array $spell, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
 		
 		// this method is used by transformers that prepare data for our
 		// collection view.  in that view, any key not listed in our constant
@@ -80,18 +156,24 @@ class Transformer implements TransformerInterface {
 		// for all fields not in that constant as follows which'll remove
 		// the descriptive data from our $record.
 		
-		$filtered = array_filter($record, function($field) use ($descriptiveKeys) {
+		$filtered = array_filter($spell, function($field) use ($descriptiveKeys) {
 			return !in_array($field, $descriptiveKeys);
 		}, ARRAY_FILTER_USE_KEY);
 		
 		// now that we've removed our descriptive keys from our data, we need
 		// to arrange what's left so that our Vue can access both the field
-		// and value information rather than just the value.
+		// and value information rather than just the value.  plus, we'll also
+		// remove anything that ends in _id since those shouldn't be in our
+		// data either.
 		
 		$temp = [];
 		foreach ($filtered as $field => $value) {
+			if (preg_match("/_id$/", $field)) {
+				continue;
+			}
+			
 			$temp[] = [
-				"column" => $this->sanitizeId($field),
+				"column" => $this->sanitize($field),
 				"html"   => $value,
 			];
 		}
