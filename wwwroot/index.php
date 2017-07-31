@@ -39,15 +39,13 @@ try {
 	$router = $app->newInstance('Dashifen\Router\Router');
 	$route = $router->route();
 	
-	
-	
 	// now that we've gotten the route that we'll be executing, we can
 	// use it to get our action.  and, we'll also pass along an action
 	// parameter if there is one for this route.  these are optional and
 	// default to the empty string when not in use.
 	
 	$action = $app->newInstance($route->getAction());
-	$response = $action->execute($route->getActionParameter(), $app);
+	$response = $action->execute($route->getActionParameter());
 	$response->send();
 } catch (RouterException $e) {
 	

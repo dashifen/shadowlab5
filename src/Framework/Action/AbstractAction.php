@@ -46,7 +46,14 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 * @throws ActionException
 	 */
 	protected function setAction(string $action): void {
-		if (in_array($action, ["create", "read", "update", "delete"])) {
+		
+		// in many apps, the idea of an update and a patch action would
+		// seem redundant.  but, the update action is the one used when
+		// we're getting information about a record and a patch is used
+		// when we're sending information back to be saved in the
+		// database.
+		
+		if (in_array($action, ["create", "read", "update", "patch", "delete"])) {
 			$this->action = $action;
 			return;
 		}
@@ -99,9 +106,10 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// we very specifically named our methods above so that they matched
 		// the public methods of our response object.  that way we can use
 		// a variable function call as follows to pass our newly authenticated
-		// data over to it.
+		// data over to it.  notice we pass our action property over to the
+		// response; it's optional, but sometimes they need it.
 		
-		$this->response->{$function}($data);
+		$this->response->{$function}($data, $this->action);
 	}
 	
 	/**

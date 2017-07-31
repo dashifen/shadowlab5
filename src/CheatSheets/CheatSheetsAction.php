@@ -7,7 +7,12 @@ use Dashifen\Response\ResponseInterface;
 
 class CheatSheetsAction extends AbstractAction {
 	public function execute(array $parameter = []): ResponseInterface {
-		$payload = $this->domain->read(["sheet_type" => $parameter]);
+		
+		// our parameter array should only have one item in it:  a type
+		// for our cheat sheet display.
+		
+		$sheet_type = sizeof($parameter) !== 0 ? $parameter[0] : "";
+		$payload = $this->domain->read(["sheet_type" => $sheet_type]);
 		
 		if ($payload->getSuccess()) {
 			
@@ -17,7 +22,7 @@ class CheatSheetsAction extends AbstractAction {
 			
 			$this->handleSuccess([
 				"sheets" => $payload->getDatum("sheets"),
-				"title"  => trim(ucfirst($parameter) . " Cheat Sheets"),
+				"title"  => trim(ucfirst($sheet_type) . " Cheat Sheets"),
 				"parameter" => $parameter
 			]);
 		} else {

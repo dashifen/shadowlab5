@@ -20,4 +20,31 @@ class BooksValidator extends Validator {
 		
 		return $valid;
 	}
+	
+	public function validateUpdate(array $data = []): bool {
+		
+		// this method gets called both when we want to validate that we
+		// have a valid book to update and when we want to validate data
+		// to save in the database.  the structure of $data will tell us
+		// which is which.  when reading information about a book, we can
+		// use the method above as our validation.  otherwise, we'll
+		// continue below.
+		
+		if (isset($data["book_id"])) {
+			return $this->validateRead($data);
+		}
+		
+		// if we're still here, then we want to actually validate our
+		// posted data.  for books, this is pretty straight forward.
+		
+		$valid = true;
+		
+		
+		
+		// for our patch, we're going to assume that all is well until
+		// proven otherwise.  thus,
+		
+		
+		return $valid;
+	}
 }

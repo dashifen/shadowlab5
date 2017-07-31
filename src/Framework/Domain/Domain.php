@@ -61,4 +61,20 @@ class Domain extends AbstractMysqlDomain {
 			DomainException::UNEXPECTED_BEHAVIOR);
 	}
 	
+	/**
+	 * @param string $table
+	 *
+	 * @return array
+	 */
+	protected function getTableDetails(string $table) {
+		
+		// when transforming data, sometimes it's nice to know about that
+		// database table from which (or into which) the data is coming (or
+		// going).  this method gets that for us.
+		
+		return $this->db->getMap("SELECT COLUMN_NAME, COLUMN_DEFAULT,
+			IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA
+			FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'shadowlab'
+			AND TABLE_NAME = :table", ["table" => $table]);
+	}
 }

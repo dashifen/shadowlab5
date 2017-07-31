@@ -14,10 +14,12 @@ class Actions extends ShadowlabContainerConfig {
 		
 		// the first parameter to all Action objects is the request.
 		// then the second and third parameters are related to the specific
-		// actions that we're loading.  Aura/Di can set the parent's parameter
-		// and then we can specify the differences for the children.
+		// actions that we're loading.  finally, its fourth parameter is a
+		// reference to our container here so that it can access Services
+		// within our dependencies as needed.
 		
 		$di->params['Dashifen\Action\AbstractAction']['request'] = $di->lazyGet("request");
+		$di->params['Dashifen\Action\AbstractAction']['container'] = $di;
 		
 		// because this object extends the Shadowlab's container configuration
 		// object, we can use the protected methods of that object to grab the

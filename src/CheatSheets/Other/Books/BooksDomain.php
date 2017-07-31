@@ -20,8 +20,8 @@ class BooksDomain extends Domain {
 			// book or for all of them -- we'll just pass control from this
 			// method to one of the two following ones.
 			
-			$payload = !empty($data["abbr"])
-				? $this->readOne($data["abbr"])
+			$payload = !empty($data["book_id"])
+				? $this->readOne($data["book_id"])
 				: $this->readAll();
 			
 			if ($payload->getSuccess()) {
@@ -45,11 +45,11 @@ class BooksDomain extends Domain {
 		return $payload;
 	}
 	
-	protected function readOne(string $abbr): PayloadInterface {
+	protected function readOne(int $book_id): PayloadInterface {
 		$sql = "SELECT book_id, book, description, abbr, included FROM books
-			WHERE abbr = :abbr";
+			WHERE book_id = :book_id";
 		
-		$book = $this->db->getRow($sql, ["abbr" => $abbr]);
+		$book = $this->db->getRow($sql, ["book_id" => $book_id]);
 		
 		// success is when we can read anything.  since we use getRow, the
 		// size of the array is the number of columns, not the number of
@@ -76,5 +76,40 @@ class BooksDomain extends Domain {
 			"books" => $books,
 			"count" => $count,
 		]);
+	}
+	
+	public function update(array $data): PayloadInterface {
+		
+		// our update is a special sort of read.  we get a book ID from
+		// the visitor so here we want to read the information about that
+		// book and then return that to our action.  luckily, we already
+		// have a method which does that.
+		
+		$books = $this->db->getCol("SELECT book_id FROM books");
+		$validation_data = array_merge($data, ["books"=>$books]);
+		if ($this->validator->validateUpdate($validation_data)) {
+			$payload = $this->readOne($data["book_id"]);
+			if ($payload->getSuccess()) {
+				
+				// if we could read information about our book, then we're
+				// ready to transform that information into a JSON string
+				// that defines our form for the VueJS client-side template.
+				// for that, we also need the information about the columns
+				// of our books database table.
+				
+				$payload->setDatum("schema", $this->getTableDetails("books"));
+				$payload = $this->transformer->transformUpdate($payload);
+			}
+		
+			return $payload;
+		}
+		
+		return $this->payloadFactory->newUpdatePayload(false, [
+			"error" => $this->validator->getValidationErrors()
+		]);
+	}
+	
+	protected function patch(array $data): PayloadInterface {
+	
 	}
 }

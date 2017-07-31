@@ -2,7 +2,7 @@
 
 namespace Shadowlab\Framework\Response;
 
-use Dashifen\Response\AbstractResponse;
+use Dashifen\Response\AbstractResponse as DashifenAbstractResponse;
 use Dashifen\Response\Factory\ResponseFactoryInterface;
 use Dashifen\Response\ResponseException;
 use Dashifen\Response\View\ViewInterface;
@@ -17,7 +17,13 @@ use Zend\Diactoros\Response\EmitterInterface;
  *
  * @package Shadowlab\Framework\Response
  */
-class Response extends AbstractResponse {
+abstract class AbstractResponse extends DashifenAbstractResponse {
+	
+	/**
+	 * @var string
+	 */
+	protected $responseType = "";
+	
 	public function __construct(ViewInterface $view, EmitterInterface $emitter, ResponseFactoryInterface $responseFactory, $root_path = "") {
 		parent::__construct($view, $emitter, $responseFactory, $root_path);
 		
@@ -28,24 +34,47 @@ class Response extends AbstractResponse {
 		$this->setDatum("error", "");
 	}
 	
-	
-	public function handleSuccess(array $data = []): void {
+	public function handleSuccess(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Success",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}
 	
-	public function handleFailure(array $data = []): void {
+	public function handleFailure(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Failure",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}
 	
-	public function handleError(array $data = []): void {
+	public function handleError(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Error",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}
 	
-	public function handleNotFound(array $data = []): void {
+	public function handleNotFound(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Not Found",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}
+	
+	/**
+	 * @param string $responseType
+	 *
+	 * @throws ResponseException
+	 */
+	protected function setResponseType(string $responseType): void {
+		$responseType = strtolower($responseType);
+		
+		if (!in_array($responseType, ["success", "failure", "error", "notfound"])) {
+			throw new ResponseException("Unexpected response type: $responseType");
+		}
+		
+		$this->responseType = $responseType;
+	}
+	
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return string
+	 * @throws ResponseException
+	 */
+	abstract protected function getTemplate(array $data = [], string $action = "read"): string;
 }

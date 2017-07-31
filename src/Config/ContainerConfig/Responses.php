@@ -27,14 +27,14 @@ class Responses extends ContainerConfig {
 		// for our responses, they're all constructed the same; only their
 		// implementation is different.  so, we can configure them as follows:
 		
-		$di->params['Shadowlab\Framework\Response\Response']['view'] = $di->lazyNew('Shadowlab\Framework\View\View');
-		$di->params['Shadowlab\Framework\Response\Response']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
-		$di->params['Shadowlab\Framework\Response\Response']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
+		$di->params['Shadowlab\Framework\Response\AbstractResponse']['view'] = $di->lazyNew('Shadowlab\Framework\View\View');
+		$di->params['Shadowlab\Framework\Response\AbstractResponse']['emitter'] = $di->lazyNew('Zend\Diactoros\Response\SapiEmitter');
+		$di->params['Shadowlab\Framework\Response\AbstractResponse']['responseFactory'] = $di->lazyNew('Dashifen\Response\Factory\ResponseFactory');
 		
 		// the final parameter to our response is the root path for the
 		// content that it needs to load.  that root is the same views folder
 		// we identified above.  we can pass that along as follows:
 		
-		$di->params['Shadowlab\Framework\Response\Response']['root_path'] = $path;
+		$di->params['Shadowlab\Framework\Response\AbstractResponse']['root_path'] = $path;
 	}
 }

@@ -31,12 +31,10 @@ class SpellsTransformer extends Transformer {
 		
 		$headers = $this->constructHeaders($spells);
 		$bodies = $this->constructBodies($spells);
-		$searchbar = $this->constructSearchbar($spells);
 		
 		return [
 			"headers"   => $headers,
 			"bodies"    => $bodies,
-			"searchbar" => $searchbar,
 		];
 	}
 	
@@ -86,7 +84,7 @@ class SpellsTransformer extends Transformer {
 		return $headers;
 	}
 	
-	protected function extractHeaders(array $data): array {
+	protected function extractHeaders(array $data, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
 		$headers = parent::extractHeaders($data);
 		
 		foreach ($headers as $i => $header) {
@@ -157,67 +155,6 @@ class SpellsTransformer extends Transformer {
 		}
 		
 		return $data;
-	}
-	
-	protected function constructSearchbar(array $spells): array {
-		
-		// while the searchbar doesn't transform the data itself, it uses
-		// that data to create a bar that we use on screen to search within
-		// it.  so, since our transformers are the object which manipulate
-		// the data between the domain and the action, it make sense to
-		// keep this manipulation here.
-		
-		$tags = [];
-		$books = [];
-		$categories = [];
-		foreach ($spells as $i => $spell) {
-			$books[$spell["book_id"]] = $spell["abbr"];
-			$categories[$spell["spell_category_id"]] = $spell["spell_category"];
-			
-			// those two were easy, but our tags are harder because it's a
-			// one-to-many relationship between spells and tags.  so, we need
-			// to explode our tag IDs and our tags and them combine them
-			// a follows:
-			
-			$x = array_filter(explode("_", $spell["spell_tags_ids"]));
-			$y = array_filter(explode(", ", $spell["spell_tags"]));
-			
-			// and, now that we have a $x and $y representing tag IDs and
-			// the tags themselves, we can combine those and append the
-			// result into $tags.
-			
-			$tags += array_combine($x, $y);
-		}
-		
-		$searchbar = [
-			[
-				[
-					"type"  => "search",
-					"label" => "Spells",
-					"for"   => "spell",
-				], [
-					"type"            => "filter",
-					"label"           => "Spell Categories",
-					"for"             => "spell-category",
-					"defaultText"     => "All Spell Categories",
-					"searchbarValues" => $this->deduplicateAndSort($categories),
-				], [
-					"type"            => "filter",
-					"label"           => "Spell Tags",
-					"for"             => "spell-tags",
-					"defaultText"     => "All Spell Tags",
-					"searchbarValues" => $this->deduplicateAndSort($tags),
-				], [
-					"type"            => "filter",
-					"label"           => "Books",
-					"for"             => "book",
-					"defaultText"     => "All Books",
-					"searchbarValues" => $this->deduplicateAndSort($books),
-				],
-			]
-		];
-		
-		return $searchbar;
 	}
 	
 	protected function transformOne(array $spells): array {

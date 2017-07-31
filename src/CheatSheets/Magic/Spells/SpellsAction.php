@@ -36,7 +36,7 @@ class SpellsAction extends AbstractAction {
 	}
 	
 	protected function getSearchbar(PayloadInterface $payload): string {
-		$searchbar = "";
+		$searchbarHTML = "";
 		
 		if ($payload->getDatum("count") > 1) {
 			
@@ -47,9 +47,95 @@ class SpellsAction extends AbstractAction {
 			/** @var SearchbarInterface $searchbar */
 			
 			$searchbar = $this->container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
-			$searchbar = $searchbar->parse($payload->getDatum("spells")["searchbar"]);
+			$searchbar = $this->constructSearchbar($searchbar, $payload);
+			$searchbarHTML = $searchbar->getBar();
 		}
 		
+		return $searchbarHTML;
+	}
+	
+	/**
+	 * @param SearchbarInterface $searchbar
+	 * @param PayloadInterface   $payload
+	 *
+	 * @return SearchbarInterface
+	 */
+	protected function constructSearchbar(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
+		
+		// first, we need to get the tags, books, and categories out of the
+		// $payload data so that we can add filters for these data.  then, we
+		// can use that information to add fields to our $searchbar along with
+		// other criteria that doesn't rely on our $payload.
+		
+		$spells = $payload->getDatum("spells");
+		list($tags, $books, $categories) = $this->collectFilterOptions($spells);
+		
+		$searchbar->addSearch("Spells", "spell");
+		$searchbar->addFilter("Spell Categories", "spell-category", $categories);
+		$searchbar->addFilter("Spell Tags", "spell-tags", $tags);
+		$searchbar->addFilter("Books", "book", $books);
+		
 		return $searchbar;
+	}
+	
+	/**
+	 * @param array $spells
+	 *
+	 * @return array
+	 */
+	protected function collectFilterOptions(array $spells): array {
+		
+		// our tags, books, and categories data all lay within our $spells
+		// array.  we'll iterate over that and get the information that we
+		// need from it.  notice that during our original iteration, we don't
+		// worry about testing for uniqueness; we'll handle that afterward.
+		
+		$tags = [];
+		$books = [];
+		$categories = [];
+		foreach ($spells as $i => $spell) {
+			$books[$spell["book_id"]] = $spell["abbr"];
+			$categories[$spell["spell_category_id"]] = $spell["spell_category"];
+			
+			// those two were easy, but our tags are harder because it's a
+			// one-to-many relationship between spells and tags.  so, we need
+			// to explode our tag IDs and our tags and them combine them
+			// a follows:
+			
+			$x = array_filter(explode("_", $spell["spell_tags_ids"]));
+			$y = array_filter(explode(", ", $spell["spell_tags"]));
+			
+			// and, now that we have a $x and $y representing tag IDs and
+			// the tags themselves, we can combine those and append the
+			// result into $tags.
+			
+			$tags += array_combine($x, $y);
+		}
+		
+		// since books and categories are added specifically by ID, those
+		// lists are already unique, but they might not be sorted.  our tags,
+		// though, are just appended over and over again and so there's
+		// definitely duplicates therein.  here, we loop over them all and
+		// tough up the data preparing it for the screen.
+		
+		$data = [
+			"tags"       => $tags,
+			"books"      => $books,
+			"categories" => $categories,
+		];
+		
+		foreach ($data as $i => $datum) {
+			if ($i === "categories") {
+				$datum = array_unique($datum);
+			}
+			
+			asort($datum);
+		}
+		
+		// our calling scope will use list() to separate our three lists
+		// into their own variables once more.  so, we only send back the
+		// array_values();
+		
+		return array_values($data);
 	}
 }

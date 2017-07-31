@@ -4,7 +4,6 @@ namespace Shadowlab\User\Login;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
-use Interop\Container\ContainerInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 
 /**
@@ -14,12 +13,11 @@ use Shadowlab\Framework\Action\AbstractAction;
  */
 class LoginAction extends AbstractAction {
 	/**
-	 * @param array             $parameter
-	 * @param ContainerInterface $container
+	 * @param array $parameter
 	 *
 	 * @return ResponseInterface
 	 */
-	public function execute(array $parameter = [], ContainerInterface $container = null): ResponseInterface {
+	public function execute(array $parameter = []): ResponseInterface {
 		if ($this->request->getSessionObj()->isAuthenticated()) {
 			
 			// if we're here but already authentic, we can just go to

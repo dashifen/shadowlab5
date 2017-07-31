@@ -6,6 +6,11 @@ use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\Transformer;
 
 class BooksTransformer extends Transformer {
+	
+	/*
+	 * READ TRANSFORMATIONS
+	 */
+	
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
 		
 		// our payload should contain a book or books.  if it's the latter,
@@ -29,18 +34,9 @@ class BooksTransformer extends Transformer {
 		$headers = $this->constructHeaders($books);
 		$bodies = $this->constructBodies($books);
 		
-		// even though our searchbar isn't a specifically a transformation
-		// of the data, it relies on that data to construct the bar.  thus,
-		// we'll put it here so that it doesn't have to be in the domain
-		// which is more about gathering the data rather than messing with
-		// it.
-		
-		$searchbar = $this->constructSearchbar($books);
-		
 		return [
 			"headers"   => $headers,
 			"bodies"    => $bodies,
-			"searchbar" => $searchbar,
 		];
 	}
 	
@@ -152,38 +148,26 @@ class BooksTransformer extends Transformer {
 		return $data;
 	}
 	
-	protected function constructSearchbar(array $books): array {
-		
-		// our searchbar should offer a way to search within a book's
-		// name as well as a way to filter by those books which are or
-		// are not included in the rest of the Shadowlab app.  luckily,
-		// the construction of this bar doesn't require sifting through
-		// our data since we know the only values for our included
-		// column are "included" and "excluded" (see above).
-		
-		$searchbar = [
-			[
-				[
-					"type"  => "search",
-					"label" => "Books",
-					"for"   => "book",
-				], [
-				"type"            => "filter",
-				"label"           => "Included",
-				"for"             => "included",
-				"defaultText"     => "Both included and excluded",
-				"searchbarValues" => [
-					"included" => "Included",
-					"excluded" => "Excluded",
-				],
-			],
-			],
-		];
-		
-		return $searchbar;
-	}
-	
 	protected function transformOne(array $books): array {
 		return $books;
 	}
+	
+	/*
+	 * UPDATE TRANSFORMATIONS
+	 */
+
+	public function transformUpdate(PayloadInterface $payload): PayloadInterface {
+		
+		// no transformation is necessary when patching the database, so
+		// when we're here, it's after we've read information about a book
+		// from the database.  therefore, what we want to do is transform
+		// our data so that our client can construct our form.
+		
+		$book = $payload->getDatum("books");
+		$schema = $payload->getDatum("schema");
+		
+		die("<pre>" . print_r($payload, true) . "</pre>");
+		
+	}
+	
 }
