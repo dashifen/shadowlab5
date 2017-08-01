@@ -6,6 +6,7 @@ use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
 use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\AddOns\Searchbar;
 
 class SpellsAction extends AbstractAction {
 	public function execute(array $parameter = []): ResponseInterface {
@@ -19,11 +20,12 @@ class SpellsAction extends AbstractAction {
 		
 		if ($payload->getSuccess()) {
 			$this->handleSuccess([
-				"searchbar" => $this->getSearchbar($payload),
-				"table"     => $payload->getDatum("spells"),
-				"title"     => $payload->getDatum("title"),
-				"count"     => $payload->getDatum("count"),
-				"caption"   => "",
+				"searchbar"    => $this->getSearchbar($payload),
+				"table"        => $payload->getDatum("spells"),
+				"title"        => $payload->getDatum("title"),
+				"count"        => $payload->getDatum("count"),
+				"capabilities" => $this->request->getSessionVar("capabilities"),
+				"caption"      => "",
 			]);
 		} else {
 			$this->handleError([
@@ -44,7 +46,7 @@ class SpellsAction extends AbstractAction {
 			// the collection view's searchbar.  we can do so as follows,
 			// utilizing that object's parse method.
 			
-			/** @var SearchbarInterface $searchbar */
+			/** @var Searchbar $searchbar */
 			
 			$searchbar = $this->container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
 			$searchbar = $this->constructSearchbar($searchbar, $payload);
@@ -67,13 +69,16 @@ class SpellsAction extends AbstractAction {
 		// can use that information to add fields to our $searchbar along with
 		// other criteria that doesn't rely on our $payload.
 		
-		$spells = $payload->getDatum("spells");
+		$spells = $payload->getDatum("original-spells");
 		list($tags, $books, $categories) = $this->collectFilterOptions($spells);
 		
+		/** @var Searchbar $searchbar */
+		
 		$searchbar->addSearch("Spells", "spell");
-		$searchbar->addFilter("Spell Categories", "spell-category", $categories);
-		$searchbar->addFilter("Spell Tags", "spell-tags", $tags);
-		$searchbar->addFilter("Books", "book", $books);
+		$searchbar->addFilter("Spell Categories", "spell-category", $categories, "", "All Spell Categories");
+		$searchbar->addFilter("Spell Tags", "spell-tags", $tags, "", "All Spell Tags");
+		$searchbar->addFilter("Books", "book", $books, "", "All Books");
+		$searchbar->addReset();
 		
 		return $searchbar;
 	}
@@ -124,7 +129,7 @@ class SpellsAction extends AbstractAction {
 			"categories" => $categories,
 		];
 		
-		foreach ($data as $i => $datum) {
+		foreach ($data as $i => &$datum) {
 			if ($i === "categories") {
 				$datum = array_unique($datum);
 			}

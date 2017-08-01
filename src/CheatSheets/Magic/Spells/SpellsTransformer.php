@@ -18,7 +18,13 @@ class SpellsTransformer extends Transformer {
 			? $this->transformAll($original)
 			: $this->transformOne($original);
 		
+		// now, we want to send back our transformed information as the
+		// spells datum.  but, we also send back the untransformed data
+		// which can be useful to the action when preparing information
+		// for the searchbar.
+		
 		$payload->setDatum("spells", $transformed);
+		$payload->setDatum("original-spells", $original);
 		return $payload;
 	}
 	

@@ -5,7 +5,8 @@ var Searchbar = Class.extend({
 		
 		this.searchbar  = $("[data-searchbar]");
 		this.searchable = $("[data-searchable]");
-		if(this.searchbar.length==0 || this.searchable.length==0) return;
+
+		if(this.searchbar.length === 0 || this.searchable.length === 0) return;
 		
 		this.search = $.proxy(this.search, this);
 		this.reset  = $.proxy(this.reset,  this);
@@ -41,7 +42,7 @@ var Searchbar = Class.extend({
 		
 		this.searchbar.trigger("searchbar:before");
 		var rows = this.searchable.find("[data-row]");
-		if (rows.length == 0) {
+		if (rows.length === 0) {
 			rows = this.searchable.find("tbody tr");
 		}
 	
@@ -56,10 +57,10 @@ var Searchbar = Class.extend({
 			this.fields.each(function() {
 				var field = $(this);
 				var type = field.context.type;
-				if(type == "reset") return;
+				if(type === "reset") return;
 				
-				var value = type=="checkbox" ? field.context.checked : field.val();
-				if (!value || value.length == 0 || value == "all") return;
+				var value = type === "checkbox" ? field.context.checked : field.val();
+				if (!value || value.length === 0 || value === "all") return;
 				
 				// if we haven't left our anonymous function at this time, then we want to compare our value against
 				// the row's data with the same name as the field's ID.  if this is a text field, we use a regular 
@@ -67,12 +68,12 @@ var Searchbar = Class.extend({
 					
 				var name = field.attr("id").replace(/_(?:search|filter|toggle)$/, "");
 
-				if (type != "text") {
+				if (type !== "text") {
 					// if there's a name + "-list" data setting, then we want to use the is() method to determine
 					// if our value is a part of that list.  otherwise, we'll simply look for a match to our value.
 					
-					if(row.data(name + "-list")) show = show && row.is("[data-" + name + "~=" + value + "]");
-					else show = show && row.data(name) == value;
+					if(row.data(name + "-list")) show = show && row.is("[data-" + name + "~=_" + value + "_]");
+					else show = show && row.data(name) === value;
 				} else {
 					// this try block helps to avoid bad regular expressions based on wacky user entry.  if we 
 					// throw an exception within, we just skip this criterion.
@@ -97,7 +98,7 @@ var Searchbar = Class.extend({
 			// the init() method for when the flag is set and reset.
 
 			var visible = rows.find(":visible");
-			if (visible.length == 1) {
+			if (visible.length === 1) {
 				visible.addClass("clicked");
 			}
 		}

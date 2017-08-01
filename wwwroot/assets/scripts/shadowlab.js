@@ -2,7 +2,7 @@ var Shadowlab = new Vue({
 	data: vueData,
 	el: "#shadowlab",
 
-	// since the <title> tag lays outside of the div#shadowlab element,
+	// since the <title> tag is outside of the div#shadowlab element,
 	// we have to alter it after the Vue object is mounted by hand as
 	// follows.
 

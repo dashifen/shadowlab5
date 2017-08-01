@@ -99,11 +99,14 @@ class BooksAction extends AbstractAction {
 			"excluded" => "Excluded",
 		];
 		
+		/** @var Searchbar $searchbar */
+		
 		$searchbar->addRow();
 		$searchbar->addSearch("Books", "book");
 		$searchbar->addFilter("Included", "included", $options, "",
 			"Both included and excluded");
 		
+		$searchbar->addReset();
 		return $searchbar;
 	}
 	

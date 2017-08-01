@@ -65,14 +65,6 @@ var Summarizer = Class.extend({
 	},
 
 	toggleClass: function(element, className) {
-
-		// if the given element has the class, we remove it.  otherwise,
-		// we add it.  thus, it is toggled.
-
-		if (element.classList.contains(className)) {
-			element.classList.remove(className);
-		} else {
-			element.classList.add(className);
-		}
+		element.classList.toggle(className, !element.classList.contains(className));
 	}
 });
