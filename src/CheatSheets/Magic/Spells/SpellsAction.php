@@ -48,7 +48,7 @@ class SpellsAction extends AbstractAction {
 			
 			/** @var Searchbar $searchbar */
 			
-			$searchbar = $this->container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
+			$searchbar = $this->container->get("searchbar");
 			$searchbar = $this->constructSearchbar($searchbar, $payload);
 			$searchbarHTML = $searchbar->getBar();
 		}

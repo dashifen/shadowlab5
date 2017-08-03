@@ -90,13 +90,6 @@ class BooksDomain extends Domain {
 		if ($this->validator->validateUpdate($validation_data)) {
 			$payload = $this->readOne($data["book_id"]);
 			if ($payload->getSuccess()) {
-				
-				// if we could read information about our book, then we're
-				// ready to transform that information into a JSON string
-				// that defines our form for the VueJS client-side template.
-				// for that, we also need the information about the columns
-				// of our books database table.
-				
 				$payload->setDatum("schema", $this->getTableDetails("books"));
 				$payload = $this->transformer->transformUpdate($payload);
 			}

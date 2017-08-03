@@ -138,4 +138,101 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function handleNotFound(array $data = []): void {
 		$this->respond(__FUNCTION__, $data);
 	}
+	
+	/*
+	 * the following methods are all used by children of this class when
+	 * building forms.  form building is a part of our action because it
+	 * relies on data from the domain and creates structures that are
+	 * passed to the response to be sent to the client.
+	 */
+	
+	protected function getFieldName(string $fieldId): string {
+		
+		// a fields name is related to its ID.  the database uses underscores
+		// to separate words in a field's ID, so here we switch them to spaces
+		// and then capitalize things.
+		
+		return ucwords(str_replace("_", " ", $fieldId));
+	}
+	
+	protected function getFieldType(array $fieldData): string {
+		$type = "Text";
+		
+		// within our $fieldData array is a DATA_TYPE index.  that data type
+		// will tell us what sort of field this should be.
+		
+		switch ($fieldData["DATA_TYPE"]) {
+			
+			case "int":
+			case "smallint":
+			case "tinyint":
+			case "bigint":
+				
+				// most of the time, our int fields simply require a
+				// Number field so we can enter the appropriate number.
+				// but, if there's also an OPTIONS array with data in
+				// it, then we want a SelectOne.
+				
+				$type = sizeof($fieldData["OPTIONS"] ?? []) > 0
+					? "SelectOne"
+					: "Number";
+				
+				break;
+				
+			case "char":
+			case "varchar":
+				
+				// usually, a Text field is good enough.  the trick is
+				// to see if the CHARACTER_MAXIMUM_LENGTH field is greater
+				// than 255.  if so, we'll switch to a text area.
+				
+				$type = ($fieldData["CHARACTER_MAXIMUM_LENGTH"] ?? 0) > 255
+					? "TextArea"
+					: "Text";
+				
+				break;
+				
+			case "text":
+				$type = "TextArea";
+				break;
+				
+			case "set":
+			case "enum":
+				$type = "SelectOne";
+				break;
+		}
+		
+		return $type;
+	}
+	
+	/**
+	 * @param array $fieldData
+	 *
+	 * @return bool
+	 */
+	protected function getFieldRequired(array $fieldData): bool {
+		
+		// the IS_NULLABLE field tells us whether or not it's required.
+		// if the field cannot be null, then it is required.  testing this
+		// is as easy as ...
+		
+		return $fieldData["IS_NULLABLE"] === "NO";
+	}
+	
+	/**
+	 * @param array $fieldData
+	 *
+	 * @return array
+	 */
+	protected function getFieldOptions(array $fieldData): array {
+		
+		// not all fields require options.  those that don't won't be
+		// effected by having them, and those that do fail to work if we
+		// don't have them.  luckily, our Domain tells us what the options
+		// should be after getting them out of the database.  so, we can
+		// just return them here.
+		
+		return $fieldData["OPTIONS"];
+	}
+	
 }

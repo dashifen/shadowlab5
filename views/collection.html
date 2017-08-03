@@ -25,7 +25,7 @@
 		></td>
 	</tr>
 	<tr v-if="body.description.description || capabilities.fixer" class="description">
-		<td :colspan="body.data.length">
+		<td :colspan="body.data.length - 1">
 			<section>
 				<div>
 					<p>{{ body.description.description | nl2br }}</p>
@@ -35,13 +35,12 @@
 						   {{ body.description.reference.abbr }}
 					</footer>
 				</div>
-				
-				<p v-if="capabilities.fixer" class="controls">
-					<a :href="body.recordId | makeUpdateLink">
-						<i class="fa fa-fw fa-pencil" aria-hidden="true" title="Update Record"></i>
-					</a>
-				</p>
 			</section>
+		</td>
+		<td class="text-center">
+			<a v-if="capabilities.fixer" class="controls" :href="body.recordId | makeUpdateLink">
+				<i class="fa fa-fw fa-pencil" aria-hidden="true" title="Update Record"></i>
+			</a>
 		</td>
 	</tr>
 </tbody>

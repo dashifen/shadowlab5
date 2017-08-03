@@ -151,23 +151,4 @@ class BooksTransformer extends Transformer {
 	protected function transformOne(array $books): array {
 		return $books;
 	}
-	
-	/*
-	 * UPDATE TRANSFORMATIONS
-	 */
-
-	public function transformUpdate(PayloadInterface $payload): PayloadInterface {
-		
-		// no transformation is necessary when patching the database, so
-		// when we're here, it's after we've read information about a book
-		// from the database.  therefore, what we want to do is transform
-		// our data so that our client can construct our form.
-		
-		$book = $payload->getDatum("books");
-		$schema = $payload->getDatum("schema");
-		
-		die("<pre>" . print_r($payload, true) . "</pre>");
-		
-	}
-	
 }

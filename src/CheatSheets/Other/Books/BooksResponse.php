@@ -4,7 +4,6 @@ namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Response\ResponseException;
 use Shadowlab\Framework\Response\AbstractResponse;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class BooksResponse extends AbstractResponse {
 	public function handleSuccess(array $data = [], string $action = "read"): void {

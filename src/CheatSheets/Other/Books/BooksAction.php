@@ -3,8 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
+use Dashifen\Form\Builder\FormBuilderInterface;
+use Dashifen\Form\FormInterface;
 use Dashifen\Response\ResponseInterface;
-use Dashifen\Searchbar\Elements\Search;
 use Dashifen\Searchbar\SearchbarInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\Searchbar;
@@ -71,8 +72,8 @@ class BooksAction extends AbstractAction {
 			
 			/** @var SearchbarInterface $searchbar */
 			
-			$searchbar = $this->container->newInstance('Shadowlab\Framework\AddOns\Searchbar');
-			$searchbar = $this->constructSearchbar($searchbar, $payload);
+			$searchbar = $this->container->get("searchbar");
+			$searchbar = $this->constructSearchbar($searchbar);
 			$searchbarHTML = $searchbar->getBar();
 		}
 		
@@ -81,11 +82,10 @@ class BooksAction extends AbstractAction {
 	
 	/**
 	 * @param SearchbarInterface $searchbar
-	 * @param PayloadInterface   $payload
 	 *
 	 * @return SearchbarInterface
 	 */
-	protected function constructSearchbar(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
+	protected function constructSearchbar(SearchbarInterface $searchbar): SearchbarInterface {
 		
 		// our searchbar should offer a way to search within a book's
 		// name as well as a way to filter by those books which are or
@@ -125,12 +125,88 @@ class BooksAction extends AbstractAction {
 		// searchbar when reading multiple books above.
 		
 		if ($payload->getSuccess()) {
-			$this->handleSuccess([]);
+			$this->handleSuccess([
+				"title"        => $payload->getDatum("title"),
+				"header"       => $payload->getDatum("header", "Edit Book Information"),
+				"instructions" => $payload->getDatum("instructions", ""),
+				"form"         => $this->getForm($payload),
+			]);
 		} else {
 			$this->handleFailure([]);
 		}
 		
 		return $this->response;
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
+	protected function getForm(PayloadInterface $payload): string {
+		
+		// even though we're only showing a single book in our form, we
+		// still uses "books" as the index within our $payload.  this is
+		// simply to homogenize the index when showing a collection and
+		// a single one.
+		
+		$book = $payload->getDatum("books");
+		$schema = $payload->getDatum("schema");
+		
+		/** @var FormInterface $form */
+		
+		$form = $this->constructForm($schema, $book);
+		return $form->getForm();
+	}
+	
+	/**
+	 * @param array $schema
+	 * @param array $book
+	 *
+	 * @return FormInterface
+	 */
+	protected function constructForm(array $schema, array $book = []): FormInterface {
+		/** @var FormBuilderInterface $formBuilder */
+		
+		$formBuilder = $this->container->get("formBuilder");
+		$currentUrl = $this->request->getServerVar("SCRIPT_URL");
+		
+		die("<pre>" . print_r($schema, true) . "</pre>");
+		
+		$formBuilder->openForm([
+			"id"     => "book-form",
+			"action" => str_replace("update", "patch", $currentUrl),
+		]);
+		
+		$formBuilder->openFieldset([
+			"id"     => strtolower(preg_replace("/\W+/", "-", $book["book"])),
+			"legend" => $book["book"],
+		]);
+		
+		
+		foreach ($schema as $fieldId => $fieldData) {
+			
+			// the $schema describes the database columns into which we want
+			// to insert data.  one of those columns is likely named guid and
+			// we can skip that one; it has a default value for new data, and
+			// we don't want to mess with it for old stuff.
+			
+			if ($fieldId !== "guid") {
+				
+				// otherwise, we use the data we have about our fields to
+				// add Field information to our form.
+				
+				$formBuilder->addField([
+					"id"       => $fieldId,
+					"name"     => $this->getFieldName($fieldId),
+					"type"     => $this->getFieldType($fieldData),
+					"required" => $this->getFieldRequired($fieldData),
+					"options"  => $this->getFieldOptions($fieldData),
+				]);
+			}
+		}
+		
+		return $formBuilder->getForm();
 	}
 	
 	protected function patch() {

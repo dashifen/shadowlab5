@@ -13,6 +13,7 @@ $app = $cb->newConfiguredInstance([
 	'Shadowlab\Config\ContainerConfig\Domains',
 	'Shadowlab\Config\ContainerConfig\Responses',
 	'Shadowlab\Config\ContainerConfig\Router',
+	'Shadowlab\Config\ContainerConfig\Services',
 ]);
 
 /**
