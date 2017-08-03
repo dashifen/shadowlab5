@@ -12,7 +12,9 @@ use Dashifen\Domain\DomainException;
  * This default Domain implementation for the Shadowlab simply throws a
  * giant tantrum all of the place.  Floor kicking.  Screaming.  All the
  * good stuff.  Children can overwrite these methods to help calm things
- * down.
+ * down.  Once we get past the CRUD related tantrums, we see some ways
+ * that we interact with the database specifically to understand the
+ * schema of the database tables that we interact with.
  *
  * @package Shadowlab\Framework\Domain
  */
@@ -68,7 +70,7 @@ class Domain extends AbstractMysqlDomain {
 	 */
 	protected function getTableDetails(string $table) {
 		
-		// when transforming data, sometimes it's nice to know about that
+		// when working with our data, sometimes it's nice to know about that
 		// database table from which (or into which) the data is coming (or
 		// going).  this method gets that for us.
 		
@@ -83,26 +85,45 @@ SCHEMA;
 		
 		$schema = $this->db->getMap($statement, ["table" => $table]);
 		
+		// what the above statement can't do for us is get the information
+		// about viable options for the values within our database columns.
+		// some types -- like enums and sets -- have very specific limitations.
+		// other times, our integer fields may be links to other database
+		// tables where we gather values based on foreign key relationships.
+		// this loop helps us find those options.
+		
 		foreach ($schema as $column => &$columnData) {
-			$type = $columnData["DATA_TYPE"];
-			
-			// in this loop we want to look for columns of the enum or set
-			// type.  if we find them, we get their values.  we also look for
-			// any integer columns and check to see if they reference any
-			// foreign keys.  if so, we'll also want to get their possible
-			// values.
-			
-			$columnData["OPTIONS"] = [];
-			
-			if (in_array($type, ["enum", "set"])) {
-				$columnData["OPTIONS"] = $this->getEnumOptions($table, $column);
-			} elseif (strpos($type, "int") !== false) {
-				$columnData["OPTIONS"] = $this->getFKOptions($table, $column);
-			}
+			$columnData["OPTIONS"] = $this->getColumnOptions($table, $column, $columnData["DATA_TYPE"]);
 		}
 		
 		return $schema;
 	}
+	
+	/**
+	 * @param string $table
+	 * @param string $column
+	 * @param string $dataType
+	 *
+	 * @return array
+	 */
+	protected function getColumnOptions(string $table, string $column, string $dataType): array {
+		$options = [];
+		
+		// there are two groups of types that we want to mess with here:
+		// enums (and sets) and any integer type.  text based columns are
+		// free-formed, after all, so we don't worry about them at this
+		// time.  once we determine if there's any work to be done here,
+		// we call one of the following methods.
+		
+		if (in_array($dataType, ["enum", "set"])) {
+			$options = $this->getEnumOptions($table, $column);
+		} elseif (strpos($dataType, "int") !== false) {
+			$options = $this->getFKOptions($table, $column);
+		}
+
+		return $options;
+	}
+
 	
 	/**
 	 * @param string $table
@@ -159,8 +180,7 @@ CONSTRAINT;
 			
 			$columns = $this->db->getTableColumns($fkTable);
 			$fkColumnData = array_diff($columns, [$fkColumn])[0];
-			$statement = "SELECT $fkColumn, $fkColumnData FROM $fkTable";
-			$options = $this->db->getMap($statement);
+			$options = $this->db->getMap("SELECT $fkColumn, $fkColumnData FROM $fkTable");
 		}
 		
 		return $options;

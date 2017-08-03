@@ -3,6 +3,7 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
+use Dashifen\Form\Builder\FormBuilderInterface;
 use Shadowlab\Framework\Domain\Domain;
 
 class BooksDomain extends Domain {
@@ -90,6 +91,16 @@ class BooksDomain extends Domain {
 		if ($this->validator->validateUpdate($validation_data)) {
 			$payload = $this->readOne($data["book_id"]);
 			if ($payload->getSuccess()) {
+				
+				// in order to build our form, our FormBuilder objects
+				// need to have two additional payload data sent to them:
+				// the database schema from which we've selected our data
+				// and the index within our $payload where that data can
+				// be found.  we call that later index "values" because it
+				// represents the values found in (or going into) the
+				// schema.
+				
+				$payload->setDatum("values", "books");
 				$payload->setDatum("schema", $this->getTableDetails("books"));
 				$payload = $this->transformer->transformUpdate($payload);
 			}

@@ -150,12 +150,18 @@ class BooksAction extends AbstractAction {
 		// simply to homogenize the index when showing a collection and
 		// a single one.
 		
-		$book = $payload->getDatum("books");
-		$schema = $payload->getDatum("schema");
+		die("<pre>" . print_r($payload, true) . "</pre>");
 		
-		/** @var FormInterface $form */
+		$payloadData = $payload->getData();
+		$formBuilder = $this->container->get("formBuilder");
+		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
+		$formBuilder->openForm($payloadData);
+		$form = $formBuilder->getForm();
 		
-		$form = $this->constructForm($schema, $book);
+		// the $form that we have now, is the actual FormInterface object,
+		// but what we want to send as a part of our response is the HTML for
+		// it.  therefore, we call the form's getForm() method now, too.
+		
 		return $form->getForm();
 	}
 	
