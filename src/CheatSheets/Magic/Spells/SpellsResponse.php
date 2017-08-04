@@ -6,7 +6,7 @@ use Shadowlab\Framework\Response\ShadowlabResponse;
 
 class SpellsResponse extends ShadowlabResponse {
 	public function handleSuccess(array $data = [], string $action = "read"): void {
-		$content = $data["count"] > 1 ? "collection.html" : "single.html";
+		$content = $data["count"] > 1 ? "read/collection.html" : "read/single.html";
 		$this->setContent($content);
 		$this->setData($data);
 	}

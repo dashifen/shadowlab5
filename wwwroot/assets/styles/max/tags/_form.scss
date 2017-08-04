@@ -41,7 +41,8 @@ form {
 			}
 		}
 
-		label {
+		label,
+		fieldset legend label {
 			display: block;
 			font-weight: bold;
 			padding-bottom: rem(2.5);
@@ -74,9 +75,8 @@ form {
 			padding: 0;
 
 			legend label {
-				font-size: rem(10);
-				font-weight: bold;
-				padding: 0 0 rem(2.5);
+				font-size: rem(16);
+				padding-left: 0;
 			}
 
 			ol {
@@ -95,6 +95,10 @@ form {
 			label {
 				font-weight: normal;
 				padding-bottom: 0;
+
+				span::after {
+					content: "" !important;
+				}
 			}
 
 			p {

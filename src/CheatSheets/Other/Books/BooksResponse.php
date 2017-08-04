@@ -9,15 +9,35 @@ class BooksResponse extends AbstractResponse {
 	public function handleSuccess(array $data = [], string $action = "read"): void {
 		$this->setResponseType("success");
 		
-		$template = $this->getTemplate($data, $action);
+		// there's a variety of things that happen during a successful
+		// response.  the method below will help us identify which template
+		// to use for our content.
 		
+		$template = $this->getTemplate($data, $action);
 		$this->setContent($template);
+		$this->setData($data);
+	}
+	
+	public function handleError(array $data = [], string $action = "read"): void {
+		$this->setResponseType("error");
+		
+		// there's only one template to handle errors:  the form.  it allows
+		// for the visitor to make changes to their entries and to send them
+		// back to us for re-validation.
+		
+		$this->setContent("update/form.html");
 		$this->setData($data);
 	}
 	
 	public function handleFailure(array $data = [], string $action = "read"): void {
 		$this->setResponseType("failure");
-		$this->setContent($this->getTemplate($data, $action));
+		
+		// like successful actions, failures come in a variety of ways.  so,
+		// we use the method below to determine the template we use for our
+		// content.
+		
+		$template = $this->getTemplate($data, $action);
+		$this->setContent($template);
 		$this->setData($data);
 	}
 	
@@ -53,15 +73,28 @@ class BooksResponse extends AbstractResponse {
 	protected function getSuccessTemplate(array $data = [], string $action = "read"): string {
 		switch ($action) {
 			case "read":
-			case "patch":
+				
+				// when we're reading information, the template we use is
+				// based on the number of items we've selected from the
+				// database.  more than one and we should a collection of
+				// items; otherwise, a single one.
+				
 				return isset($data["count"]) && $data["count"] > 1
-					? "collection.html"
-					: "single.html";
+					? "read/collection.html"
+					: "read/single.html";
 			
 			case "update":
-				return "form.html";
+				
+				// when updating, if we have a record of our success, then
+				// we'll want to share that success with our visitor.
+				// otherwise, we give them the form so they can enter data
+				// we use to perform our update.
+				
+				return isset($data["success"]) && $data["success"]
+					? "update/success.html"
+					: "update/form.html";
 		}
 		
-		return "record/not-found.html";
+		return "not-found/record.html";
 	}
 }

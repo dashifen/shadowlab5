@@ -26,15 +26,31 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function processParameter(array $parameter = []) {
 		if (sizeof($parameter) > 0) {
 			
-			// if we have information to process, then we want to
-			// remove the empty values.  we're then left with our
-			// action and record ID number.
+			// the wildcard pattern we use to identify our action parameters
+			// results in either one or three matching groups.  first, we pad
+			// it to 3 so that we homogenize that length.  then, we can use
+			// list() to get at those data.
 			
-			$parameter = array_filter($parameter);
-			$this->setAction(array_shift($parameter));
+			$parameter = array_pad($parameter, 3, "");
+			list($createAction, $otherAction, $recordId) = $parameter;
 			
-			if (sizeof($parameter) > 0) {
-				$this->setRecordId(array_shift($parameter));
+			// now, if our $otherAction is empty, we assume that we're
+			// reading.  then, to determine the action, if it's a create
+			// action, that takes precedence over the other actions.
+			
+			$action = empty($createAction)
+				? (empty($otherAction) ? "read" : $otherAction)
+				: "create";
+			
+			$this->setAction($action);
+			
+			// finally, if we have a numeric record ID, we'll set that
+			// information, too.  otherwise, we'll assume that the record
+			// ID is unnecessary or, as with a create action, that it can
+			// remain the default of zero.
+			
+			if (is_numeric($recordId)) {
+				$this->setRecordId($recordId);
 			}
 		}
 	}
@@ -53,7 +69,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// when we're sending information back to be saved in the
 		// database.
 		
-		if (in_array($action, ["create", "read", "update", "patch", "delete"])) {
+		if (in_array($action, ["create", "read", "update", "delete"])) {
 			$this->action = $action;
 			return;
 		}
@@ -138,101 +154,4 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function handleNotFound(array $data = []): void {
 		$this->respond(__FUNCTION__, $data);
 	}
-	
-	/*
-	 * the following methods are all used by children of this class when
-	 * building forms.  form building is a part of our action because it
-	 * relies on data from the domain and creates structures that are
-	 * passed to the response to be sent to the client.
-	 */
-	
-	protected function getFieldName(string $fieldId): string {
-		
-		// a fields name is related to its ID.  the database uses underscores
-		// to separate words in a field's ID, so here we switch them to spaces
-		// and then capitalize things.
-		
-		return ucwords(str_replace("_", " ", $fieldId));
-	}
-	
-	protected function getFieldType(array $fieldData): string {
-		$type = "Text";
-		
-		// within our $fieldData array is a DATA_TYPE index.  that data type
-		// will tell us what sort of field this should be.
-		
-		switch ($fieldData["DATA_TYPE"]) {
-			
-			case "int":
-			case "smallint":
-			case "tinyint":
-			case "bigint":
-				
-				// most of the time, our int fields simply require a
-				// Number field so we can enter the appropriate number.
-				// but, if there's also an OPTIONS array with data in
-				// it, then we want a SelectOne.
-				
-				$type = sizeof($fieldData["OPTIONS"] ?? []) > 0
-					? "SelectOne"
-					: "Number";
-				
-				break;
-				
-			case "char":
-			case "varchar":
-				
-				// usually, a Text field is good enough.  the trick is
-				// to see if the CHARACTER_MAXIMUM_LENGTH field is greater
-				// than 255.  if so, we'll switch to a text area.
-				
-				$type = ($fieldData["CHARACTER_MAXIMUM_LENGTH"] ?? 0) > 255
-					? "TextArea"
-					: "Text";
-				
-				break;
-				
-			case "text":
-				$type = "TextArea";
-				break;
-				
-			case "set":
-			case "enum":
-				$type = "SelectOne";
-				break;
-		}
-		
-		return $type;
-	}
-	
-	/**
-	 * @param array $fieldData
-	 *
-	 * @return bool
-	 */
-	protected function getFieldRequired(array $fieldData): bool {
-		
-		// the IS_NULLABLE field tells us whether or not it's required.
-		// if the field cannot be null, then it is required.  testing this
-		// is as easy as ...
-		
-		return $fieldData["IS_NULLABLE"] === "NO";
-	}
-	
-	/**
-	 * @param array $fieldData
-	 *
-	 * @return array
-	 */
-	protected function getFieldOptions(array $fieldData): array {
-		
-		// not all fields require options.  those that don't won't be
-		// effected by having them, and those that do fail to work if we
-		// don't have them.  luckily, our Domain tells us what the options
-		// should be after getting them out of the database.  so, we can
-		// just return them here.
-		
-		return $fieldData["OPTIONS"];
-	}
-	
 }

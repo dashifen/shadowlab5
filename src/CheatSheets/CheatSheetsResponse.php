@@ -6,7 +6,7 @@ use Dashifen\Response\ResponseException;
 use Shadowlab\Framework\Response\ShadowlabResponse;
 
 class CheatSheetsResponse extends ShadowlabResponse {
-	public function handleSuccess(array $data = []): void {
+	public function handleSuccess(array $data = [], string $action = "read"): void {
 		$this->setContent("cheat-sheets/index.html");
 		$this->setData($data);
 	}
@@ -16,12 +16,12 @@ class CheatSheetsResponse extends ShadowlabResponse {
 	// display, then we'll send a 404 response using the method defined
 	// by our parent.  so, for these, we'll throw a tantrum.
 	
-	public function handleFailure(array $data = []): void {
+	public function handleFailure(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Failure",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}
 	
-	public function handleError(array $data = []): void {
+	public function handleError(array $data = [], string $action = "read"): void {
 		throw new ResponseException("Unexpected Response: Error",
 			ResponseException::UNEXPECTED_RESPONSE);
 	}

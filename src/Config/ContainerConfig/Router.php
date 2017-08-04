@@ -19,7 +19,7 @@ class Router extends ShadowlabContainerConfig {
 		// app different from the default option within the router package.
 		// the following does so:
 		
-		$di->params['Dashifen\Router\Route\Collection\RouteCollection']['wildcardPattern'] = "`^%s/(?:(create)|(read|update|patch|delete)/(\d+)/?)$`";
+		$di->params['Dashifen\Router\Route\Collection\RouteCollection']['wildcardPattern'] = "`^%s/(?:(create)|(?:(read|update|delete)/)?(\d+)/?)$`";
 		
 		// the first three parameters for our Router object are fairly straight-
 		// forward.  we'll handle them first and then worry about the hard one.

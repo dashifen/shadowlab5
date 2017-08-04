@@ -6,12 +6,12 @@ $handlers = [
 	
 	// Magic Sheets
 	
-	'Shadowlab\CheatSheets\Magic\Spells' => ["GET" => "/cheat-sheets/magic/spells"],
+	'Shadowlab\CheatSheets\Magic\Spells' => ["BOTH" => "/cheat-sheets/magic/spells"],
 	
 	
 	// Other Sheets
 	
-	'Shadowlab\CheatSheets\Other\Books'      => ["GET" => "/cheat-sheets/other/books"],
+	'Shadowlab\CheatSheets\Other\Books' => ["BOTH" => "/cheat-sheets/other/books"],
 
 ];
 
@@ -19,6 +19,13 @@ $objects = [];
 foreach ($handlers as $handler => $routes) {
 	$parts = explode('\\', $handler);
 	$handler = $handler . '\\' . array_pop($parts);
+	
+	if (isset($routes["BOTH"])) {
+		$routes = [
+			"GET"  => $routes["BOTH"],
+			"POST" => $routes["BOTH"],
+		];
+	}
 	
 	$temp = new stdClass();
 	$temp->routes = $routes;

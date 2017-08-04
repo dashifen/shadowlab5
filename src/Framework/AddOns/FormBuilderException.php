@@ -1,6 +1,6 @@
 <?php
 
-namespace Shadowlab\Framework\AddOns\FormBuilders;
+namespace Shadowlab\Framework\AddOns;
 
 use Dashifen\Form\Builder\FormBuilderException as ParentException;
 

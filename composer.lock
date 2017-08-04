@@ -448,16 +448,16 @@
         },
         {
             "name": "dashifen/form",
-            "version": "1.9.0",
+            "version": "1.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/form.git",
-                "reference": "73f7eec9500c33951a7fe79f05fd7f55cec19c5e"
+                "reference": "d84bcead9ad174d107320dc566cba97b65e7b562"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/form/zipball/73f7eec9500c33951a7fe79f05fd7f55cec19c5e",
-                "reference": "73f7eec9500c33951a7fe79f05fd7f55cec19c5e",
+                "url": "https://api.github.com/repos/dashifen/form/zipball/d84bcead9ad174d107320dc566cba97b65e7b562",
+                "reference": "d84bcead9ad174d107320dc566cba97b65e7b562",
                 "shasum": ""
             },
             "require": {
@@ -483,7 +483,7 @@
                 }
             ],
             "description": "A series of objects that build an HTML form in the way I like.",
-            "time": "2017-08-02T17:27:55+00:00"
+            "time": "2017-08-03T14:32:25+00:00"
         },
         {
             "name": "dashifen/request",

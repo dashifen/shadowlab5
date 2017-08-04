@@ -4,7 +4,6 @@ namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Form\Builder\FormBuilderInterface;
-use Dashifen\Form\FormInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
 use Shadowlab\Framework\Action\AbstractAction;
@@ -30,7 +29,7 @@ class BooksAction extends AbstractAction {
 	/**
 	 * @return ResponseInterface
 	 */
-	protected function read() {
+	protected function read(): ResponseInterface {
 		$payload = $this->domain->read(["book_id" => $this->recordId]);
 		
 		if ($payload->getSuccess()) {
@@ -110,7 +109,24 @@ class BooksAction extends AbstractAction {
 		return $searchbar;
 	}
 	
-	protected function update() {
+	protected function update(): ResponseInterface {
+		
+		// an update is a two step process:  get data to update and
+		// then we update the database with the changes to it.  which
+		// step we're on when we're here is based on the existence of
+		// posted data.
+		
+		$posted = $this->request->getPost();
+		$method = sizeof($posted) === 0 ? "getDataToUpdate" : "savePostedData";
+		$this->{$method}();
+		
+		return $this->response;
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function getDataToUpdate(): ResponseInterface {
 		
 		// if we're getting data to update, then this is actually
 		// a special sort of read from the database.  the domain can
@@ -126,10 +142,11 @@ class BooksAction extends AbstractAction {
 		
 		if ($payload->getSuccess()) {
 			$this->handleSuccess([
-				"title"        => $payload->getDatum("title"),
-				"header"       => $payload->getDatum("header", "Edit Book Information"),
+				"title"        => "Edit " . $payload->getDatum("title"),
 				"instructions" => $payload->getDatum("instructions", ""),
 				"form"         => $this->getForm($payload),
+				"plural"       => "books",
+				"singular"     => "book",
 			]);
 		} else {
 			$this->handleFailure([]);
@@ -150,7 +167,7 @@ class BooksAction extends AbstractAction {
 		// simply to homogenize the index when showing a collection and
 		// a single one.
 		
-		die("<pre>" . print_r($payload, true) . "</pre>");
+		/** @var FormBuilderInterface $formBuilder */
 		
 		$payloadData = $payload->getData();
 		$formBuilder = $this->container->get("formBuilder");
@@ -162,74 +179,55 @@ class BooksAction extends AbstractAction {
 		// but what we want to send as a part of our response is the HTML for
 		// it.  therefore, we call the form's getForm() method now, too.
 		
-		return $form->getForm();
+		return $form->getForm(false);
 	}
 	
 	/**
-	 * @param array $schema
-	 * @param array $book
-	 *
-	 * @return FormInterface
+	 * @return ResponseInterface
 	 */
-	protected function constructForm(array $schema, array $book = []): FormInterface {
-		/** @var FormBuilderInterface $formBuilder */
-		
-		$formBuilder = $this->container->get("formBuilder");
-		$currentUrl = $this->request->getServerVar("SCRIPT_URL");
-		
-		die("<pre>" . print_r($schema, true) . "</pre>");
-		
-		$formBuilder->openForm([
-			"id"     => "book-form",
-			"action" => str_replace("update", "patch", $currentUrl),
-		]);
-		
-		$formBuilder->openFieldset([
-			"id"     => strtolower(preg_replace("/\W+/", "-", $book["book"])),
-			"legend" => $book["book"],
-		]);
-		
-		
-		foreach ($schema as $fieldId => $fieldData) {
-			
-			// the $schema describes the database columns into which we want
-			// to insert data.  one of those columns is likely named guid and
-			// we can skip that one; it has a default value for new data, and
-			// we don't want to mess with it for old stuff.
-			
-			if ($fieldId !== "guid") {
-				
-				// otherwise, we use the data we have about our fields to
-				// add Field information to our form.
-				
-				$formBuilder->addField([
-					"id"       => $fieldId,
-					"name"     => $this->getFieldName($fieldId),
-					"type"     => $this->getFieldType($fieldData),
-					"required" => $this->getFieldRequired($fieldData),
-					"options"  => $this->getFieldOptions($fieldData),
-				]);
-			}
-		}
-		
-		return $formBuilder->getForm();
-	}
-	
-	protected function patch() {
-		
-		// when patching data, our $_POST is full of shiny new stuff
-		// for our database to process.  we'll pass it along to our
-		// domain where the validator and other objects within it can
-		// work their magic.
+	protected function savePostedData(): ResponseInterface {
 		
 		$payload = $this->domain->update([
 			"posted" => $this->request->getPost(),
 		]);
 		
 		if ($payload->getSuccess()) {
-			$this->handleSuccess([]);
+			$data = $payload->getData();
+			
+			// we want to add some additional information necessary for
+			// our view.  then, we slightly alter the title for our page
+			// and send it all on its way.
+			
+			$data = array_merge($data, [
+				"item"     => $data["title"],
+				"plural"   => "books",
+				"singular" => "book",
+				"success"  => true,
+			]);
+			
+			$data["title"] .= " Saved";
+			$this->handleSuccess($data);
 		} else {
-			$this->handleFailure([]);
+			
+			// if we encountered errors when validating our data before
+			// putting it back into the database, we end up here.  we send
+			// back the same information as we do when we first present the
+			// form, but
+			
+			$this->handleError([
+				"title"        => "Unable to Save Changes",
+				"posted"       => $payload->getDatum("posted"),
+				"errors"       => $payload->getDatum("error"),
+				"form"         => $this->getForm($payload),
+				"plural"       => "books",
+				"singular"     => "book",
+				"instructions" => "We were unable to save the changes you made
+					to this information in the database.  Use the error messages
+					below and fix the problem(s) we encountered.  When you're
+					ready, click the button to continue.  If this problem
+					persists, email Dash.  It probably means he messed up the
+					code somehow.",
+			]);
 		}
 		
 		return $this->response;

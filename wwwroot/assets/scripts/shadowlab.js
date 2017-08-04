@@ -41,7 +41,16 @@ var Shadowlab = new Vue({
 });
 
 document.addEventListener("DOMContentLoaded", function() {
-	new Searchbar();
-	new Summarizer();
+	var searchbar = document.getElementsByClassName("searchbar");
+	var summarized = document.getElementsByClassName("summarized");
+
+	if (searchbar.length > 0) {
+		new Searchbar();
+	}
+
+	if (summarized.length > 0) {
+		new Summarizer();
+	}
+
 	new Focuser();
 });
