@@ -49,9 +49,23 @@ table {
 			display: none;
 		}
 
+		tbody.clicked {
+			tr.summary {
+				border-bottom-style: none;
+			}
+
+			&:hover tr {
+				background-color: #fff;
+			}
+		}
+
 		.description {
-			p:empty {
-				margin: 0;
+			p {
+				margin-top: 0;
+
+				&:empty {
+					margin: 0;
+				}
 			}
 
 			section {
@@ -82,6 +96,14 @@ table {
 				border-bottom-style: none;
 				text-decoration: none;
 			}
+
+			td:last-child {
+				vertical-align: middle;
+			}
+		}
+
+		.faded {
+			background-color: #ccc;
 		}
 	}
 

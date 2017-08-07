@@ -9,14 +9,14 @@ use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\Searchbar;
 
 class SpellsAction extends AbstractAction {
-	public function execute(array $parameter = []): ResponseInterface {
+	protected function read(): ResponseInterface {
 		
 		// the optional parameter for a spell is the sanitized version of
 		// a spells name (e.g. acid-stream for Acid Stream).  we'll pass it
 		// to the domain and it'll know what to do regardless of whether we
 		// have one or not.
 		
-		$payload = $this->domain->read(["spell_id" => $parameter]);
+		$payload = $this->domain->read(["spell_id" => $this->recordId]);
 		
 		if ($payload->getSuccess()) {
 			$this->handleSuccess([
@@ -145,4 +145,6 @@ class SpellsAction extends AbstractAction {
 		$y = array_filter(explode(", ", $spell["spell_tags"]));
 		return array_combine($x, $y);
 	}
+	
+	
 }

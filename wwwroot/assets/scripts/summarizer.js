@@ -7,19 +7,18 @@ var Summarizer = Class.extend({
 	// requires the class.extend npm module.
 
 	init: function(element) {
-		if (!element) {
-			element = this.getElement();
-		}
+		this.element = !element ? this.getElement() : element;
 
-		if (element.tagName &&
-			element.tagName === "TABLE" &&
-			element.matches(".summarized")
+		if (this.element.tagName &&
+			this.element.tagName === "TABLE" &&
+			this.element.matches(".summarized")
 		) {
 
 			// now that we know the element is a table and that it's
 			// summarized, we can attach our behaviors to it.
 
-			var clickers = element.querySelectorAll(".summary *:first-child a");
+			var clickers = this.element.querySelectorAll(".summary *:first-child a");
+
 			for(var i=0; i < clickers.length; i++) {
 				clickers[i].addEventListener("click", this.summaryClicked.bind(this));
 			}
@@ -41,7 +40,25 @@ var Summarizer = Class.extend({
 		// nearest <tbody> element and toggle it's clicked class.
 
 		var tbody = this.getClosest(event.target, "tbody");
+
+		// if this row is faded, then we want to un-fade it.  we could
+		// probably do this in CSS, but we might as well handle it here
+		// to keep the DOM pretty.
+
+		if (tbody.classList.contains("faded") && !tbody.classList.contains("clicked")) {
+			this.toggleClass(tbody, "faded");
+		}
+
+		// now, we'll toggle the clicked class which'll open or close our
+		// summary.  following that, we want to add (or remove) faded classes
+		// from the rest of our table.
+
 		this.toggleClass(tbody, "clicked");
+		this.fadeNotClicked();
+
+		// and, since we've handled this event, we'll stop it from getting
+		// dealt with elsewhere.
+
 		event.stopPropagation();
 		event.preventDefault();
 	},
@@ -66,5 +83,26 @@ var Summarizer = Class.extend({
 
 	toggleClass: function(element, className) {
 		element.classList.toggle(className, !element.classList.contains(className));
+	},
+
+	fadeNotClicked: function() {
+
+		// here, if we can find a clicked element, then we fade the other
+		// ones.  but, if we can't find any clicked elements, we actually un-
+		// fade all of them.
+
+		var clicked = this.element.querySelector("tbody.clicked");
+
+		var bodies = clicked
+			? this.element.querySelectorAll("tbody:not(.clicked)")
+			: this.element.querySelectorAll("tbody");
+
+		for(var i=0; i < bodies.length; i++) {
+			if (clicked) {
+				bodies[i].classList.add("faded");
+			} else {
+				bodies[i].classList.remove("faded");
+			}
+		}
 	}
 });
