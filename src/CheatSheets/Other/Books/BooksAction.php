@@ -11,22 +11,6 @@ use Shadowlab\Framework\AddOns\Searchbar;
 
 class BooksAction extends AbstractAction {
 	/**
-	 * @param array $parameter
-	 *
-	 * @return ResponseInterface
-	 */
-	public function execute(array $parameter = []): ResponseInterface {
-		$this->processParameter($parameter);
-		
-		// our processParameter() method will set our action and recordId
-		// properties when it can.  if it can't, then our action property
-		// will be "read" by default.  we can call one of our methods below
-		// using that property as follows; they'll handle the rest.
-		
-		return $this->{$this->action}();
-	}
-	
-	/**
 	 * @return ResponseInterface
 	 */
 	protected function read(): ResponseInterface {

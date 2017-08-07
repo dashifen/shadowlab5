@@ -164,9 +164,9 @@ class BooksDomain extends Domain {
 				WHERE description IS NULL ORDER BY book_id LIMIT 1");
 			
 			return $this->payloadFactory->newUpdatePayload(true, [
-				"title"   => $data["posted"]["book"],
-				"book_id" => $bookId,
-				"next_id" => $nextId,
+				"title"  => $data["posted"]["book"],
+				"bookId" => $bookId,
+				"nextId" => $nextId,
 			]);
 		}
 		
@@ -184,14 +184,5 @@ class BooksDomain extends Domain {
 		]);
 		
 		return $this->transformer->transformUpdate($payload);
-	}
-	
-	/**
-	 * @param array $data
-	 *
-	 * @return PayloadInterface
-	 */
-	protected function patchData(array $data): PayloadInterface {
-		return $this->payloadFactory->newUpdatePayload(true, []);
 	}
 }

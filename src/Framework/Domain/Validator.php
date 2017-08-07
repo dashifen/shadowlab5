@@ -141,7 +141,7 @@ class Validator extends AbstractValidator {
 			// error, the AND comparison will short circuit and we won't have
 			// to test the array value against false anymore
 			
-			$valid = $valid && $this->validationErrors[$column] !== false;
+			$valid = $valid && $this->validationErrors[$column] === false;
 		}
 		
 		return $valid;

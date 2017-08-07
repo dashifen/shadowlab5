@@ -21,11 +21,12 @@ class BooksResponse extends AbstractResponse {
 	public function handleError(array $data = [], string $action = "read"): void {
 		$this->setResponseType("error");
 		
-		// there's only one template to handle errors:  the form.  it allows
-		// for the visitor to make changes to their entries and to send them
-		// back to us for re-validation.
+		// errors are usually handled by re-showing the form.  unless, in our
+		// data, exists something that corresponds to an HTTP error phrase.
+		// then we show a different template.
 		
-		$this->setContent("update/form.html");
+		$template = $this->getTemplate($data, $action);
+		$this->setContent($template);
 		$this->setData($data);
 	}
 	
@@ -42,6 +43,16 @@ class BooksResponse extends AbstractResponse {
 	}
 	
 	protected function getTemplate(array $data = [], string $action = "read"): string {
+		
+		// if our parent can identify a template, then we use it by default.
+		// this is most commonly the case for HTTP errors.  otherwise, we'll
+		// continue with the switch statement below to handle responses
+		// unique to this handler.
+		
+		if (!empty($template = parent::getTemplate($data, $action))) {
+			return $template;
+		}
+		
 		switch ($this->responseType) {
 			case "success":
 				
@@ -51,6 +62,9 @@ class BooksResponse extends AbstractResponse {
 				// method below.
 				
 				return $this->getSuccessTemplate($data, $action);
+				
+			case "error":
+				return "update/form.html";
 			
 			case "failure":
 				return "not-found/record.php";

@@ -21,6 +21,7 @@
 		"dashifen/form": "<=2",
 		"dashifen/database": "^1",
 		"dashifen/session": "^1",
+		"dashifen/exception": "^1",
 		"dashifen/exceptionator": "^1",
 		"dashifen/request": "^1",
 		"dashifen/router": "^3",

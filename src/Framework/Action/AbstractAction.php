@@ -3,6 +3,7 @@
 namespace Shadowlab\Framework\Action;
 
 use Dashifen\Action\AbstractAction as DashifenAbstractAction;
+use Dashifen\Response\ResponseInterface;
 
 /**
  * Class Action
@@ -10,6 +11,13 @@ use Dashifen\Action\AbstractAction as DashifenAbstractAction;
  * @package Shadowlab\Action
  */
 abstract class AbstractAction extends DashifenAbstractAction {
+	protected const ACTION_CAPABILITIES = [
+		"create" => "fixer",
+		"read"   => "runner",
+		"update" => "fixer",
+		"delete" => "johnson",
+	];
+
 	/**
 	 * @var string $action
 	 */
@@ -22,6 +30,42 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	
 	/**
 	 * @param array $parameter
+	 *
+	 * @return ResponseInterface
+	 * @throws ActionException
+	 */
+	public function execute(array $parameter = []): ResponseInterface {
+		$this->processParameter($parameter);
+		
+		// before we continue, we have to be sure that the current visitor
+		// has the appropriate capabilities to perform the requested action.
+		// if they do not, we want to return a response that'll take us to
+		// the unauthorized view.
+		
+		if (!$this->userIsAuthorized()) {
+			$this->response->handleError(["httpError" => "Unauthorized"]);
+			return $this->response;
+		}
+		
+		// if we're still here, then we're authorized to perform this
+		// action.  the last thing we have to do is be sure that our action
+		// handler exists and, if so, we call it.  otherwise, we throw a
+		// tantrum.
+		
+		if (!method_exists($this, $this->action)) {
+			throw new ActionException(
+				"Unknown action handler: $this->action",
+				ActionException::UNKNOWN_ACTION_HANDLER
+			);
+		}
+		
+		return $this->{$this->action}();
+	}
+	
+	/**
+	 * @param array $parameter
+	 *
+	 * @throws ActionException
 	 */
 	protected function processParameter(array $parameter = []) {
 		if (sizeof($parameter) > 0) {
@@ -49,9 +93,14 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			// ID is unnecessary or, as with a create action, that it can
 			// remain the default of zero.
 			
-			if (is_numeric($recordId)) {
-				$this->setRecordId($recordId);
+			if (!is_numeric($recordId) || floor($recordId) != $recordId) {
+				throw new ActionException(
+					"Invalid record ID: $recordId",
+					ActionException::INVALID_RECORD_ID
+				);
 			}
+			
+			$this->setRecordId($recordId);
 		}
 	}
 	
@@ -74,7 +123,10 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			return;
 		}
 		
-		throw new ActionException("Unknown action: $action.");
+		throw new ActionException(
+			"Unknown action: $action.",
+			ActionException::UNKNOWN_ACTION
+		);
 	}
 	
 	/**
@@ -84,6 +136,21 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 */
 	protected function setRecordId(int $recordId) {
 		$this->recordId = $recordId;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	protected function userIsAuthorized(): bool {
+		
+		// here we want to compare our current action to the necessary
+		// capability for each of them.  we have a protected constant
+		// defined above that tells us which cap this visitor needs, we
+		// can then see if it's defined in our session for them.
+		
+		$capability = self::ACTION_CAPABILITIES[$this->action];
+		$capabilities = $this->request->getSessionVar("capabilities");
+		return isset($capabilities[$capability]);
 	}
 	
 	/**

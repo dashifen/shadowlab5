@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5bf408cb36a5be051847877c8549ef1",
+    "content-hash": "79a040e65d6fd83f89c9cabdfc71a3be",
     "packages": [
         {
             "name": "aura/di",
@@ -282,20 +282,21 @@
         },
         {
             "name": "dashifen/database",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "9fa4dcedd7d940b6dc8c7f594f35b36633f1dfb6"
+                "reference": "c0ba5df42a7c5e788b846e4be44866d6315cb6c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/9fa4dcedd7d940b6dc8c7f594f35b36633f1dfb6",
-                "reference": "9fa4dcedd7d940b6dc8c7f594f35b36633f1dfb6",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/c0ba5df42a7c5e788b846e4be44866d6315cb6c7",
+                "reference": "c0ba5df42a7c5e788b846e4be44866d6315cb6c7",
                 "shasum": ""
             },
             "require": {
                 "aura/sql": "^3.0.0-alpha1",
+                "dashifen/exception": "^1",
                 "php": "^7.1"
             },
             "require-dev": {
@@ -326,7 +327,7 @@
                 "database",
                 "pdo"
             ],
-            "time": "2017-08-02T18:56:09+00:00"
+            "time": "2017-08-07T17:14:54+00:00"
         },
         {
             "name": "dashifen/domain",
@@ -527,19 +528,20 @@
         },
         {
             "name": "dashifen/response",
-            "version": "1.1.4",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/response.git",
-                "reference": "3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc"
+                "reference": "1ddf55cda480fd22130e4a8ff7000b445b21ee11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/response/zipball/3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc",
-                "reference": "3e0548c9d2355bf0f6a15e7e2c4747f2913b5bdc",
+                "url": "https://api.github.com/repos/dashifen/response/zipball/1ddf55cda480fd22130e4a8ff7000b445b21ee11",
+                "reference": "1ddf55cda480fd22130e4a8ff7000b445b21ee11",
                 "shasum": ""
             },
             "require": {
+                "dashifen/exception": "^1",
                 "php": "^7.1",
                 "zendframework/zend-diactoros": "^1.4"
             },
@@ -562,7 +564,7 @@
                 }
             ],
             "description": "an encapsulation of a HTTP response",
-            "time": "2017-05-04T23:31:27+00:00"
+            "time": "2017-08-05T18:23:13+00:00"
         },
         {
             "name": "dashifen/router",
