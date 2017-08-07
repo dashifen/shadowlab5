@@ -515,6 +515,21 @@ var Shadowlab = new Vue({
 
 	mounted: function() {
 		document.title = this.title + " | Shadowlab";
+
+		// also, if we have table bodies and they have descriptions, we want
+		// to quickly convert new line characters to <br> tags.  we have a
+		// function below that'll do the work, so here we just see if it's
+		// necessary and, if so, we loop over our table bodies and call that
+		// function.
+
+		var withBodies = this.table.bodies && this.table.bodies.length > 0;
+		var withDescriptions = withBodies && this.table.bodies[0].description.description;
+
+		if (withDescriptions) {
+			for (var i=0; i < this.table.bodies.length; i++) {
+				this.table.bodies[i].description.description = nl2br(this.table.bodies[i].description.description);
+			}
+		}
 	},
 
 	filters: {
@@ -528,17 +543,7 @@ var Shadowlab = new Vue({
 		},
 
 		nl2br: function(str) {
-
-			// source: http://locutus.io/php/strings/nl2br/
-
-			if (typeof str === 'undefined' || str === null) {
-				return ''
-			}
-
-			// altered source: removed switch between XHTML and HTML
-			// version of the break tag.
-
-			return (str + '').replace(/(\r\n|\n\r|\r|\n)/g, '<br>' + '$1')
+			return nl2br(str);
 		},
 
 		makeUpdateLink: function(id) {
@@ -551,7 +556,18 @@ var Shadowlab = new Vue({
 			// our new href.
 
 			var endpoint = array_search(["create", "read", "update", "delete"], hrefParts);
-			return join("/", hrefParts, endpoint-1) + '/update/' + id;
+
+			// now, if we found one of our action verbs during our search, we
+			// want to join the href parts back together again up to but not
+			// including that verb (hence the -1).  if we couldn't find one
+			// of our verbs, we just use the current href as the base of our
+			// update link.
+
+			var href = endpoint !== false
+				? join("/", hrefParts, endpoint - 1)
+				: window.location.href;
+
+			return href + '/update/' + id;
 		},
 
 		makeCollectionLink: function(endpoint) {
@@ -585,6 +601,20 @@ document.addEventListener("DOMContentLoaded", function() {
  * These functions are used above to assist in filters, for example.
  * Usually, they're mock-ups of PHP-like functions for our convenience.
  */
+
+function nl2br(str) {
+
+	// source: http://locutus.io/php/strings/nl2br/
+
+	if (typeof str === 'undefined' || str === null) {
+		return ''
+	}
+
+	// altered source: removed switch between XHTML and HTML
+	// version of the break tag.
+
+	return (str + '').replace(/(\r\n|\n\r|\r|\n)/g, '<br>' + '$1')
+}
 
 function join(glue, pieces, limit) {
 	var joined = '';

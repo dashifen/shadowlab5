@@ -98,7 +98,7 @@ class SpellsTransformer extends Transformer {
 			// there's one more that we want to remove before we
 			// continue here:  the spell_tags_ids.
 			
-			if ($header === "spell_tags_ids") {
+			if ($header === "spell_tags_ids" || $header === "book") {
 				unset($headers[$i]);
 				break;
 			}
@@ -117,11 +117,11 @@ class SpellsTransformer extends Transformer {
 			// split it into two rows within a single <tbody> element
 			// on-screen.  the first row is for our data, the second
 			// for our description.  we select from the database so
-			// that our first array index is the ID for our <tbody>.
+			// that our first array index is the ID for our spell.
 			// then, we want to add our book ID as a part of the row,
 			// too.
 			
-			$rows["tbodyId"] = array_shift($spell);
+			$rows["recordId"] = array_shift($spell);
 			$rows["bookId"] = $spell["book_id"];
 			
 			// now, the parent class can help separate data from
@@ -147,6 +147,7 @@ class SpellsTransformer extends Transformer {
 			switch ($datum["column"]) {
 				case "spell":
 					$datum["searchbarValue"] = strip_tags($datum["html"]);
+					$datum["html"] = sprintf('<a href="#">%s</a>', $datum["html"]);
 					break;
 				
 				case "spell-category":
@@ -157,6 +158,13 @@ class SpellsTransformer extends Transformer {
 					$datum["searchbarValue"] = $spell["spell_tags_ids"];
 					$datum["searchbarValueList"] = 1;
 					break;
+					
+				case "book":
+					
+					// our parent Transformer will create a book column; we
+					// don't want that one.  we can unset it here.
+					
+					unset($data[$i]);
 			}
 		}
 		

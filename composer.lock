@@ -607,19 +607,20 @@
         },
         {
             "name": "dashifen/searchbar",
-            "version": "1.1.2",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/searchbar.git",
-                "reference": "953e5e9a15b31df6c613cf9d800307f3e1c0c56f"
+                "reference": "873e0b3ddc956c0007e84c404af8d3810e9f3340"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/953e5e9a15b31df6c613cf9d800307f3e1c0c56f",
-                "reference": "953e5e9a15b31df6c613cf9d800307f3e1c0c56f",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/873e0b3ddc956c0007e84c404af8d3810e9f3340",
+                "reference": "873e0b3ddc956c0007e84c404af8d3810e9f3340",
                 "shasum": ""
             },
             "require": {
+                "dashifen/exception": "^1",
                 "php": "^7.1"
             },
             "type": "library",
@@ -641,7 +642,7 @@
                 }
             ],
             "description": "a class which produces a search bar to search within on-screen data",
-            "time": "2017-08-01T01:14:08+00:00"
+            "time": "2017-08-07T19:46:42+00:00"
         },
         {
             "name": "dashifen/session",

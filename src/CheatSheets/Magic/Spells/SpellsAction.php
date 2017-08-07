@@ -89,58 +89,60 @@ class SpellsAction extends AbstractAction {
 	 * @return array
 	 */
 	protected function collectFilterOptions(array $spells): array {
+		$lists = $this->getSpellDataLists($spells);
 		
-		// our tags, books, and categories data all lay within our $spells
-		// array.  we'll iterate over that and get the information that we
-		// need from it.  notice that during our original iteration, we don't
-		// worry about testing for uniqueness; we'll handle that afterward.
+		// the getSpellDataLists() ensures that our lists are unique, but
+		// they're unordered.  so, we'll want to sort them all and return
+		// them to the calling scope.
 		
-		$tags = [];
-		$books = [];
-		$categories = [];
+		foreach ($lists as &$list) {
+			asort($list);
+		}
+		
+		return $lists;
+	}
+	
+	/**
+	 * @param array $spells
+	 *
+	 * @return array
+	 */
+	protected function getSpellDataLists(array $spells): array {
+		$tags = $books = $categories = [];
 		foreach ($spells as $i => $spell) {
-			$books[$spell["book_id"]] = $spell["abbr"];
+			
+			// we can add books and categories as follows because they have a
+			// one-to-one relationship with spells.  tags are harder because
+			// they're one-to-many.  we'll handle them in the next method.
+			
+			$books[$spell["book_id"]] = json_encode([
+				"title" => $spell["book"],
+				"text"  => $spell["abbr"],
+			]);
+			
 			$categories[$spell["spell_category_id"]] = $spell["spell_category"];
-			
-			// those two were easy, but our tags are harder because it's a
-			// one-to-many relationship between spells and tags.  so, we need
-			// to explode our tag IDs and our tags and them combine them
-			// a follows:
-			
-			$x = array_filter(explode("_", $spell["spell_tags_ids"]));
-			$y = array_filter(explode(", ", $spell["spell_tags"]));
-			
-			// and, now that we have a $x and $y representing tag IDs and
-			// the tags themselves, we can combine those and append the
-			// result into $tags.
-			
-			$tags += array_combine($x, $y);
+			$tags += $this->getSpellTags($spell);
 		}
 		
-		// since books and categories are added specifically by ID, those
-		// lists are already unique, but they might not be sorted.  our tags,
-		// though, are just appended over and over again and so there's
-		// definitely duplicates therein.  here, we loop over them all and
-		// tough up the data preparing it for the screen.
+		return [$tags, $books, $categories];
+	}
+	
+	/**
+	 * @param array $spell
+	 *
+	 * @return array
+	 */
+	protected function getSpellTags(array $spell): array {
 		
-		$data = [
-			"tags"       => $tags,
-			"books"      => $books,
-			"categories" => $categories,
-		];
+		// tags have a one-to-many relationship with our $spell.  the IDs
+		// for our tags are separated by underscores while the tags are
+		// comma separated.  both are selected from the database in the
+		// same order.  so, we can explode (and filter out blanks) each of
+		// our strings and then use array_combine() to return a map of
+		// tag IDs to tag names as follows:
 		
-		foreach ($data as $i => &$datum) {
-			if ($i === "categories") {
-				$datum = array_unique($datum);
-			}
-			
-			asort($datum);
-		}
-		
-		// our calling scope will use list() to separate our three lists
-		// into their own variables once more.  so, we only send back the
-		// array_values();
-		
-		return array_values($data);
+		$x = array_filter(explode("_", $spell["spell_tags_ids"]));
+		$y = array_filter(explode(", ", $spell["spell_tags"]));
+		return array_combine($x, $y);
 	}
 }

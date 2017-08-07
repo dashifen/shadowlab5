@@ -6,11 +6,6 @@ use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\Transformer;
 
 class BooksTransformer extends Transformer {
-	
-	/*
-	 * READ TRANSFORMATIONS
-	 */
-	
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
 		
 		// our payload should contain a book or books.  if it's the latter,

@@ -67,6 +67,21 @@ table {
 					margin: 0;
 				}
 			}
+
+			.page-reference {
+				&::before {
+					content: "p. ";
+				}
+
+				&::after {
+					content: ",";
+				}
+			}
+
+			.book-reference abbr {
+				border-bottom-style: none;
+				text-decoration: none;
+			}
 		}
 	}
 

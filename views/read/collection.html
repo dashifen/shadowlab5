@@ -28,11 +28,11 @@
 		<td :colspan="body.data.length - 1">
 			<section>
 				<div>
-					<p>{{ body.description.description | nl2br }}</p>
+					<p v-html="body.description.description"></p>
 					
-					<footer v-if="body.description.reference">
-						p. {{ body.description.reference.page }},
-						   {{ body.description.reference.abbr }}
+					<footer v-if="body.description.abbr">
+						<span class="page-reference" v-text="body.description.page"></span>
+						<span class="book-reference" v-html="body.description.abbr"></span>
 					</footer>
 				</div>
 			</section>

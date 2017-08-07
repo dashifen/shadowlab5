@@ -17,7 +17,7 @@ use Dashifen\Domain\Transformer\TransformerInterface;
  * @package Shadowlab\Framework\Domain
  */
 class Transformer implements TransformerInterface, ShadowlabTransformationsInterface {
-	public const DESCRIPTIVE_KEYS = ["description", "abbr", "page"];
+	public const DESCRIPTIVE_KEYS = ["description", "book", "abbr", "page"];
 	
 	/**
 	 * @param PayloadInterface $payload
@@ -188,8 +188,30 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		// want to return true from our filter callback when our fields are
 		// in the constant above so that we're left with only them.
 		
-		return array_filter($record, function($field) use ($descriptiveKeys) {
+		$desc = array_filter($record, function($field) use ($descriptiveKeys) {
 			return in_array($field, $descriptiveKeys);
 		}, ARRAY_FILTER_USE_KEY);
+		
+		// now, we do one other thing:  if our description includes both a
+		// book and an abbreviation, we're going to combine them into one
+		// field using an <abbr> tag.
+		
+		if (isset($desc["abbr"]) && isset($desc["book"])) {
+			$desc = $this->combineBookAndAbbreviation($desc);
+		}
+		
+		return $desc;
+	}
+	
+	protected function combineBookAndAbbreviation(array $desc): array {
+		
+		// we tested for the existence of our abbr and book indices in the
+		// prior method.  here we want to combine them into an <abbr> tag
+		// and then remove the book entirely.
+		
+		$abbr = '<abbr title="%s">%s</abbr>';
+		$desc["abbr"] = sprintf($abbr, $desc["book"], $desc["abbr"]);
+		unset($desc["book"]);
+		return $desc;
 	}
 }

@@ -6,6 +6,11 @@ use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\Domain;
 
 class SpellsDomain extends Domain {
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 */
 	public function read(array $data = []): PayloadInterface {
 		
 		// the only data we expect to receive from our action is a sanitized
@@ -20,8 +25,8 @@ class SpellsDomain extends Domain {
 			// all of our spells.  whether or not we have a sanitized version
 			// of a spell determines which we do.
 			
-			$payload = !empty($data["sanitized"])
-				? $this->readOne($data["sanitized"])
+			$payload = !empty($data["spell_id"])
+				? $this->readOne($data["spell_id"])
 				: $this->readAll();
 			
 			if ($payload->getSuccess()) {
@@ -40,7 +45,12 @@ class SpellsDomain extends Domain {
 		return $payload;
 	}
 	
-	protected function readOne(string $sanitized): PayloadInterface {
+	/**
+	 * @param int $spell_id
+	 *
+	 * @return PayloadInterface
+	 */
+	protected function readOne(int $spell_id): PayloadInterface {
 		
 		// we've prepared a spells_view in the database that makes our select
 		// query here more simple.  it handles the joins and other difficult
@@ -48,10 +58,10 @@ class SpellsDomain extends Domain {
 		
 		$sql = "SELECT spell_id, spell, spell_category, spell_tags,
 			description, type, `range`, damage, duration, drain_value,
-			abbr, page, spell_tags_ids, spell_category_id, book_id
-			FROM spells_view WHERE sanitized = :sanitized";
+			abbr, page, spell_tags_ids, spell_category_id, book_id, book
+			FROM spells_view WHERE spell_id = :spell_id";
 		
-		$spell = $this->db->getRow($sql, ["sanitized" => $sanitized]);
+		$spell = $this->db->getRow($sql, ["spell_id" => $spell_id]);
 		
 		// success is when we have read a spell.  then, we'll load it into our
 		// payload at the "spells" index so that our payload has the same
@@ -64,6 +74,9 @@ class SpellsDomain extends Domain {
 		]);
 	}
 	
+	/**
+	 * @return PayloadInterface
+	 */
 	protected function readAll(): PayloadInterface {
 		
 		// we've prepared a spells_view in the database that makes our select
@@ -72,7 +85,7 @@ class SpellsDomain extends Domain {
 		
 		$sql = "SELECT spell_id, spell, spell_category, spell_tags,
 			description, type, `range`, damage, duration, drain_value,
-			abbr, page, spell_tags_ids, spell_category_id, book_id
+			abbr, page, spell_tags_ids, spell_category_id, book_id, book
 			FROM spells_view ORDER BY spell";
 		
 		$spells = $this->db->getResults($sql);
