@@ -43,8 +43,8 @@ class QualitiesDomain extends Domain {
 		// operator, we can do this all as a single statement.
 		
 		return $payload ?? $this->payloadFactory->newReadPayload(false, [
-			"error" => $this->validator->getValidationErrors()
-		]);
+				"error" => $this->validator->getValidationErrors(),
+			]);
 	}
 	
 	/**
@@ -53,14 +53,37 @@ class QualitiesDomain extends Domain {
 	 * @return PayloadInterface
 	 */
 	protected function readOne(int $qualityId): PayloadInterface {
-	
+		$sql = "SELECT quality_id, quality, description, metagenetic,
+			freakish, cost, book_id, book, abbr, page FROM qualities_view
+			WHERE quality_id = :quality_id ORDER BY quality";
+		
+		$quality = $this->db->getRow($sql, ["quality_id" => $qualityId]);
+		
+		// if we were successful in selecting a quality, then $quality's size
+		// will be greater than zero.  that's how we can determine the type of
+		// read payload we return.
+		
+		return $this->payloadFactory->newReadPayload(sizeof($quality) > 0, [
+			"title"     => $quality["quality"],
+			"qualities" => $quality,
+			"count"     => 1,
+		]);
 	}
 	
 	/**
 	 * @return PayloadInterface
 	 */
 	protected function readAll(): PayloadInterface {
-	
+		$qualities = $this->db->getResults("SELECT quality_id, quality,
+			description, metagenetic, freakish, cost, book_id, book, abbr,
+			page FROM qualities_view ORDER BY quality");
+		
+		return $this->payloadFactory->newReadPayload(sizeof($qualities) > 0, [
+			"title"     => "Qualities",
+			"qualities" => $qualities,
+			"count"     => sizeof($qualities),
+		]);
+		
 	}
 	
 	/**
@@ -69,7 +92,7 @@ class QualitiesDomain extends Domain {
 	 * @return int
 	 */
 	protected function getNextId(array $quality = []): int {
-	
+		
 		// the next quality to describe is the one in the same category
 		// and book after the one we've received.  if we didn't get one,
 		// then we'll get it out of the database.

@@ -282,16 +282,16 @@
         },
         {
             "name": "dashifen/database",
-            "version": "1.2.2",
+            "version": "1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "277899ef702e65a85075d5eae757f70514b72479"
+                "reference": "70cddbfafd0ca0f829e9edbf4d4ca1add002c4a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/277899ef702e65a85075d5eae757f70514b72479",
-                "reference": "277899ef702e65a85075d5eae757f70514b72479",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/70cddbfafd0ca0f829e9edbf4d4ca1add002c4a3",
+                "reference": "70cddbfafd0ca0f829e9edbf4d4ca1add002c4a3",
                 "shasum": ""
             },
             "require": {
@@ -327,7 +327,7 @@
                 "database",
                 "pdo"
             ],
-            "time": "2017-08-09T15:30:21+00:00"
+            "time": "2017-08-09T15:39:59+00:00"
         },
         {
             "name": "dashifen/domain",
@@ -607,16 +607,16 @@
         },
         {
             "name": "dashifen/searchbar",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/searchbar.git",
-                "reference": "873e0b3ddc956c0007e84c404af8d3810e9f3340"
+                "reference": "906aa2faa7895677e03c151b2a1ac53330323229"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/873e0b3ddc956c0007e84c404af8d3810e9f3340",
-                "reference": "873e0b3ddc956c0007e84c404af8d3810e9f3340",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/906aa2faa7895677e03c151b2a1ac53330323229",
+                "reference": "906aa2faa7895677e03c151b2a1ac53330323229",
                 "shasum": ""
             },
             "require": {
@@ -642,7 +642,7 @@
                 }
             ],
             "description": "a class which produces a search bar to search within on-screen data",
-            "time": "2017-08-07T19:46:42+00:00"
+            "time": "2017-08-09T22:11:41+00:00"
         },
         {
             "name": "dashifen/session",

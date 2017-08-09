@@ -25,6 +25,39 @@ $db = new Database();
 $xml = new SimpleXMLElement(file_get_contents("data/qualities.xml"));
 $books = $db->getMap("SELECT abbr, book_id FROM books");
 
+$freakish = [
+	"360-degree eyesight",
+	"beak",
+	"camouflage",
+	"functional tail",
+	"larger tusks",
+	"low-light vision",
+	"proboscis",
+	"satyr legs",
+	"shiva arms",
+	"cephalopod skull",
+	"cyclopean eye",
+	"deformity",
+	"feathers",
+	"insectoid features",
+	"neoteny",
+	"scales",
+	"third eye",
+	"vestigial tail",
+];
+
+
+$isFreakish = function(string $quality) use ($freakish): string {
+	$quality = strtolower($quality);
+	foreach ($freakish as $freakishQuality) {
+		if (strpos($quality, $freakishQuality) !== false) {
+			return "Y";
+		}
+	}
+	
+	return "N";
+};
+
 foreach ($xml->qualities->quality as $quality) {
 	extract((array)$quality);
 	
@@ -55,16 +88,29 @@ foreach ($xml->qualities->quality as $quality) {
 		$maximum = "NULL";
 	}
 	
+	// since the metagenetic flag is only set for those qualities
+	// that require it, we can't rely on the extraction above to get
+	// things right; if a prior quality was metagenetic, the flag may
+	// still be set here.
+	
+	$metagenetic = isset($quality->metagenetic) ? "Y" : "N";
+	
 	$data = [
-		"quality" => $name,
-		"minimum" => $minimum,
-		"maximum" => $maximum !== "NULL" ? $maximum : PDO::PARAM_NULL,
-		"book_id" => $books[$source],
-		"page"    => $page,
+		"quality"     => $name,
+		"minimum"     => $minimum,
+		"maximum"     => $maximum !== "NULL" ? $maximum : PDO::PARAM_NULL,
+		"metagenetic" => $metagenetic,
+		"freakish"    => $isFreakish($name),
+		"book_id"     => $books[$source],
+		"page"        => $page,
 	];
-
+	
 	$key = ["guid" => strtoupper($id)];
 	$db->upsert("qualities", array_merge($data, $key), $data);
 }
+
+
+$db->runQuery("UPDATE qualities SET freakish = 'N'
+	WHERE quality IN ('Low-Light Vision (Changeling)', 'Low-Light Vision')");
 
 $db->runQuery("UPDATE qualities SET maximum = NULL WHERE maximum = 0");

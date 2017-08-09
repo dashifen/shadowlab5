@@ -311,7 +311,13 @@ var Searchbar = Class.extend({
 				return element.options[element.selectedIndex].value;
 
 			case "checkbox":
-				return element.checked;
+
+				// this one is a little harder to grasp.  we need to
+				// return the string "1" when checked because it's against
+				// such a string that we'll be testing our rows.  if we
+				// returned a numeric 1, the === test would fail.
+
+				return element.checked ? "1" : null;
 		}
 
 		return "";

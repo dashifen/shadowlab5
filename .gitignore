@@ -120,3 +120,5 @@ pma
 wwwroot/assets/scripts/plugins
 wwwroot/assets/scripts/skins
 wwwroot/assets/scripts/themes
+/wwwroot/assets/scripts/shadowlab.complete.min.js
+/wwwroot/assets/scripts/shadowlab.complete.js

@@ -5,7 +5,7 @@ namespace Shadowlab\Framework\AddOns;
 use Dashifen\Searchbar\AbstractSearchbar;
 use Dashifen\Searchbar\SearchbarException;
 
-class Searchbar extends AbstractSearchbar {
+class Searchbar extends AbstractSearchbar implements SearchbarInterface {
 	public function parse(array $searchbarData): string {
 		
 		//echo "<pre>" . print_r($searchbarData, true) . "</pre>";

@@ -13,6 +13,58 @@ class ShadowlabResponse extends AbstractResponse {
 	/**
 	 * @param array  $data
 	 * @param string $action
+	 *
+	 * @return void
+	 */
+	public function handleSuccess(array $data = [], string $action = "read"): void {
+		$this->setResponseType("success");
+		$this->setTemplate($data, $action);
+	}
+	
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return void
+	 */
+	protected function setTemplate(array $data = [], string $action = "read"): void {
+		
+		// by default, to set our template, we use our $data and $action
+		// parameters to identify it.  then, we can set it as this response's
+		// content, and specify the data that goes into it.
+		
+		$template = $this->getTemplate($data, $action);
+		$this->setContent($template);
+		$this->setData($data);
+	}
+	
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return void
+	 */
+	public function handleFailure(array $data = [], string $action = "read"): void {
+		$this->setResponseType("failure");
+		$this->setTemplate($data, $action);
+	}
+	
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return void
+	 */
+	public function handleError(array $data = [], string $action = "read"): void {
+		$this->setResponseType("error");
+		$this->setTemplate($data, $action);
+	}
+	
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return void
 	 */
 	public function handleNotFound(array $data = [], string $action = "read"): void {
 		
@@ -26,8 +78,45 @@ class ShadowlabResponse extends AbstractResponse {
 			"httpError" => "Not Found",
 		]);
 		
-		$this->setContent($this->getTemplate($data, $action));
-		$this->setData($data);
+		$this->setResponseType("notfound");
+		$this->setTemplate($data, $action);
+	}
+	
+	protected function getTemplate(array $data = [], string $action = "read"): string {
+		
+		// if our parent can identify a template, then we use it by default.
+		// this is most commonly the case for HTTP errors.  otherwise, we'll
+		// continue with the switch statement below to handle responses
+		// unique to this handler.
+		
+		if (!empty($template = parent::getTemplate($data, $action))) {
+			return $template;
+		}
+		
+		switch ($this->responseType) {
+			case "success":
+				
+				// the exact template we use for successful responses
+				// changes based on what we're doing.  since this case
+				// is more complex, we're going to handle it in its own
+				// method below.
+				
+				return $this->getSuccessTemplate($data, $action);
+			
+			case "error":
+				return "update/form.html";
+			
+			case "failure":
+			case "notfound":
+				return "not-found/record.php";
+				
+			default:
+				if (empty($this->responseType)) {
+					throw new ResponseException("Response Type Required");
+				}
+		}
+		
+		return "";
 	}
 	
 	/**
@@ -35,41 +124,33 @@ class ShadowlabResponse extends AbstractResponse {
 	 * @param string $action
 	 *
 	 * @return string
-	 * @throws ResponseException
 	 */
-	protected function getTemplate(array $data = [], string $action = "read"): string {
+	protected function getSuccessTemplate(array $data = [], string $action = "read"): string {
 		
-		// the purpose of this getTemplate() method is to look for HTTP errors.
-		// if $data has a key for one, then we can do all the necessary work
-		// to respond to our request here.
-		
-		if (!isset($data["httpError"])) {
-			return "";
+		switch ($action) {
+			case "read":
+				
+				// when we're reading information, the template we use is
+				// based on the number of items we've selected from the
+				// database.  more than one and we should a collection of
+				// items; otherwise, a single one.
+				
+				return isset($data["count"]) && $data["count"] > 1
+					? "read/collection.html"
+					: "read/single.html";
+			
+			case "update":
+				
+				// when updating, if we have a record of our success, then
+				// we'll want to share that success with our visitor.
+				// otherwise, we give them the form so they can enter data
+				// we use to perform our update.
+				
+				return isset($data["success"]) && $data["success"]
+					? "update/success.html"
+					: "update/form.html";
 		}
 		
-		// we're going to play a little fast and loose with the single
-		// responsibility principle.  technically, getting our template is
-		// what we're supposed to be doing.  but, it'd also be nice if we
-		// could set our statusCode here, too.
-		
-		$phrase = $data["httpError"];
-		$statusCode = $this->getStatusCode($phrase);
-		if ($statusCode === -1) {
-			
-			// if we don't have a valid phrase, then we'll just default to
-			// a 406 (Bad Request) error.  it's probably not the best code,
-			// but it's the closest thing we have to an unknown error that
-			// is available to us.  plus, something probably was wrong with
-			// the request or we wouldn't be here!
-			
-			$statusCode = 400;
-		}
-		
-		$this->setStatusCode($statusCode);
-		
-		// and, here's where we tell the calling scope that we've found
-		// our template.
-		
-		return "error.html";
+		return "not-found/record.html";
 	}
 }
