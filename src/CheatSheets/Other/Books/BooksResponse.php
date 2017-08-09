@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Response\ResponseException;
-use Shadowlab\Framework\Response\AbstractResponse;
+use Shadowlab\Framework\Response\ShadowlabResponse;
 
-class BooksResponse extends AbstractResponse {
+class BooksResponse extends ShadowlabResponse {
 	public function handleSuccess(array $data = [], string $action = "read"): void {
 		$this->setResponseType("success");
 		

@@ -14,6 +14,7 @@ html {
 }
 
 body {
+	color: palette(mono, text);
 	font: rem(16)/1.33 $body-text;
 	height: 100%;
 	margin: 0 auto;

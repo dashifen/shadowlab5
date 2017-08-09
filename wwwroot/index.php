@@ -4,6 +4,18 @@ require("../vendor/autoload.php");
 use Aura\Di\ContainerBuilder;
 use Dashifen\Router\RouterException;
 
+function debug($data, $die = false) {
+	if (is_array($data) || is_object($data)) {
+		echo "<pre>" . print_r($data, true) . "</pre>";
+	} else {
+		echo "$data<br>";
+	}
+	
+	if ($die) {
+		die();
+	}
+}
+
 $cb = new ContainerBuilder();
 $app = $cb->newConfiguredInstance([
 	'Shadowlab\Config\ContainerConfig\Database',

@@ -124,6 +124,14 @@ form {
 	select {
 		font: inherit;
 	}
+
+	input[type=radio],
+	input[type=checkbox] {
+		&:checked + span {
+			color: inherit;
+			font-weight: bold;
+		}
+	}
 }
 
 form.searchbar {
@@ -193,4 +201,11 @@ form.searchbar {
 
 select {
 	height: rem(27);
+}
+
+.field-selectmany {
+	ol {
+		column-count: 4;
+		column-gap: 1rem;
+	}
 }

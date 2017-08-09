@@ -1,3 +1,7 @@
+<div class="controls">
+	<a v-if="nextId" class="data-control edit-next button" :href="nextId | makeUpdateLink">Edit Next {{ singular | capitalize }}</a>
+</div>
+
 <div v-if="searchbar" v-html="searchbar"></div>
 
 <table id="collection" class="searchable summarized">

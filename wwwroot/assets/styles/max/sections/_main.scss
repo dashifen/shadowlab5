@@ -79,4 +79,13 @@ main {
 			border-color: palette(red);
 		}
 	}
+
+	& > .controls {
+		left: 0;
+		padding: 0 rem(20);
+		position: absolute;
+		text-align: right;
+		top: rem(29);
+		width: 100%;
+	}
 }

@@ -15,11 +15,11 @@ var Shadowlab = new Vue({
 		// necessary and, if so, we loop over our table bodies and call that
 		// function.
 
-		var withBodies = this.table.bodies && this.table.bodies.length > 0;
+		var withBodies = this.table && this.table.bodies && this.table.bodies.length > 0;
 		var withDescriptions = withBodies && this.table.bodies[0].description.description;
 
 		if (withDescriptions) {
-			for (var i=0; i < this.table.bodies.length; i++) {
+			for (var i = 0; i < this.table.bodies.length; i++) {
 				this.table.bodies[i].description.description = nl2br(this.table.bodies[i].description.description);
 			}
 		}
@@ -86,7 +86,19 @@ document.addEventListener("DOMContentLoaded", function() {
 		new Summarizer();
 	}
 
+	tinymce.init({
+		"selector": "textarea#description",
+		"toolbar": "bold italic | superscript subscript | bullist numlist | outdent indent | undo redo",
+		"plugins": "lists",
+		"branding": false,
+		"menubar": false
+	});
+
 	new Focuser();
+});
+
+document.addEventListener("click", function(event) {
+	console.log(event.target);
 });
 
 /*
@@ -128,7 +140,7 @@ function join(glue, pieces, limit) {
 		joined = pieces.pop();
 
 		var count = 0;
-		while(pieces.length > 0 && count++ < limit) {
+		while (pieces.length > 0 && count++ < limit) {
 			joined += glue + pieces.pop();
 		}
 	}
@@ -136,14 +148,14 @@ function join(glue, pieces, limit) {
 	return joined;
 }
 
-function array_search (needles, haystack) {
+function array_search(needles, haystack) {
 
 	// like the PHP function of the same name, we want to return the
 	// index of our first needle within the haystack.  so we loop over
 	// the needles and compare them against the haystack array.
 
-	for (var i=0; i < needles.length; i++) {
-		for (var j=0; j < haystack.length; j++) {
+	for (var i = 0; i < needles.length; i++) {
+		for (var j = 0; j < haystack.length; j++) {
 			if (haystack[j] === needles[i]) {
 				return j;
 			}

@@ -1,4 +1,5 @@
 <section id="shadowlab-form">
 	<p v-if="instructions" v-html="instructions"></p>
+	<pre v-if="errors" v-html="errors"></pre>
 	<div v-html="form"></div>
 </section>

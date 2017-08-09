@@ -20,4 +20,15 @@ class SpellsValidator extends Validator {
 	
 		return $valid;
 	}
+	
+	public function validateUpdate(array $data = []): bool {
+		
+		// to validate our update, we need to determine if we have posted
+		// data or not.  if not, then we can just validate that we've got
+		// what we need to read about a spell in the database.
+		
+		return isset($data["posted"])
+			? $this->checkForCommonErrors(...array_values($data))
+			: $this->validateRead($data);
+	}
 }

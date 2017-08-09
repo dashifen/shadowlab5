@@ -169,18 +169,22 @@ CONSTRAINT;
 			"column"   => $column
 		]);
 		
-		list($fkTable, $fkColumn) = array_values($fkConstraint);
-		
-		if (strlen($fkTable) > 0) {
-			
-			// if we identified a FK relationship for this column, we need
-			// to know the name of the _other_ column in the database table.
-			// we can get all of its columns, remove the $fkColumn and then
-			// we get the remaining column.
-			
-			$columns = $this->db->getTableColumns($fkTable);
-			$fkColumnData = array_diff($columns, [$fkColumn])[0];
-			$options = $this->db->getMap("SELECT $fkColumn, $fkColumnData FROM $fkTable");
+		if (sizeof($fkConstraint) > 0) {
+			list($fkTable, $fkColumnId) = array_values($fkConstraint);
+			if (strlen($fkTable) > 0) {
+				
+				// if we identified a FK relationship for this column, we need
+				// to know the name of the _other_ column in the database table.
+				// we can get all of its columns, remove the $fkColumnId and then
+				// we get the remaining column.
+				
+				$columns = $this->db->getTableColumns($fkTable);
+				$fkColumnData = array_diff($columns, [$fkColumnId]);
+				$fkColumn = array_shift($fkColumnData);
+				
+				$options = $this->db->getMap("SELECT $fkColumnId, $fkColumn FROM $fkTable");
+				asort($options);
+			}
 		}
 		
 		return $options;

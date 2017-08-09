@@ -3,6 +3,8 @@
 namespace Shadowlab\Framework\Action;
 
 use Dashifen\Action\AbstractAction as DashifenAbstractAction;
+use Dashifen\Domain\Payload\PayloadInterface;
+use Dashifen\Form\Builder\FormBuilderInterface;
 use Dashifen\Response\ResponseInterface;
 
 /**
@@ -220,5 +222,31 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 */
 	protected function handleNotFound(array $data = []): void {
 		$this->respond(__FUNCTION__, $data);
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
+	protected function getForm(PayloadInterface $payload): string {
+		
+		// when one of our actions needs to show a form, it can call this
+		// method along with a payload that describes the form needed to
+		// produce it.
+		
+		/** @var FormBuilderInterface $formBuilder */
+		
+		$payloadData = $payload->getData();
+		$formBuilder = $this->container->get("formBuilder");
+		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
+		$formBuilder->openForm($payloadData);
+		$form = $formBuilder->getForm();
+		
+		// the $form that we have now, is the actual FormInterface object,
+		// but what we want to send as a part of our response is the HTML for
+		// it.  therefore, we call the form's getForm() method now, too.
+		
+		return $form->getForm(false);
 	}
 }

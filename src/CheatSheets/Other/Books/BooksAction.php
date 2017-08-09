@@ -3,7 +3,6 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Dashifen\Form\Builder\FormBuilderInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
 use Shadowlab\Framework\Action\AbstractAction;
@@ -100,11 +99,11 @@ class BooksAction extends AbstractAction {
 		// step we're on when we're here is based on the existence of
 		// posted data.
 		
-		$posted = $this->request->getPost();
-		$method = sizeof($posted) === 0 ? "getDataToUpdate" : "savePostedData";
-		$this->{$method}();
+		$method = $this->request->getServerVar("REQUEST_METHOD") !== "POST"
+			? "getDataToUpdate"
+			: "savePostedData";
 		
-		return $this->response;
+		return $this->{$method}();
 	}
 	
 	/**
@@ -140,40 +139,10 @@ class BooksAction extends AbstractAction {
 	}
 	
 	/**
-	 * @param PayloadInterface $payload
-	 *
-	 * @return string
-	 */
-	protected function getForm(PayloadInterface $payload): string {
-		
-		// even though we're only showing a single book in our form, we
-		// still uses "books" as the index within our $payload.  this is
-		// simply to homogenize the index when showing a collection and
-		// a single one.
-		
-		/** @var FormBuilderInterface $formBuilder */
-		
-		$payloadData = $payload->getData();
-		$formBuilder = $this->container->get("formBuilder");
-		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
-		$formBuilder->openForm($payloadData);
-		$form = $formBuilder->getForm();
-		
-		// the $form that we have now, is the actual FormInterface object,
-		// but what we want to send as a part of our response is the HTML for
-		// it.  therefore, we call the form's getForm() method now, too.
-		
-		return $form->getForm(false);
-	}
-	
-	/**
 	 * @return ResponseInterface
 	 */
 	protected function savePostedData(): ResponseInterface {
-		
-		$payload = $this->domain->update([
-			"posted" => $this->request->getPost(),
-		]);
+		$payload = $this->domain->update(["posted" => $this->request->getPost()]);
 		
 		if ($payload->getSuccess()) {
 			$data = $payload->getData();

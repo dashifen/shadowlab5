@@ -56,6 +56,7 @@ foreach ($xml->spells->spell as $spell) {
 $filter = function($x) {
 	return !empty(trim($x));
 };
+
 $categories = array_filter(array_unique($categories), $filter);
 $tags = array_filter(array_unique($tags), $filter);
 $types = array_filter(array_unique($types), $filter);
@@ -69,6 +70,7 @@ $durations = array_filter(array_unique($durations), $filter);
 
 $db_categories = $db->getCol("SELECT spell_category FROM spells_categories");
 $new_categories = array_diff($categories, $db_categories);
+
 foreach ($new_categories as $new_category) {
 	$db->insert("spells_categories", ["spell_category" => $new_category]);
 }
@@ -77,6 +79,7 @@ $category_map = $db->getMap("SELECT spell_category, spell_category_id FROM spell
 
 $db_tags = $db->getCol("SELECT spell_tag FROM spells_tags");
 $new_tags = array_diff($tags, $db_tags);
+
 foreach ($new_tags as $tag) {
 	$db->insert("spells_tags", ["spell_tag" => $tag]);
 }
@@ -141,8 +144,6 @@ foreach ($xml->spells->spell as $xmlSpell) {
 			$spell["drain_value"] = "F-4";
 		}
 		
-		// before we insert, we need to do the same transformations that we
-		
 		$key = ["guid" => $guid];
 		$db->upsert("spells", array_merge($spell, $key), $spell);
 		$spell_id = $db->getVar("SELECT spell_id FROM spells WHERE guid=:guid", $key);
@@ -155,6 +156,7 @@ foreach ($xml->spells->spell as $xmlSpell) {
 		
 		$tags = explode(", ", (string)$xmlSpell->descriptor);
 		$tags = array_filter(array_unique($tags), $filter);
+		
 		foreach ($tags as $i => $tag) {
 			$tags[$i] = $tag_map[$tag];
 		}
@@ -165,10 +167,11 @@ foreach ($xml->spells->spell as $xmlSpell) {
 		
 		if (sizeof($tags_to_add) > 0) {
 			foreach ($tags_to_add as $i => $tag_id) {
-				$tags_to_add[$i] = ["spell_id" => $spell_id, "spell_tag_id" => $tag_id];
+				$db->insert("spells_spell_tags", [
+					"spell_id"     => $spell_id,
+					"spell_tag_id" => $tag_id,
+				]);
 			}
-			
-			$db->insert("spells_spell_tags", $tags_to_add);
 		}
 		
 		if (sizeof($tags_to_del) > 0) {

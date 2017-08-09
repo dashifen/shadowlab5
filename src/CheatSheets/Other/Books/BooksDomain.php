@@ -155,18 +155,10 @@ class BooksDomain extends Domain {
 			
 			$this->db->update("books", $bookData, ["book_id" => $bookId]);
 			
-			// after a successful update, we want to give our visitor the
-			// ability to quickly update the next un-described book in the
-			// database.  so, we'll get the "next" ID and send it back in
-			// our payload.
-			
-			$nextId = $this->db->getVar("SELECT book_id FROM books
-				WHERE description IS NULL ORDER BY book_id LIMIT 1");
-			
 			return $this->payloadFactory->newUpdatePayload(true, [
 				"title"  => $data["posted"]["book"],
-				"bookId" => $bookId,
-				"nextId" => $nextId,
+				"nextId" => $this->getNextId(),
+				"thisId" => $bookId,
 			]);
 		}
 		
@@ -184,5 +176,13 @@ class BooksDomain extends Domain {
 		]);
 		
 		return $this->transformer->transformUpdate($payload);
+	}
+	
+	/**
+	 * @return int
+	 */
+	protected function getNextId(): int {
+		return $this->db->getVar("SELECT book_id FROM books
+			WHERE description IS NULL ORDER BY book");
 	}
 }

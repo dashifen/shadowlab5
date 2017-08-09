@@ -74,12 +74,6 @@ table {
 				div {
 					flex: 1;
 				}
-
-				p.controls {
-					display: flex;
-					flex-direction: column;
-					margin: 0;
-				}
 			}
 
 			.page-reference {
@@ -99,6 +93,11 @@ table {
 
 			td:last-child {
 				vertical-align: middle;
+			}
+			
+			a.controls {
+				position: relative;
+				z-index: 1;
 			}
 		}
 

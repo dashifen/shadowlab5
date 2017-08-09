@@ -6,8 +6,6 @@ var gulp = require("gulp"),
 	uglify  = require("gulp-uglify"),
 	rename  = require("gulp-rename"),
 	sass    = require("gulp-sass"),
-	add_src = require("gulp-add-src"),
-	cssmin  = require("gulp-cssmin"),
 	runseq  = require("run-sequence"),
 
 	files = {
@@ -29,6 +27,7 @@ var gulp = require("gulp"),
 			js:   [
 				"./wwwroot/assets/scripts/module-stub.js",
 				"./node_modules/class.extend/lib/class.js",
+				"./node_modules/tinymce/tinymce.min.js",
 				"./vendor/dashifen/searchbar/web/scripts/searchbar.js",
 				"./wwwroot/assets/scripts/focuser.js",
 				"./wwwroot/assets/scripts/summarizer.js",

@@ -169,7 +169,11 @@ class FormBuilder implements FormBuilderInterface {
 				// are in all caps, so we'll continue that trend.
 				
 				$columnData["COLUMN_NAME"] = $column;
-				$columnData["COLUMN_VALUE"] = $values[$column] ?? $columnData["COLUMN_DEFAULT"];
+				$columnData["COLUMN_VALUE"] = $this->getValues($values, $column, $columnData);
+				$columnData["COLUMN_ERROR"] = isset($payload["errors"][$column])
+					? $payload["errors"][$column]
+					: false;
+				
 				$this->addField($columnData);
 			}
 		}
@@ -210,6 +214,36 @@ class FormBuilder implements FormBuilderInterface {
 	}
 	
 	/**
+	 * @param array  $values
+	 * @param string $column
+	 * @param array  $columnData
+	 *
+	 * @return string|array
+	 */
+	protected function getValues(array $values, string $column, array $columnData) {
+		
+		// identifying the value for a column isn't as straightforward as we
+		// might like.  if we have a single, scalar value, then it's easy; the
+		// hard part comes when we have a SelectMany field and need to work
+		// with an array.
+		
+		$multiple = $columnData["MULTIPLE"] ?? false;
+		if (!$multiple || isset($values[$column])) {
+			return $values[$column] ?? $columnData["COLUMN_DEFAULT"];
+		}
+		
+		// if we haven't returned, then we need to prepare the array of values
+		// for a SelectMany field.  in this case, there's a VALUES_KEY index
+		// within our data which refers to the index within $values that has
+		// our information in it.  that information is underscore-separated,
+		// so we can explode it and then filter our blanks.
+		
+		$index = $columnData["VALUES_KEY"];
+		$values = isset($values[$index]) ? explode("_", $values[$index]) : [];
+		return array_filter($values);
+	}
+	
+	/**
 	 * @param array  $columnData
 	 * @param string $object
 	 *
@@ -223,10 +257,11 @@ class FormBuilder implements FormBuilderInterface {
 		
 		$type = $this->getFieldType($columnData);
 		
-		$this->form["fieldsets"][$this->currentFieldset]["fields"][] = [
+		$field = [
 			"id"                   => $columnData["COLUMN_NAME"],
 			"name"                 => $columnData["COLUMN_NAME"],
 			"value"                => $columnData["COLUMN_VALUE"],
+			"error"				   => $columnData["COLUMN_ERROR"],
 			"label"                => $this->getFieldLabel($columnData["COLUMN_NAME"]),
 			"additionalAttributes" => $this->getFieldAttributes($type, $columnData),
 			"classes"              => $this->getFieldClasses($type, $columnData),
@@ -234,6 +269,8 @@ class FormBuilder implements FormBuilderInterface {
 			"options"              => $this->getFieldOptions($columnData),
 			"type"                 => $type,
 		];
+		
+		$this->form["fieldsets"][$this->currentFieldset]["fields"][] = $field;
 	}
 	
 	/**
@@ -257,10 +294,11 @@ class FormBuilder implements FormBuilderInterface {
 				// most of the time, our int fields simply require a
 				// Number field so we can enter the appropriate number.
 				// but, if there's also an OPTIONS array with data in
-				// it, then we want a SelectOne.
+				// it, then we want a SelectOne unless a MULTIPLE flag
+				// is set; in which case we want a SelectMany
 				
 				$type = sizeof($columnData["OPTIONS"] ?? []) > 0
-					? "SelectOne"
+					? (isset($columnData["MULTIPLE"]) ? "SelectMany" : "SelectOne")
 					: "Number";
 				
 				// if our type is Number, then we have one other exception:
@@ -335,7 +373,12 @@ class FormBuilder implements FormBuilderInterface {
 				break;
 		}
 		
-		return $name;
+		// finally, if we have " Id" in the name, we just remove it.
+		// there's no need for that on-screen.  rather than test for
+		// it's existence and remove it only when necessary, we'll just
+		// try to replace it; if it's not there, then nothing happens.
+		
+		return str_replace(" Id", "", $name);
 	}
 	
 	/**
