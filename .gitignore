@@ -115,6 +115,8 @@ pma
 /src/Config/Credentials/
 /wwwroot/parsers/data/
 *test*
+/wwwroot/assets/scripts/max/private/
+/wwwroot/sandbox/
 /wwwroot/assets/scripts/themes/
 /wwwroot/assets/scripts/plugins/
 /wwwroot/assets/scripts/skins/
