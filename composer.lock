@@ -282,16 +282,16 @@
         },
         {
             "name": "dashifen/database",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "c0ba5df42a7c5e788b846e4be44866d6315cb6c7"
+                "reference": "277899ef702e65a85075d5eae757f70514b72479"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/c0ba5df42a7c5e788b846e4be44866d6315cb6c7",
-                "reference": "c0ba5df42a7c5e788b846e4be44866d6315cb6c7",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/277899ef702e65a85075d5eae757f70514b72479",
+                "reference": "277899ef702e65a85075d5eae757f70514b72479",
                 "shasum": ""
             },
             "require": {
@@ -327,7 +327,7 @@
                 "database",
                 "pdo"
             ],
-            "time": "2017-08-07T17:14:54+00:00"
+            "time": "2017-08-09T15:30:21+00:00"
         },
         {
             "name": "dashifen/domain",
@@ -449,16 +449,16 @@
         },
         {
             "name": "dashifen/form",
-            "version": "1.9.2",
+            "version": "1.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/form.git",
-                "reference": "d84bcead9ad174d107320dc566cba97b65e7b562"
+                "reference": "cb55f6d803328704cf888d9366af46f694b002e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/form/zipball/d84bcead9ad174d107320dc566cba97b65e7b562",
-                "reference": "d84bcead9ad174d107320dc566cba97b65e7b562",
+                "url": "https://api.github.com/repos/dashifen/form/zipball/cb55f6d803328704cf888d9366af46f694b002e3",
+                "reference": "cb55f6d803328704cf888d9366af46f694b002e3",
                 "shasum": ""
             },
             "require": {
@@ -484,7 +484,7 @@
                 }
             ],
             "description": "A series of objects that build an HTML form in the way I like.",
-            "time": "2017-08-03T14:32:25+00:00"
+            "time": "2017-08-09T12:50:14+00:00"
         },
         {
             "name": "dashifen/request",

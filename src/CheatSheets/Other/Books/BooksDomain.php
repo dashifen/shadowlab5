@@ -30,6 +30,7 @@ class BooksDomain extends Domain {
 				// currently, it's just an array, but we need to prepare
 				// it for display in our table or single views.
 				
+				$payload->setDatum("nextId", $this->getNextId());
 				$payload = $this->transformer->transformRead($payload);
 			}
 		} else {

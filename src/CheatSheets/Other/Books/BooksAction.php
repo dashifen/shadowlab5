@@ -21,12 +21,16 @@ class BooksAction extends AbstractAction {
 				"searchbar"    => $this->getSearchbar($payload),
 				"title"        => $payload->getDatum("title"),
 				"count"        => $payload->getDatum("count"),
+				"nextId"       => $payload->getDatum("nextId"),
 				"capabilities" => $this->request->getSessionVar("capabilities"),
 				"caption"      => "The following are the SR books in this application.
 					They're not all the published books for SR5; only those with
 					quantifiable rules and stats are here.  Some, mostly the German
 					content, are not included, i.e. you won't find their data
 					elsewhere in the Shadowlab.",
+				
+				"plural"   => "books",
+				"singular" => "book",
 			]);
 		} else {
 			$this->handleFailure([

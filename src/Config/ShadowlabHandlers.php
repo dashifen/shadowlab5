@@ -11,7 +11,8 @@ $handlers = [
 	
 	// Other Sheets
 	
-	'Shadowlab\CheatSheets\Other\Books' => ["BOTH" => "/cheat-sheets/other/books"],
+	'Shadowlab\CheatSheets\Other\Books'     => ["BOTH" => "/cheat-sheets/other/books"],
+	'Shadowlab\CheatSheets\Other\Qualities' => ["BOTH" => "/cheat-sheets/other/qualities"],
 
 ];
 
