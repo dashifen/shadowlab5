@@ -78,19 +78,6 @@ ul, ol {
 @import "tags/table";
 @import "tags/form";
 @import "tags/lists";
+@import "other/deleter";
+@import "other/sweet-alert";
 @import "atoms";
-
-.sweet-alert {
-	h2, p {
-		color: palette(mono, text);
-		text-align: left;
-	}
-
-	button {
-		background-color: palette(blue) !important;
-
-		&:active, &:focus, &:hover {
-			background-color: lighten(palette(blue), 25%) !important;
-		}
-	}
-}

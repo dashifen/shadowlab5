@@ -48,7 +48,7 @@ class BooksDomain extends Domain {
 	
 	protected function readOne(int $book_id): PayloadInterface {
 		$sql = "SELECT book_id, book, description, abbr, included FROM books
-			WHERE book_id = :book_id";
+			WHERE book_id = :book_id AND deleted = 0";
 		
 		$book = $this->db->getRow($sql, ["book_id" => $book_id]);
 		
@@ -66,7 +66,7 @@ class BooksDomain extends Domain {
 	
 	protected function readAll(): PayloadInterface {
 		$books = $this->db->getResults("SELECT book_id, book, description,
-			abbr, included FROM books ORDER BY book");
+			abbr, included FROM books WHERE deleted = 0 ORDER BY book");
 		
 		// success here is simply selecting anything, and our title should
 		// be more general than the one above.
@@ -77,6 +77,14 @@ class BooksDomain extends Domain {
 			"books" => $books,
 			"count" => $count,
 		]);
+	}
+	
+	/**
+	 * @return int
+	 */
+	protected function getNextId(): int {
+		return $this->db->getVar("SELECT book_id FROM books
+			WHERE description IS NULL ORDER BY book");
 	}
 	
 	public function update(array $data): PayloadInterface {
@@ -179,11 +187,31 @@ class BooksDomain extends Domain {
 		return $this->transformer->transformUpdate($payload);
 	}
 	
-	/**
-	 * @return int
-	 */
-	protected function getNextId(): int {
-		return $this->db->getVar("SELECT book_id FROM books
-			WHERE description IS NULL ORDER BY book");
+	public function delete(array $data): PayloadInterface {
+		
+		// to delete, we must have received a record ID and that ID must
+		// live in the database.  our validator can handle this check for
+		// us, but we'll need to send it the list of book IDs.
+		
+		$books = $this->db->getCol("SELECT book_id FROM books");
+		$validationData = array_merge($data, ["books" => $books]);
+		if ($this->validator->validateDelete($validationData)) {
+			
+			// if the validator says we're okay, then actually deleting is
+			// pretty straight forward:  we set the deleted flag for the
+			// specified book and that'll hide it from the application.  the
+			// book remains in the database, which is handy so that the next
+			// time we parse Chummer data, it doesn't show up in the app
+			// again.
+			
+			$values = ["deleted" => 1];
+			$key = ["book_id" => $data["book_id"]];
+			$this->db->update("books", $values, $key);
+			return $this->payloadFactory->newDeletePayload(true);
+		}
+		
+		return $this->payloadFactory->newDeletePayload(false, [
+			"error" => $this->validator->getValidationErrors()
+		]);
 	}
 }

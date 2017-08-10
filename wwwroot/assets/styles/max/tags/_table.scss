@@ -60,44 +60,52 @@ table {
 		}
 
 		.description {
-			p {
-				margin-top: 0;
-
-				&:empty {
-					margin: 0;
-				}
-			}
-
-			section {
+			footer {
 				display: flex;
 
 				div {
 					flex: 1;
+
+					&.record-controls {
+						bottom: rem(3);
+						position: relative;
+						text-align: right;
+
+						a {
+							background: #E4E4E4;
+							border: rem(1) solid #D0D0D0;
+							border-radius: rem(3);
+							color: palette(mono);
+							padding: rem(3);
+
+							&:hover, &:focus {
+								background: #F0F0F0;
+								color: palette(mono, text);
+							}
+
+							&.deleter.confirmed {
+								color: palette(blue);
+							}
+						}
+					}
 				}
 			}
 
-			.page-reference {
-				&::before {
-					content: "p. ";
+			.reference {
+				.page {
+					&::before {
+						content: "p. ";
+					}
+
+					&::after {
+						content: ",";
+					}
 				}
 
-				&::after {
-					content: ",";
+				.book abbr {
+					border-bottom-style: none;
+					text-decoration: none;
 				}
-			}
-
-			.book-reference abbr {
-				border-bottom-style: none;
-				text-decoration: none;
-			}
-
-			td:last-child {
-				vertical-align: middle;
-			}
-			
-			a.controls {
-				position: relative;
-				z-index: 1;
 			}
 		}
 

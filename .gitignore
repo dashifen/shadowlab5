@@ -115,10 +115,8 @@ pma
 /src/Config/Credentials/
 /wwwroot/parsers/data/
 *test*
-/wwwroot/assets/scripts/max/private/
 /wwwroot/sandbox/
-wwwroot/assets/scripts/plugins
-wwwroot/assets/scripts/skins
-wwwroot/assets/scripts/themes
-/wwwroot/assets/scripts/shadowlab.complete.min.js
-/wwwroot/assets/scripts/shadowlab.complete.js
+/wwwroot/assets/scripts/tinymce/
+/wwwroot/assets/scripts/shadowlab.bundled.min.js
+/wwwroot/assets/scripts/shadowlab.bundled.js
+/wwwroot/assets/scripts/_old.zip

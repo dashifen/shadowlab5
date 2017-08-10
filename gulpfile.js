@@ -27,10 +27,10 @@ var gulp = require("gulp"),
 			js:   [
 				"./wwwroot/assets/scripts/module-stub.js",
 				"./node_modules/class.extend/lib/class.js",
-				"./node_modules/tinymce/tinymce.min.js",
 				"./vendor/dashifen/searchbar/web/scripts/searchbar.js",
-				"./wwwroot/assets/scripts/focuser.js",
 				"./wwwroot/assets/scripts/summarizer.js",
+				"./wwwroot/assets/scripts/focuser.js",
+				"./wwwroot/assets/scripts/deleter.js",
 				"./wwwroot/assets/scripts/shadowlab.js"
 			]
 		}
@@ -62,7 +62,7 @@ gulp.task("build-js", function() {
 	gulp.src(files.js.js)
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
-		.pipe(concat("shadowlab.complete.js"))
+		.pipe(concat("shadowlab.bundled.js"))
 		.pipe(gulp.dest(files.js.dest))
 		.pipe(uglify())
 		.pipe(sourcemaps.write())

@@ -1,0 +1,14 @@
+.sweet-alert {
+	h2, p {
+		color: palette(mono, text);
+		text-align: left;
+	}
+
+	button {
+		background-color: palette(blue) !important;
+
+		&:active, &:focus, &:hover {
+			background-color: lighten(palette(blue), 25%) !important;
+		}
+	}
+}

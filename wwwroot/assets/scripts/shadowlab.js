@@ -8,21 +8,6 @@ var Shadowlab = new Vue({
 
 	mounted: function() {
 		document.title = this.title + " | Shadowlab";
-
-		// also, if we have table bodies and they have descriptions, we want
-		// to quickly convert new line characters to <br> tags.  we have a
-		// function below that'll do the work, so here we just see if it's
-		// necessary and, if so, we loop over our table bodies and call that
-		// function.
-
-		var withBodies = this.table && this.table.bodies && this.table.bodies.length > 0;
-		var withDescriptions = withBodies && this.table.bodies[0].description.description;
-
-		if (withDescriptions) {
-			for (var i = 0; i < this.table.bodies.length; i++) {
-				this.table.bodies[i].description.description = nl2br(this.table.bodies[i].description.description);
-			}
-		}
 	},
 
 	filters: {
@@ -37,6 +22,20 @@ var Shadowlab = new Vue({
 
 		nl2br: function(str) {
 			return nl2br(str);
+		},
+
+		stripTags: function (input, allowed) {
+
+			//  source  http://locutus.io/php/strip_tags/
+
+			allowed = (((allowed || '') + '').toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
+
+			var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
+			var commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+
+			return input.replace(commentsAndPhpTags, '').replace(tags, function ($0, $1) {
+				return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+			})
 		},
 
 		makeUpdateLink: function(id) {
@@ -60,7 +59,18 @@ var Shadowlab = new Vue({
 				? join("/", hrefParts, endpoint - 1)
 				: window.location.href;
 
-			return href + '/update/' + id;
+			return href + "/update/" + id;
+		},
+
+		makeDeleteLink: function(id) {
+
+			// this works just like the prior one, we just add a different
+			// action verb at the end.
+
+			var hrefParts = window.location.href.split("/");
+			var endpoint = array_search(["create", "read", "update", "delete"], hrefParts);
+			var href = endpoint !== false ? join("/", hrefParts, endpoint-1) : window.location.href;
+			return href + "/delete/" + id;
 		},
 
 		makeCollectionLink: function(endpoint) {
@@ -82,7 +92,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		new Searchbar();
 	}
 
-	if (document.getElementsByClassName("summarized").length > 0) {
+	var summarized = document.getElementsByClassName("summarized");
+	if (summarized.length > 0) {
+		new Deleter(summarized[0]);
 		new Summarizer();
 	}
 
@@ -97,29 +109,11 @@ document.addEventListener("DOMContentLoaded", function() {
 	new Focuser();
 });
 
-document.addEventListener("click", function(event) {
-	console.log(event.target);
-});
-
 /*
  * Additional/Helper functions
  * These functions are used above to assist in filters, for example.
  * Usually, they're mock-ups of PHP-like functions for our convenience.
  */
-
-function nl2br(str) {
-
-	// source: http://locutus.io/php/strings/nl2br/
-
-	if (typeof str === 'undefined' || str === null) {
-		return ''
-	}
-
-	// altered source: removed switch between XHTML and HTML
-	// version of the break tag.
-
-	return (str + '').replace(/(\r\n|\n\r|\r|\n)/g, '<br>' + '$1')
-}
 
 function join(glue, pieces, limit) {
 	var joined = '';

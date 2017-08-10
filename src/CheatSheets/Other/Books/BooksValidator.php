@@ -13,7 +13,7 @@ class BooksValidator extends Validator {
 		// all books) or when the ID we have is in the list.
 		
 		$bookId = $data["book_id"] ?? null;
-		$valid = is_null($bookId) || in_array($bookId, $data["books"] ?? []);
+		$valid = empty($bookId) || in_array($bookId, $data["books"] ?? []);
 		$this->validationErrors["book_id"] = !$valid ? "Unknown book ID" : false;
 		return $valid;
 	}
@@ -32,5 +32,17 @@ class BooksValidator extends Validator {
 		return isset($data["posted"])
 			? $this->checkForCommonErrors(...array_values($data))
 			: $this->validateRead($data);
+	}
+	
+	public function	validateDelete(array $data = []): bool {
+		
+		// this is similar to validating a read action:  we get an ID and
+		// it better be in our list.  the difference is that the ID is
+		// required; it's optional during a read.
+		
+		$bookId = $data["book_id"];
+		$valid = is_numeric($bookId) && in_array($bookId, $data["books"] ?? []);
+		$this->validationErrors["book_id"] = !$valid ? "Invalid book ID: $bookId" : false;
+		return $valid;
 	}
 }

@@ -134,6 +134,7 @@ class BooksAction extends AbstractAction {
 				"form"         => $this->getForm($payload),
 				"plural"       => "books",
 				"singular"     => "book",
+				"errors"       => "",
 			]);
 		} else {
 			$this->handleFailure([]);
@@ -187,6 +188,29 @@ class BooksAction extends AbstractAction {
 			]);
 		}
 		
+		return $this->response;
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function delete(): ResponseInterface {
+		$payload = $this->domain->delete(["book_id" => $this->recordId]);
+		
+		if ($payload->getSuccess()) {
+			
+			// when we successfully delete, we just want to re-show the
+			// collection.  we can do this with a redirect response as
+			// follows.
+			
+			$host = $this->request->getServerVar("HTTP_HOST");
+			$url = $this->request->getServerVar("REQUEST_URI");
+			$url = "http://$host" . substr($url, 0, strpos($url, "/delete"));
+			$this->response->redirect($url);
+		} else {
+			$this->handleFailure([]);
+		}
+	
 		return $this->response;
 	}
 }
