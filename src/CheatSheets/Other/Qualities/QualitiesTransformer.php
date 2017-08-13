@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Transformer;
+use Shadowlab\Framework\Domain\AbstractTransformer;
 
-class QualitiesTransformer extends Transformer {
+class QualitiesTransformer extends AbstractTransformer {
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
 		
 		// our payload contains either one quality or all of them.  once we
@@ -60,7 +60,8 @@ class QualitiesTransformer extends Transformer {
 	 * @return array
 	 */
 	protected function constructColumnHeaders(array $qualities): array {
-		$headers = $this->extractHeaders($qualities);
+		$descriptiveKeys = array_merge(AbstractTransformer::DESCRIPTIVE_KEYS, ["minimum", "maximum"]);
+		$headers = $this->extractHeaders($qualities, $descriptiveKeys);
 		
 		// now that we've gathered our column headers, we want to apply some
 		// classes to them for the screen as follows:
@@ -124,7 +125,8 @@ class QualitiesTransformer extends Transformer {
 	 *
 	 * @return array
 	 */
-	protected function extractData(array $quality, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractData(array $quality, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+		$descriptiveKeys = array_merge(AbstractTransformer::DESCRIPTIVE_KEYS, ["minimum", "maximum"]);
 		$data = parent::extractData($quality, $descriptiveKeys);
 		
 		// our data is, for this table, just the quality name and the cost of

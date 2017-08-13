@@ -5,10 +5,10 @@ namespace Shadowlab\CheatSheets\Other\Books;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
-use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\Action\ShadowlabAction;
 use Shadowlab\Framework\AddOns\Searchbar;
 
-class BooksAction extends AbstractAction {
+class BooksAction extends ShadowlabAction {
 	/**
 	 * @return ResponseInterface
 	 */

@@ -2,12 +2,17 @@
 
 namespace Shadowlab\User\Login;
 
+use Dashifen\Action\AbstractAction;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
-use Shadowlab\Framework\Action\AbstractAction;
 
 /**
  * Class LoginAction
+ *
+ * Our login action is different from our cheat sheets.  So, instead
+ * of extended this Shadowlab's abstract action, which is geared toward
+ * the selection of records and collections, we'll just extend our
+ * Framework's action.
  *
  * @package Shadowlab\User\Login
  */
@@ -88,7 +93,7 @@ class LoginAction extends AbstractAction {
 				// bad password, etc.) but those are handled in the else
 				// below.
 				
-				$this->handleError([
+				$this->response->handleError([
 					"title" => "Unauthorized Access",
 				]);
 			} else {
@@ -98,7 +103,7 @@ class LoginAction extends AbstractAction {
 				// want to be sure that we "remember" the email and the URL
 				// to which they want to go after logging in.
 				
-				$this->handleFailure([
+				$this->response->handleFailure([
 					"title"       => "Login Failed",
 					"email"       => $email,
 					"redirect_to" => $this->request->getPostVar("redirect_to"),
@@ -163,7 +168,7 @@ class LoginAction extends AbstractAction {
 		// so we can just handle success here.  since we've not done
 		// anything yet, there's no errors and
 		
-		$this->handleSuccess([
+		$this->response->handleSuccess([
 			"title"       => "Login",
 			"email"       => $this->request->getCookieVar("email"),
 			"redirect_to" => $this->request->getSessionVar("redirect_to"),

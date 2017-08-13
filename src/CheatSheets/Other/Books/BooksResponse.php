@@ -2,8 +2,8 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
-use Shadowlab\Framework\Response\ShadowlabResponse;
+use Shadowlab\Framework\Response\AbstractResponse;
 
-class BooksResponse extends ShadowlabResponse {
+class BooksResponse extends AbstractResponse {
 
 }

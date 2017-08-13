@@ -2,9 +2,8 @@
 
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
-use Shadowlab\Framework\Response\ShadowlabResponse;
-use Dashifen\Response\ResponseException;
+use Shadowlab\Framework\Response\AbstractResponse;
 
-class SpellsResponse extends ShadowlabResponse {
+class SpellsResponse extends AbstractResponse {
 
 }

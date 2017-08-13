@@ -2,27 +2,36 @@
 
 namespace Shadowlab\CheatSheets;
 
-use Dashifen\Response\ResponseException;
-use Shadowlab\Framework\Response\ShadowlabResponse;
+use Shadowlab\Framework\Response\AbstractResponse;
 
-class CheatSheetsResponse extends ShadowlabResponse {
-	public function handleSuccess(array $data = [], string $action = "read"): void {
-		$this->setContent("cheat-sheets/index.html");
-		$this->setData($data);
+class CheatSheetsResponse extends AbstractResponse {
+	/**
+	 * @param string $template
+	 *
+	 * @return string
+	 */
+	protected function getHandlerTemplate(string $template): string {
+		
+		// we trust that our parent will handle the general template
+		// identification correctly.  so this can just return the
+		// $template that was sent here.
+		
+		return $template;
 	}
 	
-	// this response doesn't handle failure or errors well.  in fact,
-	// it doesn't handle them at all!  if we couldn't find sheets to
-	// display, then we'll send a 404 response using the method defined
-	// by our parent.  so, for these, we'll throw a tantrum.
-	
-	public function handleFailure(array $data = [], string $action = "read"): void {
-		throw new ResponseException("Unexpected Response: Failure",
-			ResponseException::UNEXPECTED_RESPONSE);
+	/**
+	 * @param string $template
+	 *
+	 * @return string
+	 */
+	protected function getHandlerSuccessTemplate(string $template): string {
+		
+		// when we successfully grab a set of sheets, then we want to
+		// display them using the cheat-sheets index view.  our parent
+		// can't know that, so we'll tell it that information here.
+		
+		$template = "cheat-sheets/index.html";
+		return $template;
 	}
 	
-	public function handleError(array $data = [], string $action = "read"): void {
-		throw new ResponseException("Unexpected Response: Error",
-			ResponseException::UNEXPECTED_RESPONSE);
-	}
 }

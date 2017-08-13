@@ -2,8 +2,8 @@
 
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
-use Shadowlab\Framework\Response\ShadowlabResponse;
+use Shadowlab\Framework\Response\AbstractResponse;
 
-class QualitiesResponse extends ShadowlabResponse {
+class QualitiesResponse extends AbstractResponse {
 
 }

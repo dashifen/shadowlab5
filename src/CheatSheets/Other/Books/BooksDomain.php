@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Domain;
+use Shadowlab\Framework\Domain\AbstractDomain;
 
-class BooksDomain extends Domain {
+class BooksDomain extends AbstractDomain {
 	public function read(array $data = []): PayloadInterface {
 		
 		// the only $data we expect to get from our action is an optional
@@ -187,31 +187,5 @@ class BooksDomain extends Domain {
 		return $this->transformer->transformUpdate($payload);
 	}
 	
-	public function delete(array $data): PayloadInterface {
-		
-		// to delete, we must have received a record ID and that ID must
-		// live in the database.  our validator can handle this check for
-		// us, but we'll need to send it the list of book IDs.
-		
-		$books = $this->db->getCol("SELECT book_id FROM books");
-		$validationData = array_merge($data, ["books" => $books]);
-		if ($this->validator->validateDelete($validationData)) {
-			
-			// if the validator says we're okay, then actually deleting is
-			// pretty straight forward:  we set the deleted flag for the
-			// specified book and that'll hide it from the application.  the
-			// book remains in the database, which is handy so that the next
-			// time we parse Chummer data, it doesn't show up in the app
-			// again.
-			
-			$values = ["deleted" => 1];
-			$key = ["book_id" => $data["book_id"]];
-			$this->db->update("books", $values, $key);
-			return $this->payloadFactory->newDeletePayload(true);
-		}
-		
-		return $this->payloadFactory->newDeletePayload(false, [
-			"error" => $this->validator->getValidationErrors()
-		]);
-	}
+	
 }

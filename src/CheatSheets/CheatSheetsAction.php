@@ -2,14 +2,16 @@
 
 namespace Shadowlab\CheatSheets;
 
+use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Dashifen\Response\ResponseInterface;
 
 class CheatSheetsAction extends AbstractAction {
 	public function execute(array $parameter = []): ResponseInterface {
 		
-		// our parameter array should only have one item in it:  a type
-		// for our cheat sheet display.
+		// the cheat sheet action is different from the others.  so,
+		// we're just going to overwrite the default execute() method
+		// to do exactly what we need it to do here.
 		
 		$sheet_type = sizeof($parameter) !== 0 ? $parameter[0] : "";
 		$payload = $this->domain->read(["sheet_type" => $sheet_type]);
@@ -36,5 +38,43 @@ class CheatSheetsAction extends AbstractAction {
 		}
 		
 		return $this->response;
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
+	protected function getSearchbar(PayloadInterface $payload): string {
+		
+		// our cheat sheets don't get a searchbar at this time, so we
+		// just return the empty string.
+		
+		return "";
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getSingular(): string {
+		return "cheat sheet";
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getPlural(): string {
+		return "cheat sheets";
+	}
+	
+	protected function getTable(): string {
+		return "cheat_sheets";
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getRecordIdName(): string {
+		return "sheet_id";
 	}
 }

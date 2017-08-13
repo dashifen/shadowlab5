@@ -2,37 +2,40 @@
 
 namespace Shadowlab\User\Login;
 
-use Shadowlab\Framework\Response\ShadowlabResponse;
+use Shadowlab\Framework\Response\AbstractResponse;
 
-class LoginResponse extends ShadowlabResponse {
-	public function handleSuccess(array $data = [], string $action = 'read'): void {
+class LoginResponse extends AbstractResponse {
+	/**
+	 * @param string $template
+	 *
+	 * @return string
+	 */
+	protected function getHandlerTemplate(string $template): string {
 		
-		// handleSuccess is not actually a successful login in this case.
-		// it's simply the page that show the login form.  there's not much
-		// to do, really, other than set our data and load up the login
-		// form.
+		// success or failure, our template is the login.html view.  so,
+		// here we ignore whatever our parent object determined the template
+		// to be and simply return the one we need unless our parent sent
+		// us the error view; that one we still use.
 		
-		$this->setContent("login.html");
-		$this->setData($data);
+		$template = $template === "error.html" ? $template : "login.html";
+		return $template;
 	}
 	
-	public function handleFailure(array $data = [], string $action = 'read'): void {
+	/**
+	 * @param string $template
+	 *
+	 * @return string
+	 */
+	protected function getHandlerSuccessTemplate(string $template): string {
 		
-		// perhaps oddly, the success and failure responses include the same
-		// content.  the information in our data is what's different.
+		// there's two success states for our action:  someone visiting the
+		// page to enter their credentials (i.e. a successful request for the
+		// form) and a successful authentication.  the former requires the
+		// login.html view, the latter redirects.  so, we can just return the
+		// login view here and let the Action take over from there.
 		
-		$this->setContent("login.html");
-		$this->setData($data);
+		$template = "login.html";
+		return $template;
 	}
 	
-	public function handleError(array $data = [], string $action = 'read'): void {
-		
-		// and, our error response is for when they've exceeded 5 login
-		// attempts.  this will, hopefully, help to mitigate attempts to
-		// brute force access to the system.
-		
-		$this->setStatusCode(401);						// unauthorized
-		$this->setContent("login-failed.html");
-		$this->setData($data);
-	}
 }

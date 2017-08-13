@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Domain;
+use Shadowlab\Framework\Domain\AbstractDomain;
 
-class QualitiesDomain extends Domain {
+class QualitiesDomain extends AbstractDomain {
 	/**
 	 * @param array $data
 	 *
@@ -54,8 +54,9 @@ class QualitiesDomain extends Domain {
 	 */
 	protected function readOne(int $qualityId): PayloadInterface {
 		$sql = "SELECT quality_id, quality, description, metagenetic,
-			freakish, cost, book_id, book, abbr, page FROM qualities_view
-			WHERE quality_id = :quality_id ORDER BY quality";
+			freakish, cost, minimum, maximum, book_id, book, abbr, page
+			FROM qualities_view WHERE quality_id = :quality_id
+			ORDER BY quality";
 		
 		$quality = $this->db->getRow($sql, ["quality_id" => $qualityId]);
 		
@@ -75,8 +76,9 @@ class QualitiesDomain extends Domain {
 	 */
 	protected function readAll(): PayloadInterface {
 		$qualities = $this->db->getResults("SELECT quality_id, quality,
-			description, metagenetic, freakish, cost, book_id, book, abbr,
-			page FROM qualities_view ORDER BY quality");
+			description, metagenetic, freakish, cost, minimum, maximum,
+			book_id, book, abbr, page FROM qualities_view
+			ORDER BY quality");
 		
 		return $this->payloadFactory->newReadPayload(sizeof($qualities) > 0, [
 			"title"     => "Qualities",
@@ -98,14 +100,7 @@ class QualitiesDomain extends Domain {
 		// then we'll get it out of the database.
 		
 		if (sizeof($quality) === 0) {
-			$quality = $this->getRecentlyUpdatedQuality();
-		}
-		
-		// if our quality is still blank, we just get the first "blank"
-		// quality in alphabetical order.
-		
-		if (sizeof($quality) === 0) {
-			return $this->getNextBlankQuality();
+			$quality = $this->getNextBlankQuality();
 		}
 		
 		// still here?  then we have a quality to work with.  first, we see
@@ -143,22 +138,17 @@ class QualitiesDomain extends Domain {
 		// criteria, but just in case something gets weird, we'll do things
 		// this way.
 		
-		return $this->getNextBlankQuality();
+		return $this->getNextBlankQuality()["quality_id"];
 	}
 	
 	/**
 	 * @return array
 	 */
-	protected function getRecentlyUpdatedQuality(): array {
-		return $this->db->getRow("SELECT minimum, book_id FROM qualities
-			WHERE description IS NOT NULL ORDER BY timestamp DESC LIMIT 1");
+	protected function getNextBlankQuality(): array {
+		return $this->db->getRow("SELECT quality_id, book_id
+			FROM qualities WHERE description IS NULL
+			ORDER BY quality");
 	}
 	
-	/**
-	 * @return int
-	 */
-	protected function getNextBlankQuality(): int {
-		return $this->db->getVar("SELECT quality_id FROM qualities
-			WHERE description IS NULL ORDER BY quality");
-	}
+	
 }

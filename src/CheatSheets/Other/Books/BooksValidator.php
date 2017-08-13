@@ -2,9 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
-use Shadowlab\Framework\Domain\Validator;
+use Shadowlab\Framework\Domain\AbstractValidator;
 
-class BooksValidator extends Validator {
+class BooksValidator extends AbstractValidator {
 	public function validateRead(array $data = []): bool {
 		
 		// to validate a read, we get a list of all book IDs and, when

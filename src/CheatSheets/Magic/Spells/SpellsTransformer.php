@@ -4,9 +4,9 @@ namespace Shadowlab\CheatSheets\Magic\Spells;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Domain\Transformer\TransformerInterface;
-use Shadowlab\Framework\Domain\Transformer;
+use Shadowlab\Framework\Domain\AbstractTransformer;
 
-class SpellsTransformer extends Transformer {
+class SpellsTransformer extends AbstractTransformer {
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
 		
 		// our $payload will have either one or many books.  the count
@@ -90,7 +90,7 @@ class SpellsTransformer extends Transformer {
 		return $headers;
 	}
 	
-	protected function extractHeaders(array $data, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractHeaders(array $data, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		$headers = parent::extractHeaders($data);
 		
 		foreach ($headers as $i => $header) {
@@ -135,7 +135,7 @@ class SpellsTransformer extends Transformer {
 		return $bodies;
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		$descriptiveKeys = array_merge($descriptiveKeys, ["spell_tags_ids"]);
 		$data = parent::extractData($spell, $descriptiveKeys);
 		

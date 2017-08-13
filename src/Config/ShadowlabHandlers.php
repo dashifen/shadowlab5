@@ -6,14 +6,13 @@ $handlers = [
 	
 	// Magic Sheets
 	
-	'Shadowlab\CheatSheets\Magic\Spells' => ["BOTH" => "/cheat-sheets/magic/spells"],
-	
+	'Shadowlab\CheatSheets\Magic\Spells'      => ["BOTH" => "/cheat-sheets/magic/spells"],
+	'Shadowlab\CheatSheets\Magic\AdeptPowers' => ["BOTH" => "/cheat-sheets/magic/spells/adept-powers"],
 	
 	// Other Sheets
 	
 	'Shadowlab\CheatSheets\Other\Books'     => ["BOTH" => "/cheat-sheets/other/books"],
 	'Shadowlab\CheatSheets\Other\Qualities' => ["BOTH" => "/cheat-sheets/other/qualities"],
-
 ];
 
 $objects = [];

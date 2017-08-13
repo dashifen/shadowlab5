@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Transformer;
+use Shadowlab\Framework\Domain\AbstractTransformer;
 
-class BooksTransformer extends Transformer {
+class BooksTransformer extends AbstractTransformer {
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
 		
 		// our payload should contain a book or books.  if it's the latter,
@@ -100,7 +100,7 @@ class BooksTransformer extends Transformer {
 		return $bodies;
 	}
 	
-	protected function extractDescription(array $record, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractDescription(array $record, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// the default behavior of our parent's method is to include the abbr
 		// in the description for the page reference.  but, in this case, the
@@ -110,7 +110,7 @@ class BooksTransformer extends Transformer {
 		return parent::extractDescription($record, ["description"]);
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// like above, the parent would normally remove the abbr from our data
 		// in favor of keeping it as a part of the description.  we'll want to

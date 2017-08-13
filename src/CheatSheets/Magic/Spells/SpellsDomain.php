@@ -3,9 +3,9 @@
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Domain;
+use Shadowlab\Framework\Domain\AbstractDomain;
 
-class SpellsDomain extends Domain {
+class SpellsDomain extends AbstractDomain {
 	/**
 	 * @param array $data
 	 *

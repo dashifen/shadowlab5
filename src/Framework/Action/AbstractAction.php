@@ -19,7 +19,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		"update" => "fixer",
 		"delete" => "johnson",
 	];
-
+	
 	/**
 	 * @var string $action
 	 */
@@ -155,6 +155,38 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		return isset($capabilities[$capability]);
 	}
 	
+	
+	protected function read(): ResponseInterface {
+		$payload = $this->domain->read([
+			"recordId" => $this->recordId,
+		]);
+		
+		if ($payload->getSuccess()) {
+			$this->handleSuccess([
+				"table"        => $payload->getDatum("data"),
+				"title"        => $payload->getDatum("title"),
+				"count"        => $payload->getDatum("count"),
+				"nextId"       => $payload->getDatum("nextId"),
+				"searchbar"    => $this->getSearchbar($payload),
+				"capabilities" => $this->request->getSessionVar("capabilities"),
+				"singular"     => $this->getSingular(),
+				"plural"       => $this->getPlural(),
+				"caption"      => $this->getCaption(),
+			]);
+		} else {
+			$noun = $payload->getDatum("count") === 1
+				? $this->getSingular()
+				: $this->getPlural();
+			
+			$this->handleFailure([
+				"title" => "Perception Failed",
+				"noun"  => $noun,
+			]);
+		}
+		
+		return $this->response;
+	}
+	
 	/**
 	 * @param array $data
 	 *
@@ -198,6 +230,36 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	}
 	
 	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
+	abstract protected function getSearchbar(PayloadInterface $payload): string;
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getSingular(): string;
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getPlural(): string;
+	
+	/**
+	 * @return string
+	 */
+	protected function getCaption(): string {
+		
+		// most of our collection tables don't need a caption.  so, by
+		// default, we'll just return the empty string.  the children of
+		// this object can make the changes to it that they need to when
+		// they need to.
+		
+		return "";
+	}
+	
+	/**
 	 * @param array $data
 	 *
 	 * @return void
@@ -207,22 +269,44 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	}
 	
 	/**
-	 * @param array $data
-	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	protected function handleError(array $data = []): void {
-		$this->respond(__FUNCTION__, $data);
+	protected function update(): ResponseInterface {
+		
+		// when we're updating the database, we actually do two things:
+		// first we get data that we're going to update, then we save the
+		// changes to those data when the visitor sends it back to us.
+		
+		$method = $this->request->getServerVar("REQUEST_METHOD") !== "post"
+			? "getDataToUpdate"
+			: "savePostedData";
+		
+		return $this->{$method}();
 	}
 	
-	/**
-	 * @param array $data
-	 *
-	 * @return void
-	 */
-	protected function handleNotFound(array $data = []): void {
-		$this->respond(__FUNCTION__, $data);
+	protected function getDataToUpdate(): ResponseInterface {
+		$payload = $this->domain->update([
+			"recordId" => $this->recordId,
+			"table"    => $this->getTable(),
+		]);
+		
+		if ($payload->getSuccess()) {
+			$this->handleSuccess([
+				"title"        => "Edit " . $payload->getDatum("title"),
+				"instructions" => $payload->getDatum("instructions", ""),
+				"form"         => $this->getForm($payload),
+				"singular"     => $this->getSingular(),
+				"plural"       => $this->getPlural(),
+				"errors"       => "",
+			]);
+		} else {
+			$this->handleFailure([]);
+		}
+		
+		return $this->response;
 	}
+	
+	abstract protected function getTable(): string;
 	
 	/**
 	 * @param PayloadInterface $payload
@@ -248,5 +332,111 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// it.  therefore, we call the form's getForm() method now, too.
 		
 		return $form->getForm(false);
+	}
+	
+	protected function savePostedData(): ResponseInterface {
+		$payload = $this->domain->update([
+			"posted" => $this->request->getPost(),
+			"idName" => $this->getRecordIdName(),
+			"table"  => $this->getTable(),
+		]);
+		
+		if ($payload->getSuccess()) {
+			$data = $payload->getData();
+			
+			// we want to add some additional information necessary for
+			// our view.  then, we slightly alter the title for our page
+			// and send it all on its way.
+			
+			$data = array_merge($data, [
+				"item"     => $data["title"],
+				"singular" => $this->getSingular(),
+				"plural"   => $this->getPlural(),
+				"success"  => true,
+			]);
+			
+			$data["title"] .= " Saved";
+			$this->handleSuccess($data);
+		} else {
+			
+			// if we encountered errors when validating our data before
+			// putting it back into the database, we end up here.  we send
+			// back the same information as we do when we first present the
+			// form, but
+			
+			$this->handleError([
+				"title"        => "Unable to Save Changes",
+				"posted"       => $payload->getDatum("posted"),
+				"errors"       => $payload->getDatum("errors"),
+				"form"         => $this->getForm($payload),
+				"singular"     => $this->getSingular(),
+				"plural"       => $this->getPlural(),
+				"instructions" => $this->getErrorInstructions(),
+			]);
+		}
+		
+		return $this->response;
+	}
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getRecordIdName(): string;
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return void
+	 */
+	protected function handleError(array $data = []): void {
+		$this->respond(__FUNCTION__, $data);
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getErrorInstructions(): string {
+		return "We were unable to save the changes you made to this
+			information in the database.  Use the error messages below
+			and fix the problem(s) we encountered.  When you're ready,
+			click the button to continue.  If this problem persists,
+			email Dash.  It probably means he messed up the code
+			somehow.";
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function delete(): ResponseInterface {
+		$payload = $this->domain->delete([
+			"recordId" => $this->recordId,
+			"idName"   => $this->getRecordIdName(),
+			"table"    => $this->getTable(),
+		]);
+		
+		if ($payload->getSuccess()) {
+			
+			// when we successfully delete, we just want to re-show the
+			// collection.  we can do this with a redirect response as
+			// follows.
+			
+			$host = $this->request->getServerVar("HTTP_HOST");
+			$url = $this->request->getServerVar("REQUEST_URI");
+			$url = "http://$host" . substr($url, 0, strpos($url, "/delete"));
+			$this->response->redirect($url);
+		} else {
+			$this->handleFailure([]);
+		}
+		
+		return $this->response;
+	}
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return void
+	 */
+	protected function handleNotFound(array $data = []): void {
+		$this->respond(__FUNCTION__, $data);
 	}
 }

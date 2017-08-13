@@ -3,73 +3,73 @@
 namespace Shadowlab\CheatSheets;
 
 use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Domain\Domain;
+use Shadowlab\Framework\Domain\AbstractDomain;
 
-class CheatSheetsDomain extends Domain {
+class CheatSheetsDomain extends AbstractDomain {
 	public function read(array $data = []): PayloadInterface {
 		
-		// our validator is simply going to check that our sheet type
-		// matches the types in the database.  we'll have to get those
-		// types here and then pass them to the validator so that it
-		// can do its work.
+		// what we get from our Action is not a numeric ID, this time.
+		// instead, we get the word that represents a type of sheet in
+		// the database.  before we let our parent take over, we need
+		// to switch that sheet type to it's linked ID.
 		
-		$sheet_types = $this->db->getCol("SELECT sheet_type FROM sheets_types");
-		$validation_data = array_merge($data, ["sheet_types" => $sheet_types]);
-		if (!$this->validator->validateRead($validation_data)) {
-			
-			// if we couldn't validate what we were doing, then we have
-			// an error.  likely, this is a request for a type of sheet
-			// that does not, at this time, exist.  so, we'll tell the
-			// visitor all about it.
-			
-			return $this->payloadFactory->newReadPayload(false);
-		}
-		
-		// if we didn't return above, then we have a valid sheet type.  we'll
-		// select the sheets that match this type (or all of them if we don't
-		// have a type), and then we can send the results back to the action.
-		
-		$sheet_type = $data["sheet_type"];
-		
-		$sheets = !empty($sheet_type)
-			? $this->getSheetsByType($sheet_type)
-			: $this->getSheets();
-		
-		// the success of our payload is determined by whether or not
-		// we've identified sheets to return.  so if the size of our
-		// array is greater than zero, we've been successful.
-		
-		$success = sizeof($sheets) > 0;
-		$payload = $this->payloadFactory->newReadPayload($success, [
-			"sheets" => $sheets,
-		]);
-		
-		if ($success) {
-			
-			// if we were successful, there's some work we have to do to
-			// prepare our sheets for display on the screen.  our transformer
-			// can take care of that for us.
-			
-			$payload = $this->transformer->transformRead($payload);
-		}
-		
-		return $payload;
+		$statement = "SELECT sheet_type_id FROM sheets_types WHERE sheet_type = :sheet_type";
+		$sheet_type_id = $this->db->getVar($statement, ["sheet_type" => $data["sheet_type"]]);
+		return parent::read(["sheet_type_id" => $sheet_type_id]);
 	}
 	
-	protected function getSheetsByType(string $sheet_type): array {
-		$sql = "SELECT sheet_type, sheet_name, route
-			FROM sheets INNER JOIN sheets_types USING (sheet_type_id)
-			WHERE sheet_type = :sheet_type
+	/**
+	 * @return array
+	 */
+	protected function getRecords(): array {
+		return $this->db->getCol("SELECT sheet_type_id FROM sheets_types");
+	}
+	
+	/**
+	 * @param int $recordId
+	 *
+	 * @return PayloadInterface
+	 */
+	protected function readOne(int $recordId): PayloadInterface {
+		$statement = "SELECT sheet_type, sheet_name, route FROM sheets
+			INNER JOIN sheets_types USING (sheet_type_id)
+			WHERE sheet_type_id = :sheet_type_id
 			ORDER BY sheet_name";
 		
-		return $this->db->getResults($sql, ["sheet_type" => $sheet_type]);
+		// even though we only select one record here, we still call it
+		// "records" as we return it so that the AbstractDomain can find
+		// what we've selected regardless of whether we select a record
+		// or a collection.
+		
+		$records = $this->db->getResults($statement, ["sheet_type_id" => $recordId]);
+		return $this->payloadFactory->newReadPayload(sizeof($records) > 0, [
+			"records" => $records
+		]);
 	}
 	
-	protected function getSheets() {
-		$sql = "SELECT sheet_type, sheet_name, route
+	/**
+	 * @return PayloadInterface
+	 */
+	protected function readAll(): PayloadInterface {
+		$records = $this->db->getResults("SELECT sheet_type, sheet_name, route
 			FROM sheets INNER JOIN sheets_types USING (sheet_type_id)
-			ORDER BY sheet_type, sheet_name";
+			ORDER BY sheet_type, sheet_name");
 		
-		return $this->db->getResults($sql);
+		return $this->payloadFactory->newReadPayload(sizeof($records) > 0, [
+			"records" => $records
+		]);
+	}
+	
+	/**
+	 * @return int
+	 */
+	protected function getNextId(): int {
+		
+		// we need to implement this method because it's abstract in our
+		// parent.  but, the CheatSheetsDomain doesn't do any updating of
+		// information, so it doesn't need a next ID.  we'll just return
+		// zero.
+		
+		return 0;
 	}
 }

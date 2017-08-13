@@ -2,11 +2,25 @@
 
 namespace Shadowlab\User\Login;
 
-use Shadowlab\Framework\Domain\Domain;
+use Dashifen\Domain\AbstractMysqlDomain;
 use Dashifen\Domain\Payload\PayloadInterface;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Dashifen\Domain\DomainException;
 
-class LoginDomain extends Domain {
+/**
+ * Class LoginDomain
+ *
+ * Like its Action, the LoginDomain doesn't need the bells and whistles
+ * set up for the cheat sheet domains.  so, we just sort of skip over
+ * them and directly extend the AbstractMysqlDomain of our framework.
+ *
+ * @package Shadowlab\User\Login
+ */
+class LoginDomain extends AbstractMysqlDomain {
+	public function create(array $data = []): PayloadInterface {
+		throw new DomainException("Unexpected LoginDomain Behavior: Create",
+			DomainException::UNEXPECTED_BEHAVIOR);
+	}
+	
 	public function read(array $data = []): PayloadInterface {
 		if ($this->validator->validateRead($data)) {
 			
@@ -117,5 +131,10 @@ class LoginDomain extends Domain {
 		}
 		
 		return $this->payloadFactory->newUpdatePayload($success);
+	}
+	
+	public function delete(array $data): PayloadInterface {
+		throw new DomainException("Unexpected LoginDomain Behavior: Delete",
+			DomainException::UNEXPECTED_BEHAVIOR);
 	}
 }

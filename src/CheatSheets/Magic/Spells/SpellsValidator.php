@@ -2,9 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
-use Shadowlab\Framework\Domain\Validator;
+use Shadowlab\Framework\Domain\AbstractValidator;
 
-class SpellsValidator extends Validator {
+class SpellsValidator extends AbstractValidator {
 	public function validateRead(array $data = []): bool {
 	
 		// from the domain we get an individual spell ID number as well

@@ -5,10 +5,10 @@ namespace Shadowlab\CheatSheets\Magic\Spells;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
 use Dashifen\Searchbar\SearchbarInterface;
-use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\Action\ShadowlabAction;
 use Shadowlab\Framework\AddOns\Searchbar;
 
-class SpellsAction extends AbstractAction {
+class SpellsAction extends ShadowlabAction {
 	protected function read(): ResponseInterface {
 		
 		// the optional parameter for a spell is the sanitized version of

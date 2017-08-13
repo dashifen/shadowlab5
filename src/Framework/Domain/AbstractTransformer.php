@@ -16,7 +16,7 @@ use Dashifen\Domain\Transformer\TransformerInterface;
  *
  * @package Shadowlab\Framework\Domain
  */
-class Transformer implements TransformerInterface, ShadowlabTransformationsInterface {
+abstract class AbstractTransformer implements TransformerInterface {
 	public const DESCRIPTIVE_KEYS = ["description", "book", "abbr", "page"];
 	
 	/**
@@ -34,8 +34,37 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 	 * @return PayloadInterface
 	 */
 	public function transformRead(PayloadInterface $payload): PayloadInterface {
+		
+		// our $payload will have either one record or a full collection.
+		// the count index will tell us which is which.  then, we call one
+		// of the abstract methods below to transform our data using a
+		// variable method name.  notice that we also send back our
+		// original, untransformed data in case it's useful to our Action.
+		
+		$original = $payload->getDatum("records");
+		$method = $payload->getDatum("count") > 1 ? "transformAll" : "transformOne";
+		
+		$payload->setData([
+			"records"          => $this->{$method}($original),
+			"original-records" => $original,
+		]);
+		
 		return $payload;
 	}
+	
+	/**
+	 * @param array $records
+	 *
+	 * @return array
+	 */
+	abstract protected function transformAll(array $records): array;
+	
+	/**
+	 * @param array $records
+	 *
+	 * @return array
+	 */
+	abstract protected function transformOne(array $records): array;
 	
 	/**
 	 * @param PayloadInterface $payload
@@ -43,6 +72,41 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 	 * @return PayloadInterface
 	 */
 	public function transformUpdate(PayloadInterface $payload): PayloadInterface {
+		
+		// when we transform a payload for updating, what we're really doing
+		// is removing information from our data that we don't need to insert.
+		// we can identify these data because they'll be optional (i.e.
+		// nullable) and empty in our record.
+		
+		$schema = $payload->getDatum("schema");
+		$record = $payload->getDatum("record");
+		foreach ($schema as $column => $columnData) {
+			if ($columnData["IS_NULLABLE"] === "YES") {
+				
+				// now that we know our column is nullable, we need to see
+				// if the record's value for that column is empty.  we use
+				// empty in addition to our null coalescing operator so that
+				// values like zero and the empty string won't be read as
+				// real values.
+				
+				$value = $record[$column] ?? "";
+				if (empty($value)) {
+				
+					// if our value is empty, we actually unset it from our
+					// record.  that'll allow the database to store the default
+					// value (NULL or otherwise) in its place.
+					
+					unset($record[$column]);
+				}
+			}
+		}
+		
+		// now, we store our transformed $record back in the payload and
+		// send it back to our Domain for processing.  we don't worry about
+		// sending back the original record since, if we need it, it's
+		// already there.
+		
+		$payload->setDatum("record", $record);
 		return $payload;
 	}
 	
@@ -55,7 +119,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return $payload;
 	}
 	
-	public function abbreviate(string $string): string {
+	protected function abbreviate(string $string): string {
 		
 		// it's common that we want to abbreviate information that we
 		// display in table headers using our collection view.  this
@@ -67,7 +131,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return strtoupper(join("", $matches[1]));
 	}
 	
-	public function sanitize(string $unsanitary): string {
+	protected function sanitize(string $unsanitary): string {
 		
 		// we take this essentially from WordPress to produce ID attribute
 		// values from some other sort of string during our transformation.
@@ -85,7 +149,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return $sanitary;
 	}
 	
-	public function unsanitize(string $sanitary): string {
+	protected function unsanitize(string $sanitary): string {
 		
 		// this is the opposite of the above sanitize action.  here we
 		// identify things that don't look like letters or numbers and
@@ -95,13 +159,19 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return preg_replace("/[\W-_]+/", " ", $sanitary);
 	}
 	
-	public function deduplicate(array $data, bool $sort = false): array {
+	protected function deduplicateAndSort(array $data): array {
+		return $this->deduplicate($data, true);
+	}
+	
+	protected function deduplicate(array $data, bool $sort = false): array {
 		
 		// the $data array is assumed to be non-unique.  so, we want to
 		// make it so by removing duplicates.  we'll also trim values to
 		// avoid "foo " and "foo" being different.
 		
-		$data = array_filter($data, function($datum) { return trim($datum); });
+		$data = array_filter($data, function($datum) {
+			return trim($datum);
+		});
 		$data = array_unique($data);
 		
 		// if our sort flag is set, then we'll also perform an associative
@@ -114,12 +184,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return $data;
 	}
 	
-	public function deduplicateAndSort(array $data): array {
-		return $this->deduplicate($data, true);
-	}
-	
-
-	protected function extractHeaders(array $data, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractHeaders(array $data, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// our $data is a set of data selected from the database.  if we're
 		// transforming it, then we've already confirmed that there's at least
@@ -148,7 +213,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		});
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// this method is used by transformers that prepare data for our
 		// collection view.  in that view, any key not listed in our constant
@@ -181,7 +246,7 @@ class Transformer implements TransformerInterface, ShadowlabTransformationsInter
 		return $temp;
 	}
 	
-	protected function extractDescription(array $record, array $descriptiveKeys = Transformer::DESCRIPTIVE_KEYS): array {
+	protected function extractDescription(array $record, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// this is the opposite, effectively of the prior method.  the logic
 		// is the same, but this time we want to filter out the data.  so we
