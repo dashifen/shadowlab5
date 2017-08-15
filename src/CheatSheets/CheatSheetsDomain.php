@@ -28,36 +28,36 @@ class CheatSheetsDomain extends AbstractDomain {
 	/**
 	 * @param int $recordId
 	 *
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	protected function readOne(int $recordId): PayloadInterface {
+	protected function readOne(int $recordId): array {
 		$statement = "SELECT sheet_type, sheet_name, route FROM sheets
 			INNER JOIN sheets_types USING (sheet_type_id)
 			WHERE sheet_type_id = :sheet_type_id
 			ORDER BY sheet_name";
 		
-		// even though we only select one record here, we still call it
-		// "records" as we return it so that the AbstractDomain can find
-		// what we've selected regardless of whether we select a record
-		// or a collection.
-		
-		$records = $this->db->getResults($statement, ["sheet_type_id" => $recordId]);
-		return $this->payloadFactory->newReadPayload(sizeof($records) > 0, [
-			"records" => $records
-		]);
+		return $this->db->getResults($statement, ["sheet_type_id" => $recordId]);
 	}
 	
 	/**
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	protected function readAll(): PayloadInterface {
-		$records = $this->db->getResults("SELECT sheet_type, sheet_name, route
+	protected function readAll(): array {
+		return $this->db->getResults("SELECT sheet_type, sheet_name, route
 			FROM sheets INNER JOIN sheets_types USING (sheet_type_id)
 			ORDER BY sheet_type, sheet_name");
-		
-		return $this->payloadFactory->newReadPayload(sizeof($records) > 0, [
-			"records" => $records
-		]);
+	}
+	
+	/**
+	 * @param array $records
+	 * @param bool  $isCollection
+	 *
+	 * @return string
+	 */
+	protected function getRecordsTitle(array $records, bool $isCollection): string {
+		return !$isCollection
+			? ucwords($records[0]["sheet_type"]) . " Sheets"
+			: "Shadowlab Cheat Sheets";
 	}
 	
 	/**

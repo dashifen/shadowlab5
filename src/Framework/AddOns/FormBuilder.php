@@ -77,27 +77,36 @@ class FormBuilder implements FormBuilderInterface {
 	/**
 	 * @param array $payload
 	 *
-	 * @return void
+	 * @return string
 	 * @throws FormBuilderException
 	 */
-	protected function confirmPayloadValidity(array $payload): void {
+	protected function confirmPayloadValidity(array $payload): string {
 		
-		// when working with our data, the $payload has to provide us with
-		// the information we need to understand the schema we're working with.
-		// specifically, it must have a schema and values index.  and, the
-		// values index must refer to a third index where we find our data.
+		// when working with our data, the payload tells us about the table
+		// we're working with and the records that we're working with.  even
+		// though we're only going to be building a form for a single record,
+		// that index in our payload is plural to homogenize its name when
+		// working with collections or individual records.
 		
 		$keys = array_keys($payload);
 		if (!in_array("schema", $keys)) {
 			throw new FormBuilderException("Unknown schema", FormBuilderException::UNKNOWN_SCHEMA);
 		}
 		
-		if (!in_array("values", $keys)) {
-			throw new FormBuilderException("Unknown values", FormBuilderException::UNKNOWN_VALUES);
+		// our information is either to be found at the posted or the records
+		// index.  here we'll test them both to determine which we're working
+		// on now.
+		
+		$valuesIndex = "";
+		if (in_array("records", $keys)) {
+			$valuesIndex = "records";
+		} elseif (in_array("posted", $keys)) {
+			$valuesIndex = "posted";
+		} else {
+			throw new FormBuilderException("Unknown records", FormBuilderException::UNKNOWN_VALUES);
 		}
 		
-		$values = $payload["values"];
-		if (!isset($payload[$values]) || !is_array($payload[$values])) {
+		if (!is_array($payload[$valuesIndex])) {
 			throw new FormBuilderException("Undefined values", FormBuilderException::UNDEFINED_VALUES);
 		}
 		
@@ -108,6 +117,8 @@ class FormBuilder implements FormBuilderInterface {
 		if (!in_array("currentUrl", $keys)) {
 			throw new FormBuilderException("Unknown URL", FormBuilderException::UNKNOWN_URL);
 		}
+		
+		return $valuesIndex;
 	}
 	
 	/**
@@ -126,14 +137,14 @@ class FormBuilder implements FormBuilderInterface {
 	 * @return void
 	 */
 	public function openFieldset(array $payload = [], string $object = 'Dashifen\Form\Fieldset\Fieldset'): void {
-		$this->confirmPayloadValidity($payload);
+		$valuesIndex = $this->confirmPayloadValidity($payload);
 		
 		// we have a currentFieldset property that defaults to -1.  that's so
 		// we can increment it here and start our record of fieldsets at zero.
 		// our Shadowlab forms are not expected to have more than one Fieldset
 		// in them, but we'll leave the door open to that functionality later.
 		
-		$values = $payload[$payload["values"]];
+		$values = $payload[$valuesIndex];
 		$legend = $this->findLegend($values);
 		$fieldsetId = $this->sanitize($legend);
 		

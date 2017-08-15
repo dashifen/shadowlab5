@@ -2,24 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
-use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class QualitiesTransformer extends AbstractTransformer {
-	public function transformRead(PayloadInterface $payload): PayloadInterface {
-		
-		// our payload contains either one quality or all of them.  once we
-		// determine which is the case here, we can know what to do next.
-		
-		$original = $payload->getDatum("qualities");
-		$transformed = $payload->getDatum("count") === 1
-			? $this->transformOne($original)
-			: $this->transformAll($original);
-		
-		$payload->setDatum("qualities", $transformed);
-		return $payload;
-	}
-	
 	/**
 	 * @param array $quality
 	 *

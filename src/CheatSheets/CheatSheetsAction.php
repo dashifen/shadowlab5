@@ -23,8 +23,8 @@ class CheatSheetsAction extends AbstractAction {
 			// our menu is all we need here.
 			
 			$this->handleSuccess([
-				"sheets" => $payload->getDatum("sheets"),
-				"title"  => trim(ucfirst($sheet_type) . " Cheat Sheets"),
+				"sheets" => $payload->getDatum("records"),
+				"title"  => $payload->getDatum("title"),
 				"parameter" => $parameter
 			]);
 		} else {

@@ -2,46 +2,11 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
+use Shadowlab\Framework\AddOns\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
-use Dashifen\Response\ResponseInterface;
-use Dashifen\Searchbar\SearchbarInterface;
-use Shadowlab\Framework\Action\ShadowlabAction;
-use Shadowlab\Framework\AddOns\Searchbar;
+use Shadowlab\Framework\Action\AbstractAction;
 
-class BooksAction extends ShadowlabAction {
-	/**
-	 * @return ResponseInterface
-	 */
-	protected function read(): ResponseInterface {
-		$payload = $this->domain->read(["book_id" => $this->recordId]);
-		
-		if ($payload->getSuccess()) {
-			$this->handleSuccess([
-				"table"        => $payload->getDatum("books"),
-				"searchbar"    => $this->getSearchbar($payload),
-				"title"        => $payload->getDatum("title"),
-				"count"        => $payload->getDatum("count"),
-				"nextId"       => $payload->getDatum("nextId"),
-				"capabilities" => $this->request->getSessionVar("capabilities"),
-				"caption"      => "The following are the SR books in this application.
-					They're not all the published books for SR5; only those with
-					quantifiable rules and stats are here.  Some, mostly the German
-					content, are not included, i.e. you won't find their data
-					elsewhere in the Shadowlab.",
-				
-				"plural"   => "books",
-				"singular" => "book",
-			]);
-		} else {
-			$this->handleFailure([
-				"noun"  => empty($parameter) ? "books" : "book",
-				"title" => "Perception Failed",
-			]);
-		}
-		
-		return $this->response;
-	}
-	
+class BooksAction extends AbstractAction {
 	/**
 	 * @param PayloadInterface $payload
 	 *
@@ -85,7 +50,7 @@ class BooksAction extends ShadowlabAction {
 			"excluded" => "Excluded",
 		];
 		
-		/** @var Searchbar $searchbar */
+		/** @var SearchbarInterface $searchbar */
 		
 		$searchbar->addRow();
 		$searchbar->addSearch("Books", "book");
@@ -96,121 +61,32 @@ class BooksAction extends ShadowlabAction {
 		return $searchbar;
 	}
 	
-	protected function update(): ResponseInterface {
-		
-		// an update is a two step process:  get data to update and
-		// then we update the database with the changes to it.  which
-		// step we're on when we're here is based on the existence of
-		// posted data.
-		
-		$method = $this->request->getServerVar("REQUEST_METHOD") !== "POST"
-			? "getDataToUpdate"
-			: "savePostedData";
-		
-		return $this->{$method}();
+	/**
+	 * @return string
+	 */
+	protected function getSingular(): string {
+		return "book";
 	}
 	
 	/**
-	 * @return ResponseInterface
+	 * @return string
 	 */
-	protected function getDataToUpdate(): ResponseInterface {
-		
-		// if we're getting data to update, then this is actually
-		// a special sort of read from the database.  the domain can
-		// tell the difference between looking up old data and patching
-		// new data because our parameter here doesn't include any new
-		// data.
-		
-		$payload = $this->domain->update(["book_id" => $this->recordId]);
-		
-		// now, our $payload can tell us how to build a form for this
-		// information on the client side similar to how we build a
-		// searchbar when reading multiple books above.
-		
-		if ($payload->getSuccess()) {
-			$this->handleSuccess([
-				"title"        => "Edit " . $payload->getDatum("title"),
-				"instructions" => $payload->getDatum("instructions", ""),
-				"form"         => $this->getForm($payload),
-				"plural"       => "books",
-				"singular"     => "book",
-				"errors"       => "",
-			]);
-		} else {
-			$this->handleFailure([]);
-		}
-		
-		return $this->response;
+	protected function getPlural(): string {
+		return "books";
 	}
 	
 	/**
-	 * @return ResponseInterface
+	 * @return string
 	 */
-	protected function savePostedData(): ResponseInterface {
-		$payload = $this->domain->update(["posted" => $this->request->getPost()]);
-		
-		if ($payload->getSuccess()) {
-			$data = $payload->getData();
-			
-			// we want to add some additional information necessary for
-			// our view.  then, we slightly alter the title for our page
-			// and send it all on its way.
-			
-			$data = array_merge($data, [
-				"item"     => $data["title"],
-				"plural"   => "books",
-				"singular" => "book",
-				"success"  => true,
-			]);
-			
-			$data["title"] .= " Saved";
-			$this->handleSuccess($data);
-		} else {
-			
-			// if we encountered errors when validating our data before
-			// putting it back into the database, we end up here.  we send
-			// back the same information as we do when we first present the
-			// form, but
-			
-			$this->handleError([
-				"title"        => "Unable to Save Changes",
-				"posted"       => $payload->getDatum("posted"),
-				"errors"       => $payload->getDatum("error"),
-				"form"         => $this->getForm($payload),
-				"plural"       => "books",
-				"singular"     => "book",
-				"instructions" => "We were unable to save the changes you made
-					to this information in the database.  Use the error messages
-					below and fix the problem(s) we encountered.  When you're
-					ready, click the button to continue.  If this problem
-					persists, email Dash.  It probably means he messed up the
-					code somehow.",
-			]);
-		}
-		
-		return $this->response;
+	protected function getTable(): string {
+		return "books";
 	}
 	
 	/**
-	 * @return ResponseInterface
+	 * @return string
 	 */
-	protected function delete(): ResponseInterface {
-		$payload = $this->domain->delete(["book_id" => $this->recordId]);
-		
-		if ($payload->getSuccess()) {
-			
-			// when we successfully delete, we just want to re-show the
-			// collection.  we can do this with a redirect response as
-			// follows.
-			
-			$host = $this->request->getServerVar("HTTP_HOST");
-			$url = $this->request->getServerVar("REQUEST_URI");
-			$url = "http://$host" . substr($url, 0, strpos($url, "/delete"));
-			$this->response->redirect($url);
-		} else {
-			$this->handleFailure([]);
-		}
-	
-		return $this->response;
+	protected function getRecordIdName(): string {
+		return "book_id";
 	}
+	
 }

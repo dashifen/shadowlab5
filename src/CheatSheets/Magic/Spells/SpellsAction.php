@@ -2,44 +2,44 @@
 
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
+use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\AddOns\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
-use Dashifen\Response\ResponseInterface;
-use Dashifen\Searchbar\SearchbarInterface;
-use Shadowlab\Framework\Action\ShadowlabAction;
-use Shadowlab\Framework\AddOns\Searchbar;
 
-class SpellsAction extends ShadowlabAction {
-	protected function read(): ResponseInterface {
-		
-		// the optional parameter for a spell is the sanitized version of
-		// a spells name (e.g. acid-stream for Acid Stream).  we'll pass it
-		// to the domain and it'll know what to do regardless of whether we
-		// have one or not.
-		
-		$payload = $this->domain->read(["spell_id" => $this->recordId]);
-		
-		if ($payload->getSuccess()) {
-			$this->handleSuccess([
-				"searchbar"    => $this->getSearchbar($payload),
-				"table"        => $payload->getDatum("spells"),
-				"title"        => $payload->getDatum("title"),
-				"count"        => $payload->getDatum("count"),
-				"nextId"       => $payload->getDatum("nextId"),
-				"capabilities" => $this->request->getSessionVar("capabilities"),
-				"plural"       => "spells",
-				"singular"     => "spell",
-				"caption"      => "",
-			]);
-		} else {
-			$this->handleError([
-				"noun"  => $payload->getDatum("count") > 1 ? "spells" : "spell",
-				"title" => "Perception Failed",
-			]);
-		}
-		
-		return $this->response;
+class SpellsAction extends AbstractAction {
+	/**
+	 * @return string
+	 */
+	protected function getSingular(): string {
+		return "spell";
 	}
 	
+	/**
+	 * @return string
+	 */
+	protected function getPlural(): string {
+		return "spells";
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getTable(): string {
+		return "spells";
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getRecordIdName(): string {
+		return "spell_id";
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
 	protected function getSearchbar(PayloadInterface $payload): string {
 		$searchbarHTML = "";
 		
@@ -49,7 +49,7 @@ class SpellsAction extends ShadowlabAction {
 			// the collection view's searchbar.  we can do so as follows,
 			// utilizing that object's parse method.
 			
-			/** @var Searchbar $searchbar */
+			/** @var SearchbarInterface $searchbar */
 			
 			$searchbar = $this->container->get("searchbar");
 			$searchbar = $this->constructSearchbar($searchbar, $payload);
@@ -72,10 +72,10 @@ class SpellsAction extends ShadowlabAction {
 		// can use that information to add fields to our $searchbar along with
 		// other criteria that doesn't rely on our $payload.
 		
-		$spells = $payload->getDatum("original-spells");
+		$spells = $payload->getDatum("original-records");
 		list($tags, $books, $categories) = $this->collectFilterOptions($spells);
 		
-		/** @var Searchbar $searchbar */
+		/** @var SearchbarInterface $searchbar */
 		
 		$searchbar->addSearch("Spells", "spell");
 		$searchbar->addFilter("Spell Categories", "spell-category", $categories, "", "All Spell Categories");
@@ -147,99 +147,5 @@ class SpellsAction extends ShadowlabAction {
 		$x = array_filter(explode("_", $spell["spell_tags_ids"]));
 		$y = array_filter(explode(", ", $spell["spell_tags"]));
 		return array_combine($x, $y);
-	}
-	
-	/**
-	 * @return ResponseInterface
-	 */
-	protected function update(): ResponseInterface {
-		
-		// like our read action -- which can either read a single record
-		// or a collection -- our update behavior is split in two as well.
-		// if we do not have posted data as a part of our request, then
-		// we actually want to read the old data out of the database and
-		// send back a form.  otherwise, we update the database with the
-		// data the visitor changed.
-		
-		$method = $this->request->getServerVar("REQUEST_METHOD") !== "POST"
-			? "getDataToUpdate"
-			: "savePostedData";
-		
-		return $this->{$method}();
-	}
-	
-	/**
-	 * @return ResponseInterface
-	 */
-	protected function getDataToUpdate(): ResponseInterface {
-		
-		// when getting data to update, we pass our record ID over to the
-		// domain and it'll send back more information on what the visitor
-		// has requested.
-		
-		$payload = $this->domain->update(["spell_id" => $this->recordId]);
-		
-		if ($payload->getSuccess()) {
-			$this->handleSuccess([
-				"title"        => "Edit " . $payload->getDatum("title"),
-				"instructions" => $payload->getDatum("instructions", ""),
-				"form"         => $this->getForm($payload),
-				"plural"       => "spells",
-				"singular"     => "spell",
-				"errors"       => "",
-			]);
-		} else {
-			$this->handleFailure([]);
-		}
-		
-		return $this->response;
-	}
-	
-	/**
-	 * @return ResponseInterface
-	 */
-	protected function savePostedData(): ResponseInterface {
-		$payload = $this->domain->update(["posted" => $this->request->getPost()]);
-		
-		if ($payload->getSuccess()) {
-			$data = $payload->getData();
-			
-			// we want to add some additional information necessary for
-			// our view.  then, we slightly alter the title for our page
-			// and send it all on its way.
-			
-			$data = array_merge($data, [
-				"item"     => $data["title"],
-				"plural"   => "spells",
-				"singular" => "spell",
-				"success"  => true,
-			]);
-			
-			$data["title"] .= " Saved";
-			$this->handleSuccess($data);
-		} else {
-			
-			// if we encountered errors when validating our data before
-			// putting it back into the database, we end up here.  we send
-			// back the same information as we do when we first present the
-			// form, but
-			
-			$this->handleError([
-				"title"        => "Unable to Save Changes",
-				"posted"       => $payload->getDatum("posted"),
-				"errors"       => $payload->getDatum("error"),
-				"form"         => $this->getForm($payload),
-				"plural"       => "books",
-				"singular"     => "book",
-				"instructions" => "We were unable to save the changes you made
-					to this information in the database.  Use the error messages
-					below and fix the problem(s) we encountered.  When you're
-					ready, click the button to continue.  If this problem
-					persists, email Dash.  It probably means he messed up the
-					code somehow.",
-			]);
-		}
-		
-		return $this->response;
 	}
 }

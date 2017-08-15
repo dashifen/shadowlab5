@@ -17,6 +17,7 @@
 <tbody v-for="body in table.bodies"
 	:data-id="body.recordId"
 	:data-book="body.bookId"
+	:data-described="body.description.description && capabilities.fixer ? 'yes' : 'no'"
 	class="searchable-row removable"
 >
 	<tr class="data summary">

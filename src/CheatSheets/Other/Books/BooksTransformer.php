@@ -2,24 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
-use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class BooksTransformer extends AbstractTransformer {
-	public function transformRead(PayloadInterface $payload): PayloadInterface {
-		
-		// our payload should contain a book or books.  if it's the latter,
-		// then the count will be greater then one
-		
-		$original = $payload->getDatum("books");
-		$transformed = $payload->getDatum("count") > 1
-			? $this->transformAll($original)
-			: $this->transformOne($original);
-		
-		$payload->setDatum("books", $transformed);
-		return $payload;
-	}
-	
 	protected function transformAll(array $books): array {
 		
 		// our collection view expects a data structure that defines the

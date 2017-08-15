@@ -3,7 +3,6 @@
 namespace Shadowlab\CheatSheets;
 
 use Shadowlab\Framework\Domain\AbstractTransformer;
-use Dashifen\Domain\Payload\PayloadInterface;
 
 class CheatSheetsTransformer extends AbstractTransformer {
 	/**

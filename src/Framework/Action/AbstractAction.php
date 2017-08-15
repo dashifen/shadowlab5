@@ -163,7 +163,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		
 		if ($payload->getSuccess()) {
 			$this->handleSuccess([
-				"table"        => $payload->getDatum("data"),
+				"table"        => $payload->getDatum("records"),
 				"title"        => $payload->getDatum("title"),
 				"count"        => $payload->getDatum("count"),
 				"nextId"       => $payload->getDatum("nextId"),
@@ -277,7 +277,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// first we get data that we're going to update, then we save the
 		// changes to those data when the visitor sends it back to us.
 		
-		$method = $this->request->getServerVar("REQUEST_METHOD") !== "post"
+		$method = $this->request->getServerVar("REQUEST_METHOD") !== "POST"
 			? "getDataToUpdate"
 			: "savePostedData";
 		
@@ -306,6 +306,9 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		return $this->response;
 	}
 	
+	/**
+	 * @return string
+	 */
 	abstract protected function getTable(): string;
 	
 	/**

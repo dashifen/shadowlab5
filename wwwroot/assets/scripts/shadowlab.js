@@ -20,10 +20,6 @@ var Shadowlab = new Vue({
 			})
 		},
 
-		nl2br: function(str) {
-			return nl2br(str);
-		},
-
 		stripTags: function (input, allowed) {
 
 			//  source  http://locutus.io/php/strip_tags/

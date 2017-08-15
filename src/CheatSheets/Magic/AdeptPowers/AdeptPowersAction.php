@@ -1,12 +1,12 @@
 <?php
 
-namespace Shadowlab\CheatSheets\Other\Qualities;
+namespace Shadowlab\CheatSheets\Magic\AdeptPowers;
 
+use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
-use Dashifen\Domain\Payload\PayloadInterface;
 
-class QualitiesAction extends AbstractAction {
+class AdeptPowersAction extends AbstractAction {
 	/**
 	 * @param PayloadInterface $payload
 	 *
@@ -17,22 +17,13 @@ class QualitiesAction extends AbstractAction {
 		
 		if ($payload->getDatum("count") > 1) {
 			
-			// when we're displaying more than one quality, we want to
-			// construct a searchbar for our screen as follows.
+			// if we're showing more than one power on this screen, then
+			// it's worth it to provide a searchbar.
 			
 			/** @var SearchbarInterface $searchbar */
 			
 			$searchbar = $this->container->get("searchbar");
-			
-			$filterOptions = [
-				"negative" => "Negative Qualities",
-				"positive" => "Positive Qualities",
-			];
-			
-			$searchbar->addSearch("Qualities", "quality");
-			$searchbar->addFilter("Cost", "cost", $filterOptions, "", "Positive &amp; Negative");
-			$searchbar->addToggle("Metagenetic", "metagenetic");
-			$searchbar->addToggle("Freakish", "freakish");
+			$searchbar->addSearch("Powers", "power");
 			$searchbar->addReset();
 			
 			$searchbarHTML = $searchbar->getBar();
@@ -45,27 +36,28 @@ class QualitiesAction extends AbstractAction {
 	 * @return string
 	 */
 	protected function getSingular(): string {
-		return "quality";
+		return "adept power";
 	}
 	
 	/**
 	 * @return string
 	 */
 	protected function getPlural(): string {
-		return "qualities";
+		return "adept powers";
 	}
 	
 	/**
 	 * @return string
 	 */
 	protected function getTable(): string {
-		return "qualities";
+		return "adept_powers";
 	}
 	
 	/**
 	 * @return string
 	 */
 	protected function getRecordIdName(): string {
-		return "quality_id";
+		return "adept_power_id";
 	}
+	
 }

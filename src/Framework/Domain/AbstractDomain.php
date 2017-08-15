@@ -51,9 +51,18 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 			// as long as that works, we'll add on the next quality to be
 			// described and call it a day.
 			
-			$payload = !empty($data["recordId"])
+			$isCollection = empty($data["recordId"] ?? "");
+			
+			$records = !$isCollection
 				? $this->readOne($data["recordId"])
 				: $this->readAll();
+			
+			$count = sizeof($records);
+			$payload = $this->payloadFactory->newReadPayload($count > 0, [
+				"title"   => $this->getRecordsTitle($records, $isCollection),
+				"records" => $records,
+				"count"   => $count,
+			]);
 			
 			if ($payload->getSuccess()) {
 				$payload->setDatum("nextId", $this->getNextId());
@@ -86,17 +95,29 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 	 *
 	 * @param int $recordId
 	 *
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	abstract protected function readOne(int $recordId): PayloadInterface;
+	abstract protected function readOne(int $recordId): array;
 	
 	/**
 	 * this one gets all records in a collection from the database and
 	 * returns them all at once.
 	 *
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	abstract protected function readAll(): PayloadInterface;
+	abstract protected function readAll(): array;
+	
+	/**
+	 * this one simply returns the title for our records (e.g. spells or
+	 * qualities or vehicles).  at this level, we don't know what we're
+	 * working with, but
+	 *
+	 * @param array $records
+	 * @param bool  $isCollection
+	 *
+	 * @return string
+	 */
+	abstract protected function getRecordsTitle(array $records, bool $isCollection): string;
 	
 	/**
 	 * for the purposes of quickly identifying where to start updating
@@ -127,39 +148,6 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 	 *
 	 * @return PayloadInterface
 	 */
-	public function delete(array $data): PayloadInterface {
-		
-		// to delete, we must have received a record ID and that ID must
-		// live in the database.  our validator can handle this check for
-		// us, but we'll need to send it the list of book IDs.
-		
-		$records = $this->getRecords();
-		$validationData = array_merge($data, ["records" => $records]);
-		if ($this->validator->validateDelete($validationData)) {
-			
-			// if the validator says we're okay, then actually deleting is
-			// pretty straight forward:  we set the deleted flag for the
-			// specified book and that'll hide it from the application.  the
-			// book remains in the database, which is handy so that the next
-			// time we parse Chummer data, it doesn't show up in the app
-			// again.
-			
-			$values = ["deleted" => 1];
-			$key = [$data["idName"] => $data["recordId"]];
-			$this->db->update($data["table"], $values, $key);
-			return $this->payloadFactory->newDeletePayload(true);
-		}
-		
-		return $this->payloadFactory->newDeletePayload(false, [
-			"errors" => $this->validator->getValidationErrors(),
-		]);
-	}
-	
-	/**
-	 * @param array $data
-	 *
-	 * @return PayloadInterface
-	 */
 	protected function getDataToUpdate(array $data): PayloadInterface {
 		
 		// getting our data to update is a special kind of read action.
@@ -175,7 +163,11 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 			// the information about the database table, and send it
 			// all back to our action.
 			
-			$payload = $this->readOne($data["quality_id"]);
+			$records = $this->readOne($data["recordId"]);
+			$payload = $this->payloadFactory->newUpdatePayload(sizeof($records) > 0, [
+				"records" => $records
+			]);
+			
 			if ($payload->getSuccess()) {
 				$payload->setDatum("schema", $this->getTableDetails($data["table"]));
 				return $payload;
@@ -335,10 +327,8 @@ CONSTRAINT;
 		// table into which we're going to be inserting it.  so, we'll
 		// get its schema and then pass everything over to our validator.
 		
-		$validationData = array_merge($data, [
-			"schema" => $this->getTableDetails($data["table"]),
-		]);
-		
+		$schema = $this->getTableDetails($table);
+		$validationData = array_merge($data, ["schema" => $schema]);
 		if ($this->validator->validateUpdate($validationData)) {
 			
 			// if we've validated our data, we're ready to put it into the
@@ -354,21 +344,22 @@ CONSTRAINT;
 				return $index !== $idName;
 			}, ARRAY_FILTER_USE_KEY);
 			
-			// our transformer wants a payload; even though we don't really
-			// need the other bits and bobs of such an object at this time,
-			// we'll create one for our use here.  to do that, we'll need
-			// to also send our transformer the schema that goes with our
-			// record.  luckily, we've already gotten that above.
+			// at this point, we can pass our record and table data over
+			// to our transformer so that it can handle any changes that
+			// it needs to do before we we save our records.
 			
 			$payload = $this->payloadFactory->newUpdatePayload(true, [
-				"schema" => $validationData["schema"],
+				"schema" => $schema,
 				"record" => $record,
 			]);
 			
 			$payload = $this->transformer->transformUpdate($payload);
-			$this->db->update($table, $payload->getDatum("record"), [
-				$idName => $recordId,
-			]);
+			
+			// we'll pass the saving process over to our saveRecord method
+			// as follows.  this is to allow children to overwrite things if
+			// they need to.
+			
+			$this->saveRecord($table, $payload, [$idName => $recordId]);
 			
 			// to know the name of this item within our $record, we can
 			// remove the "_id" part of our ID's name, and that leaves
@@ -393,6 +384,50 @@ CONSTRAINT;
 			"errors" => $this->validator->getValidationErrors(),
 			"schema" => $validationData["schema"],
 			"posted" => $validationData["posted"],
+		]);
+	}
+	
+	protected function saveRecord(string $table, PayloadInterface $payload, array $key) {
+		
+		// our $payload contains the transformed record.  we can extract
+		// that and and save our record in the specified table.
+		
+		$transformedRecord = $payload->getDatum("record");
+		$this->db->update($table, $transformedRecord, $key);
+	}
+	
+	
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 */
+	public function delete(array $data): PayloadInterface {
+		
+		// to delete, we must have received a record ID and that ID must
+		// live in the database.  our validator can handle this check for
+		// us, but we'll need to send it the list of book IDs.
+		
+		$records = $this->getRecords();
+		$validationData = array_merge($data, ["records" => $records]);
+		if ($this->validator->validateDelete($validationData)) {
+			
+			// if the validator says we're okay, then actually deleting is
+			// pretty straight forward:  we set the deleted flag for the
+			// specified book and that'll hide it from the application.  the
+			// book remains in the database, which is handy so that the next
+			// time we parse Chummer data, it doesn't show up in the app
+			// again.
+			
+			$values = ["deleted" => 1];
+			$key = [$data["idName"] => $data["recordId"]];
+			$this->db->update($data["table"], $values, $key);
+			return $this->payloadFactory->newDeletePayload(true);
+		}
+		
+		return $this->payloadFactory->newDeletePayload(false, [
+			"errors" => $this->validator->getValidationErrors(),
 		]);
 	}
 }

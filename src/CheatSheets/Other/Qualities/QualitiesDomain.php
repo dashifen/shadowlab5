@@ -2,90 +2,31 @@
 
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
-use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Domain\AbstractDomain;
 
 class QualitiesDomain extends AbstractDomain {
 	/**
-	 * @param array $data
-	 *
-	 * @return PayloadInterface
-	 */
-	public function read(array $data = []): PayloadInterface {
-		
-		// when we're reading information, we need to be sure that any
-		// quality ID that we get from our Action exists in the database.
-		// so, we'll get the list of those IDs and pass them and our $data
-		// over to the validator.
-		
-		$qualities = $this->db->getCol("SELECT quality_id FROM qualities");
-		$validationData = array_merge($data, ["qualities" => $qualities]);
-		if ($this->validator->validateRead($validationData)) {
-			
-			// if things are valid, then we want to either read the entire
-			// collection of our qualities or the single one that's specified.
-			// as long as that works, we'll add on the next quality to be
-			// described and call it a day.
-			
-			$payload = !empty($data["quality_id"])
-				? $this->readOne($data["quality_id"])
-				: $this->readAll();
-			
-			if ($payload->getSuccess()) {
-				$payload->setDatum("nextId", $this->getNextId());
-				$payload = $this->transformer->transformRead($payload);
-			}
-		}
-		
-		// if we didn't create a payload inside the if-block above, then
-		// we do so here.  this avoids needed extra else's because of the
-		// two ifs in the above block.  with the beatific null coalescing
-		// operator, we can do this all as a single statement.
-		
-		return $payload ?? $this->payloadFactory->newReadPayload(false, [
-				"error" => $this->validator->getValidationErrors(),
-			]);
-	}
-	
-	/**
 	 * @param int $qualityId
 	 *
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	protected function readOne(int $qualityId): PayloadInterface {
+	protected function readOne(int $qualityId): array {
 		$sql = "SELECT quality_id, quality, description, metagenetic,
 			freakish, cost, minimum, maximum, book_id, book, abbr, page
 			FROM qualities_view WHERE quality_id = :quality_id
 			ORDER BY quality";
 		
-		$quality = $this->db->getRow($sql, ["quality_id" => $qualityId]);
-		
-		// if we were successful in selecting a quality, then $quality's size
-		// will be greater than zero.  that's how we can determine the type of
-		// read payload we return.
-		
-		return $this->payloadFactory->newReadPayload(sizeof($quality) > 0, [
-			"title"     => $quality["quality"],
-			"qualities" => $quality,
-			"count"     => 1,
-		]);
+		return $this->db->getRow($sql, ["quality_id" => $qualityId]);
 	}
 	
 	/**
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	protected function readAll(): PayloadInterface {
-		$qualities = $this->db->getResults("SELECT quality_id, quality,
+	protected function readAll(): array {
+		return $this->db->getResults("SELECT quality_id, quality,
 			description, metagenetic, freakish, cost, minimum, maximum,
 			book_id, book, abbr, page FROM qualities_view
 			ORDER BY quality");
-		
-		return $this->payloadFactory->newReadPayload(sizeof($qualities) > 0, [
-			"title"     => "Qualities",
-			"qualities" => $qualities,
-			"count"     => sizeof($qualities),
-		]);
-		
 	}
 	
 	/**
@@ -148,6 +89,23 @@ class QualitiesDomain extends AbstractDomain {
 		return $this->db->getRow("SELECT quality_id, book_id
 			FROM qualities WHERE description IS NULL
 			ORDER BY quality");
+	}
+	
+	/**
+	 * @return array
+	 */
+	protected function getRecords(): array {
+		return $this->db->getCol("SELECT quality_id FROM qualities");
+	}
+	
+	/**
+	 * @param array $records
+	 * @param bool  $isCollection
+	 *
+	 * @return string
+	 */
+	protected function getRecordsTitle(array $records, bool $isCollection): string {
+		return !$isCollection ? $records[0]["quality"] : "Qualities";
 	}
 	
 	

@@ -2,32 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
-use Dashifen\Domain\Payload\PayloadInterface;
-use Dashifen\Domain\Transformer\TransformerInterface;
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class SpellsTransformer extends AbstractTransformer {
-	public function transformRead(PayloadInterface $payload): PayloadInterface {
-		
-		// our $payload will have either one or many books.  the count
-		// index will tell us which is which.  then, we call one of the
-		// methods below to transform our data.
-		
-		$original = $payload->getDatum("spells");
-		$transformed = $payload->getDatum("count") > 1
-			? $this->transformAll($original)
-			: $this->transformOne($original);
-		
-		// now, we want to send back our transformed information as the
-		// spells datum.  but, we also send back the untransformed data
-		// which can be useful to the action when preparing information
-		// for the searchbar.
-		
-		$payload->setDatum("spells", $transformed);
-		$payload->setDatum("original-spells", $original);
-		return $payload;
-	}
-	
 	protected function transformAll(array $spells): array {
 		
 		// our full list of spells is displayed using our collection view.

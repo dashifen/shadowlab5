@@ -131,7 +131,7 @@ abstract class AbstractValidator extends DashifenAbstractValidator {
 		// too long, and data that cannot be found within a set of valid
 		// options.
 		
-		$valid = true;
+		$foundErrors = false;
 		foreach ($schema as $column => $columnData) {
 			if ($column !== "guid") {
 				$value = $posted[$column] ?? null;
@@ -172,18 +172,17 @@ abstract class AbstractValidator extends DashifenAbstractValidator {
 					}
 				}
 				
-				// and, finally, if we've set our error message, then we'll make
-				// sure that our valid flag is set, too.  by ANDing the value of
-				// $valid with our test, we can avoid a single-line if-block and
-				// still get the result we want.  plus, once we hit the first
-				// error, the AND comparison will short circuit and we won't have
-				// to test the array value against false anymore
+				// and, finally, if we've set our error message, then we'll
+				// make sure that our $foundErrors flag is set as well.  that
+				// becomes our return value below.
 				
-				$valid = $valid && $this->validationErrors[$column] === false;
+				if ($this->validationErrors[$column] !== false) {
+					$foundErrors = true;
+				}
 			}
 		}
 		
-		return $valid;
+		return $foundErrors;
 	}
 	
 	/**
