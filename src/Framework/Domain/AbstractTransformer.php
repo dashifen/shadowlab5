@@ -217,7 +217,7 @@ abstract class AbstractTransformer implements TransformerInterface {
 		}));
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function extractSummary(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// this method is used by transformers that prepare data for our
 		// collection view.  in that view, any key not listed in our constant

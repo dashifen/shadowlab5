@@ -97,7 +97,7 @@ class QualitiesTransformer extends AbstractTransformer {
 				"recordId"    => array_shift($quality),
 				"bookId"      => $quality["book_id"],
 				"description" => $this->extractDescription($quality),
-				"data"        => $this->extractData($quality),
+				"data"        => $this->extractSummary($quality),
 			];
 		}
 		
@@ -110,9 +110,9 @@ class QualitiesTransformer extends AbstractTransformer {
 	 *
 	 * @return array
 	 */
-	protected function extractData(array $quality, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function extractSummary(array $quality, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		$descriptiveKeys = array_merge(AbstractTransformer::DESCRIPTIVE_KEYS, ["minimum", "maximum"]);
-		$data = parent::extractData($quality, $descriptiveKeys);
+		$data = parent::extractSummary($quality, $descriptiveKeys);
 		
 		// our data is, for this table, just the quality name and the cost of
 		// it.  we'll need to do a little bit of work on both of those, but

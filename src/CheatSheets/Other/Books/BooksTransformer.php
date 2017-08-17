@@ -78,7 +78,7 @@ class BooksTransformer extends AbstractTransformer {
 			
 			$temp["recordId"] = array_shift($book);
 			$temp["description"] = $this->extractDescription($book);
-			$temp["data"] = $this->extractData($book);
+			$temp["data"] = $this->extractSummary($book);
 			$bodies[] = $temp;
 		}
 		
@@ -95,14 +95,14 @@ class BooksTransformer extends AbstractTransformer {
 		return parent::extractDescription($record, ["description"]);
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function extractSummary(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// like above, the parent would normally remove the abbr from our data
 		// in favor of keeping it as a part of the description.  we'll want to
 		// send the same list of descriptive keys here as we did above to avoid
 		// this.
 		
-		$data = parent::extractData($spell, ["description"]);
+		$data = parent::extractSummary($spell, ["description"]);
 		
 		// now that we have our data, there's one thing we need to do to it.
 		// the included column should display Y and N (as an answer to the

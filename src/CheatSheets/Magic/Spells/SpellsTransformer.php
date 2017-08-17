@@ -105,16 +105,16 @@ class SpellsTransformer extends AbstractTransformer {
 			// description:
 			
 			$rows["description"] = $this->extractDescription($spell);
-			$rows["data"] = $this->extractData($spell);
+			$rows["data"] = $this->extractSummary($spell);
 			$bodies[] = $rows;
 		}
 		
 		return $bodies;
 	}
 	
-	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function extractSummary(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		$descriptiveKeys = array_merge($descriptiveKeys, ["spell_tags_ids"]);
-		$data = parent::extractData($spell, $descriptiveKeys);
+		$data = parent::extractSummary($spell, $descriptiveKeys);
 		
 		// there's additional modifications for this specific record set
 		// that our parent can't know to do.  these relate to the setup

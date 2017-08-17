@@ -30,11 +30,11 @@ class AdeptPowersTransformer extends AbstractTransformer {
 	}
 	
 	/**
-	 * @param $powers
+	 * @param $powers array
 	 *
 	 * @return array
 	 */
-	protected function constructHeaders($powers): array {
+	protected function constructHeaders(array $powers): array {
 		$headers = [];
 		$columns = $this->extractHeaders($powers);
 		foreach ($columns as $column) {
@@ -126,9 +126,15 @@ class AdeptPowersTransformer extends AbstractTransformer {
 			// extraction methods.
 			
 			$power_id = array_shift($power);
+			
+			// unlike some of our other records, an adept power's description
+			// is made up of both the actual description and then some
+			// information about the Adept Ways that reduce it's cost.  we
+			// want to merge them together using this first method.
+			
 			$power = $this->mergeDescriptions($power);
 			$description = $this->extractDescription($power);
-			$data = $this->extractData($power);
+			$data = $this->extractSummary($power);
 			
 			foreach ($data as &$datum) {
 				$datum = $this->enhanceDatum($datum, $power["adept_power_way_ids"]);
@@ -177,7 +183,7 @@ class AdeptPowersTransformer extends AbstractTransformer {
 	 *
 	 * @return array
 	 */
-	protected function extractData(array $power, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function extractSummary(array $power, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
 		
 		// like our header method above, we want to make sure that the
 		// information about our adept ways is not a part of our table
@@ -186,7 +192,7 @@ class AdeptPowersTransformer extends AbstractTransformer {
 		// in our table body.
 		
 		$keys = array_merge($descriptiveKeys, self::REMOVABLE_KEYS);
-		return parent::extractData($power, $keys);
+		return parent::extractSummary($power, $keys);
 	}
 	
 	/**
