@@ -13,7 +13,7 @@ use Dashifen\Domain\Entity\AbstractEntity;
  *
  * @package Shadowlab\Framework\Domain
  */
-class Entity extends AbstractEntity {
+class ShadowlabEntity extends AbstractEntity {
 	/**
 	 * @return bool
 	 */

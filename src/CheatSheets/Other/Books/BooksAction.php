@@ -2,41 +2,18 @@
 
 namespace Shadowlab\CheatSheets\Other\Books;
 
-use Shadowlab\Framework\AddOns\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\AddOns\SearchbarInterface;
 
 class BooksAction extends AbstractAction {
 	/**
-	 * @param PayloadInterface $payload
-	 *
-	 * @return string
-	 */
-	protected function getSearchbar(PayloadInterface $payload): string {
-		$searchbarHTML = "";
-		
-		if ($payload->getDatum("count") > 1) {
-			
-			// if we're displaying more than one book, then we want a
-			// searchbar to help the visitor find the one they're looking
-			// for.
-			
-			/** @var SearchbarInterface $searchbar */
-			
-			$searchbar = $this->container->get("searchbar");
-			$searchbar = $this->constructSearchbar($searchbar);
-			$searchbarHTML = $searchbar->getBar();
-		}
-		
-		return $searchbarHTML;
-	}
-	
-	/**
 	 * @param SearchbarInterface $searchbar
+	 * @param PayloadInterface   $payload
 	 *
 	 * @return SearchbarInterface
 	 */
-	protected function constructSearchbar(SearchbarInterface $searchbar): SearchbarInterface {
+	protected function getSearchbarFields(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
 		
 		// our searchbar should offer a way to search within a book's
 		// name as well as a way to filter by those books which are or

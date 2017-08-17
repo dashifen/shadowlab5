@@ -6,6 +6,7 @@ use Dashifen\Action\AbstractAction as DashifenAbstractAction;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Form\Builder\FormBuilderInterface;
 use Dashifen\Response\ResponseInterface;
+use Shadowlab\Framework\AddOns\SearchbarInterface;
 
 /**
  * Class Action
@@ -234,7 +235,30 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 *
 	 * @return string
 	 */
-	abstract protected function getSearchbar(PayloadInterface $payload): string;
+	protected function getSearchbar(PayloadInterface $payload): string {
+		$searchbarHtml = "";
+		
+		if ($payload->getDatum("count", 0) > 1) {
+			/** @var SearchbarInterface $searchbar */
+			
+			$searchbar = $this->container->get("searchbar");
+			$searchbar = $this->getSearchbarFields($searchbar, $payload);
+			$searchbarHtml = $searchbar->getBar();
+		}
+		
+		return $searchbarHtml;
+	}
+	
+	/**
+	 * @param SearchbarInterface $searchbar
+	 * @param PayloadInterface   $payload
+	 *
+	 * @return SearchbarInterface
+	 */
+	abstract protected function getSearchbarFields(
+		SearchbarInterface $searchbar,
+		PayloadInterface $payload
+	): SearchbarInterface;
 	
 	/**
 	 * @return string

@@ -30,8 +30,7 @@ class CheatSheetsResponse extends AbstractResponse {
 		// display them using the cheat-sheets index view.  our parent
 		// can't know that, so we'll tell it that information here.
 		
-		$template = "cheat-sheets/index.html";
-		return $template;
+		return "cheat-sheets/index.html";
 	}
 	
 }

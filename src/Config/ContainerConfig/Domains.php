@@ -29,8 +29,19 @@ class Domains extends ShadowlabContainerConfig {
 			: $this->getHandlerCache();
 		
 		foreach ($handlers as $handler) {
-			$di->params[$handler->domain]["validator"] = $di->lazyNew($handler->validator);
 			$di->params[$handler->domain]["transformer"] = $di->lazyNew($handler->transformer);
+			
+			// many of our Domains don't need to do any additional work to
+			// validate their data beyond what the framework abstractions do.
+			// so, for them, we've prepared a default ShadowlabValidator.
+			// if there isn't a validator for this specific Handler, then
+			// we use the default.
+			
+			if (!class_exists(($class = $handler->validator))) {
+				$class = 'Shadowlab\Framework\Domain\ShadowlabValidator';
+			}
+			
+			$di->params[$handler->domain]["validator"] = $di->lazyNew($class);
 			
 			// the domain doesn't need an instance of an entity object, but
 			// it does need to know the entity with which it's going to be
@@ -40,7 +51,7 @@ class Domains extends ShadowlabContainerConfig {
 			// this framework (or maybe just within this app) so we're
 			// essentially stubbing them by using the same Entity throughout.
 			
-			$di->setters[$handler->domain]["setEntityType"] = 'Shadowlab\Framework\Domain\Entity';
+			$di->setters[$handler->domain]["setEntityType"] = 'Shadowlab\Framework\Domain\ShadowlabEntity';
 		}
 	}
 }

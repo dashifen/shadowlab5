@@ -33,7 +33,17 @@ class Actions extends ShadowlabContainerConfig {
 		
 		foreach ($handlers as $handler) {
 			$di->params[$handler->action]['domain'] = $di->lazyNew($handler->domain);
-			$di->params[$handler->action]['response'] = $di->lazyNew($handler->response);
+			
+			// sometimes, we need specific responses for our specific Actions.
+			// most of the time, though, the work done in our AbstractResponse
+			// is enough.  therefore, if the specified response object doesn't
+			// exist, we just fall back on the ShadowlabResponse object.
+			
+			if (!class_exists(($class = $handler->response))) {
+				$class = 'Shadowlab\Framework\Response\ShadowlabResponse';
+			}
+			
+			$di->params[$handler->action]['response'] = $di->lazyNew($class);
 		}
 	}
 }

@@ -17,8 +17,7 @@ class LoginResponse extends AbstractResponse {
 		// to be and simply return the one we need unless our parent sent
 		// us the error view; that one we still use.
 		
-		$template = $template === "error.html" ? $template : "login.html";
-		return $template;
+		return $template === "error.html" ? $template : "login.html";
 	}
 	
 	/**
@@ -34,8 +33,6 @@ class LoginResponse extends AbstractResponse {
 		// login.html view, the latter redirects.  so, we can just return the
 		// login view here and let the Action take over from there.
 		
-		$template = "login.html";
-		return $template;
+		return "login.html";
 	}
-	
 }

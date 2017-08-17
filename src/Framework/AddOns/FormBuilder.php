@@ -97,7 +97,6 @@ class FormBuilder implements FormBuilderInterface {
 		// index.  here we'll test them both to determine which we're working
 		// on now.
 		
-		$valuesIndex = "";
 		if (in_array("records", $keys)) {
 			$valuesIndex = "records";
 		} elseif (in_array("posted", $keys)) {
@@ -143,11 +142,10 @@ class FormBuilder implements FormBuilderInterface {
 		// we can increment it here and start our record of fieldsets at zero.
 		// our Shadowlab forms are not expected to have more than one Fieldset
 		// in them, but we'll leave the door open to that functionality later.
-		
+
 		$values = $payload[$valuesIndex];
 		$legend = $this->findLegend($values);
 		$fieldsetId = $this->sanitize($legend);
-		
 		$this->form["fieldsets"][++$this->currentFieldset] = [
 			"id"     => $fieldsetId,
 			"legend" => $legend,
@@ -221,7 +219,8 @@ class FormBuilder implements FormBuilderInterface {
 		// if we never found the key we were looking for, that's an unknown
 		// legend.  that's a paddling.
 		
-		throw new FormBuilderException("Unknown legend", FormBuilderException::MISSING_LEGEND);
+		throw new FormBuilderException("Unknown legend",
+			FormBuilderException::MISSING_LEGEND);
 	}
 	
 	/**
@@ -239,7 +238,12 @@ class FormBuilder implements FormBuilderInterface {
 		// with an array.
 		
 		$multiple = $columnData["MULTIPLE"] ?? false;
-		if (!$multiple || isset($values[$column])) {
+		
+		if (!$multiple) {
+			
+			// for non multiple fields, we can return the value we find
+			// in $values or the default in our $columnData.
+			
 			return $values[$column] ?? $columnData["COLUMN_DEFAULT"];
 		}
 		
@@ -301,6 +305,7 @@ class FormBuilder implements FormBuilderInterface {
 			case "smallint":
 			case "tinyint":
 			case "bigint":
+			case "decimal":
 				
 				// most of the time, our int fields simply require a
 				// Number field so we can enter the appropriate number.
@@ -421,7 +426,25 @@ class FormBuilder implements FormBuilderInterface {
 		$attr = [];
 		switch ($columnType) {
 			case "Number":
-				$attr = ["step" => "1"];
+				
+				// for number fields, we want to try and set min and step
+				// attributes.  step is easiest and is based on the
+				// NUMERIC_SCALE; if it's zero, our step size is 1 (i.e.
+				// whole numbers).  otherwise, it represents the number of
+				// significant decimal figures.
+				
+				$attr["step"] = $columnData["NUMERIC_SCALE"] != 0
+					? sprintf(".%0".$columnData["NUMERIC_SCALE"]."d", 1)
+					: 1;
+				
+				// now, for our minimum value, if we can find the string
+				// "unsigned" in our column type, then the minimum is zero.
+				// otherwise, we don't set it at all.
+				
+				if (strpos($columnData["COLUMN_TYPE"], "unsigned")!==false) {
+					$attr["min"] = 0;
+				}
+				
 				break;
 				
 			case "Text":

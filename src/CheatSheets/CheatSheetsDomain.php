@@ -19,10 +19,12 @@ class CheatSheetsDomain extends AbstractDomain {
 	}
 	
 	/**
-	 * @return array
+	 * @param bool $view
+	 *
+	 * @return array [string, string, string]
 	 */
-	protected function getRecords(): array {
-		return $this->db->getCol("SELECT sheet_type_id FROM sheets_types");
+	protected function getRecordDetails($view = false): array {
+		return ["sheet_type_id", "sheets_types", "sheet_type"];
 	}
 	
 	/**
@@ -61,15 +63,15 @@ class CheatSheetsDomain extends AbstractDomain {
 	}
 	
 	/**
-	 * @return int
+	 * @param array $record
+	 *
+	 * @return array
 	 */
-	protected function getNextId(): int {
+	protected function getNextRecordCriteria(array $record) {
 		
-		// we need to implement this method because it's abstract in our
-		// parent.  but, the CheatSheetsDomain doesn't do any updating of
-		// information, so it doesn't need a next ID.  we'll just return
-		// zero.
+		// sheets don't really have a next ID, but we still need a
+		// WHERE clause, so we'll return an identity clause.
 		
-		return 0;
+		return ["1=1"];
 	}
 }

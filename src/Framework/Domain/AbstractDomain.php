@@ -81,13 +81,22 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 	}
 	
 	/**
-	 * when we getRecords(), we want a list of the records against which
-	 * we test ID numbers to determine whether or not we can read information
-	 * from the database.
-	 *
 	 * @return array
 	 */
-	abstract protected function getRecords(): array;
+	protected function getRecords(): array {
+		list($idName, $table) = $this->getRecordDetails();
+		return $this->db->getCol("SELECT $idName FROM $table");
+	}
+	
+	/**
+	 * returns the record ID name, table, and ordinal about the table
+	 * that a specific Domain works with.
+	 *
+	 * @param bool $view
+	 *
+	 * @return array [string, string, string]
+	 */
+	abstract protected function getRecordDetails($view = false): array;
 	
 	/**
 	 * this method simply grabs a single record from the database based
@@ -120,13 +129,56 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 	abstract protected function getRecordsTitle(array $records, bool $isCollection): string;
 	
 	/**
-	 * for the purposes of quickly identifying where to start updating
-	 * the database with new information, this one gets the next ID
-	 * number from the database
+	 * @param array $record
 	 *
-	 * @return int
+	 * @return int|null
 	 */
-	abstract protected function getNextId(): int;
+	protected function getNextId(array $record = []): ?int {
+		
+		// under most circumstances, getting the next ID for a record is
+		// as easy as getting the next record without a description and in
+		// the same book as $record sorted alphabetically.  if a specific
+		// collection requires a different means of determining the next
+		// ID, it's on it to make changes to these methods.
+		
+		$criteria = $this->getNextRecordCriteria($record);
+		list($idName, $table, $ordinal) = $this->getRecordDetails();
+		while (sizeof($criteria) > 0) {
+			
+			// now, we'll se our data gathered above to create a query that
+			// should get us our next ID.  if we find one, we return it.
+			// otherwise, we pop off one of our criterion and loop again.
+			
+			$where = join(" AND ", $criteria);
+			$sql = "SELECT $idName FROM $table WHERE $where ORDER BY $ordinal";
+			$nextRecordId = $this->db->getVar($sql);
+			
+			if (is_numeric($nextRecordId)) {
+				return $nextRecordId;
+			}
+			
+			array_pop($criteria);
+		}
+		
+		return null;
+	}
+	
+	protected function getNextRecordCriteria(array $record) {
+		
+		// by default, we want to get the next record based on the lack of
+		// a description and the book of the current record.  some Domains
+		// may need more than this, so they can enhance this method as they
+		// see fit.
+		
+		$criteria = ["description IS NULL"];
+		if (is_numeric(($book_id = ($record["book_id"] ?? null)))) {
+			$criteria[] = "book_id = $book_id";
+		}
+		
+		return $criteria;
+	}
+	
+	
 	
 	/**
 	 * @param array $data
@@ -141,6 +193,39 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 		
 		$method = !isset($data["posted"]) ? "getDataToUpdate" : "savePostedData";
 		return $this->{$method}($data);
+	}
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 */
+	public function delete(array $data): PayloadInterface {
+		
+		// to delete, we must have received a record ID and that ID must
+		// live in the database.  our validator can handle this check for
+		// us, but we'll need to send it the list of book IDs.
+		
+		$records = $this->getRecords();
+		$validationData = array_merge($data, ["records" => $records]);
+		if ($this->validator->validateDelete($validationData)) {
+			
+			// if the validator says we're okay, then actually deleting is
+			// pretty straight forward:  we set the deleted flag for the
+			// specified book and that'll hide it from the application.  the
+			// book remains in the database, which is handy so that the next
+			// time we parse Chummer data, it doesn't show up in the app
+			// again.
+			
+			$values = ["deleted" => 1];
+			$key = [$data["idName"] => $data["recordId"]];
+			$this->db->update($data["table"], $values, $key);
+			return $this->payloadFactory->newDeletePayload(true);
+		}
+		
+		return $this->payloadFactory->newDeletePayload(false, [
+			"errors" => $this->validator->getValidationErrors(),
+		]);
 	}
 	
 	/**
@@ -165,7 +250,7 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 			
 			$records = $this->readOne($data["recordId"]);
 			$payload = $this->payloadFactory->newUpdatePayload(sizeof($records) > 0, [
-				"records" => $records
+				"records" => $records,
 			]);
 			
 			if ($payload->getSuccess()) {
@@ -181,35 +266,42 @@ abstract class AbstractDomain extends AbstractMysqlDomain {
 	
 	/**
 	 * @param string $table
+	 * @param bool   $withFKOptions
 	 *
 	 * @return array
 	 */
-	protected function getTableDetails(string $table) {
+	protected function getTableDetails(string $table, bool $withFKOptions = true) {
 		
 		// when working with our data, sometimes it's nice to know about that
 		// database table from which (or into which) the data is coming (or
 		// going).  this method gets that for us.
 		
 		$statement = <<< SCHEMA
-			SELECT COLUMN_NAME, COLUMN_DEFAULT, IS_NULLABLE,
-				DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA
+			SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT,
+				IS_NULLABLE, CHARACTER_MAXIMUM_LENGTH, EXTRA,
+				NUMERIC_PRECISION, NUMERIC_SCALE
 			
 			FROM INFORMATION_SCHEMA.COLUMNS
-			WHERE TABLE_SCHEMA = 'shadowlab'
+			WHERE TABLE_SCHEMA = :database
 			AND TABLE_NAME = :table
 SCHEMA;
 		
-		$schema = $this->db->getMap($statement, ["table" => $table]);
+		$schema = $this->db->getMap($statement, [
+			"database" => $this->db->getDatabase(),
+			"table"    => $table,
+		]);
 		
-		// what the above statement can't do for us is get the information
-		// about viable options for the values within our database columns.
-		// some types -- like enums and sets -- have very specific limitations.
-		// other times, our integer fields may be links to other database
-		// tables where we gather values based on foreign key relationships.
-		// this loop helps us find those options.
-		
-		foreach ($schema as $column => &$columnData) {
-			$columnData["OPTIONS"] = $this->getColumnOptions($table, $column, $columnData["DATA_TYPE"]);
+		if ($withFKOptions) {
+			// what the above statement can't do for us is get the information
+			// about viable options for the values within our database columns.
+			// some types -- like enums and sets -- have very specific
+			// limitations.  other times, our integer fields may be links to
+			// other database tables where we gather values based on foreign
+			// key relationships.  this loop helps us find those options.
+			
+			foreach ($schema as $column => &$columnData) {
+				$columnData["OPTIONS"] = $this->getColumnOptions($table, $column, $columnData["DATA_TYPE"]);
+			}
 		}
 		
 		return $schema;
@@ -273,9 +365,10 @@ SCHEMA;
 		$statement = <<< CONSTRAINT
 			SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
 			FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-			WHERE TABLE_SCHEMA = :database
-			AND TABLE_NAME = :table
-			AND COLUMN_NAME = :column
+			WHERE REFERENCED_TABLE_NAME IS NOT NULL
+				AND TABLE_SCHEMA = :database
+				AND TABLE_NAME = :table
+				AND COLUMN_NAME = :column
 CONSTRAINT;
 		
 		$fkConstraint = $this->db->getRow($statement, [
@@ -303,6 +396,38 @@ CONSTRAINT;
 		}
 		
 		return $options;
+	}
+	
+	/**
+	 * @param array  $schema
+	 * @param string $schemaKey
+	 * @param array  $schemata
+	 * @param string $schemataKey
+	 *
+	 * @return array
+	 */
+	protected function addToSchemaAfter(array $schema, string $schemaKey, array $schemata, string $schemataKey): array {
+		
+		// sometimes we need to add information to our $schema after a
+		// specific key.  this function does that for us.  we don't need
+		// it for every table, but for those that have foreign key
+		// relationships, it's important.
+		
+		$temp = [];
+		foreach ($schema as $key => $value) {
+			$temp[$key] = $value;
+			
+			// now, if our $key matches the $schemaKey we're looking for,
+			// we'll also add our $schemata parameter to our $temp array.
+			// when we return this array, our new information will,
+			// therefore, appear after the specified $key.
+			
+			if ($key === $schemaKey) {
+				$temp[$schemataKey] = $schemata;
+			}
+		}
+		
+		return $temp;
 	}
 	
 	/**
@@ -359,7 +484,7 @@ CONSTRAINT;
 			// as follows.  this is to allow children to overwrite things if
 			// they need to.
 			
-			$this->saveRecord($table, $payload, [$idName => $recordId]);
+			$recordId = $this->saveRecord($table, $payload, [$idName => $recordId]);
 			
 			// to know the name of this item within our $record, we can
 			// remove the "_id" part of our ID's name, and that leaves
@@ -369,7 +494,7 @@ CONSTRAINT;
 			$recordName = str_replace("_id", "", $idName);
 			return $this->payloadFactory->newUpdatePayload(true, [
 				"title"  => $posted[$recordName],
-				"nextId" => $this->getNextId(),
+				"nextId" => $this->getNextId($record),
 				"thisId" => $recordId,
 			]);
 		}
@@ -387,47 +512,27 @@ CONSTRAINT;
 		]);
 	}
 	
-	protected function saveRecord(string $table, PayloadInterface $payload, array $key) {
+	/**
+	 * @param string           $table
+	 * @param PayloadInterface $payload
+	 * @param array            $key
+	 *
+	 * @return int
+	 */
+	protected function saveRecord(string $table, PayloadInterface $payload, array $key): int {
 		
 		// our $payload contains the transformed record.  we can extract
 		// that and and save our record in the specified table.
 		
 		$transformedRecord = $payload->getDatum("record");
-		$this->db->update($table, $transformedRecord, $key);
-	}
-	
-	
-	
-	/**
-	 * @param array $data
-	 *
-	 * @return PayloadInterface
-	 */
-	public function delete(array $data): PayloadInterface {
 		
-		// to delete, we must have received a record ID and that ID must
-		// live in the database.  our validator can handle this check for
-		// us, but we'll need to send it the list of book IDs.
-		
-		$records = $this->getRecords();
-		$validationData = array_merge($data, ["records" => $records]);
-		if ($this->validator->validateDelete($validationData)) {
-			
-			// if the validator says we're okay, then actually deleting is
-			// pretty straight forward:  we set the deleted flag for the
-			// specified book and that'll hide it from the application.  the
-			// book remains in the database, which is handy so that the next
-			// time we parse Chummer data, it doesn't show up in the app
-			// again.
-			
-			$values = ["deleted" => 1];
-			$key = [$data["idName"] => $data["recordId"]];
-			$this->db->update($data["table"], $values, $key);
-			return $this->payloadFactory->newDeletePayload(true);
+		$id = array_values($key)[0];
+		if ($id != 0) {
+			$this->db->update($table, $transformedRecord, $key);
+		} else {
+			$id = $this->db->insert($table, $transformedRecord);
 		}
 		
-		return $this->payloadFactory->newDeletePayload(false, [
-			"errors" => $this->validator->getValidationErrors(),
-		]);
+		return $id;
 	}
 }

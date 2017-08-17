@@ -2,9 +2,10 @@
 
 namespace Shadowlab\CheatSheets;
 
-use Dashifen\Domain\Payload\PayloadInterface;
-use Shadowlab\Framework\Action\AbstractAction;
 use Dashifen\Response\ResponseInterface;
+use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Dashifen\Domain\Payload\PayloadInterface;
 
 class CheatSheetsAction extends AbstractAction {
 	public function execute(array $parameter = []): ResponseInterface {
@@ -23,9 +24,9 @@ class CheatSheetsAction extends AbstractAction {
 			// our menu is all we need here.
 			
 			$this->handleSuccess([
-				"sheets" => $payload->getDatum("records"),
-				"title"  => $payload->getDatum("title"),
-				"parameter" => $parameter
+				"sheets"    => $payload->getDatum("records"),
+				"title"     => $payload->getDatum("title"),
+				"parameter" => $parameter,
 			]);
 		} else {
 			
@@ -41,16 +42,13 @@ class CheatSheetsAction extends AbstractAction {
 	}
 	
 	/**
-	 * @param PayloadInterface $payload
+	 * @param SearchbarInterface $searchbar
+	 * @param PayloadInterface   $payload
 	 *
-	 * @return string
+	 * @return SearchbarInterface
 	 */
-	protected function getSearchbar(PayloadInterface $payload): string {
-		
-		// our cheat sheets don't get a searchbar at this time, so we
-		// just return the empty string.
-		
-		return "";
+	protected function getSearchbarFields(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
+		return $searchbar;
 	}
 	
 	/**

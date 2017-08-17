@@ -1,17 +1,17 @@
 <?php
 
-namespace Shadowlab\User\Login;
+namespace Shadowlab\CheatSheets\Matrix\MatrixActions;
 
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
-class LoginTransformer extends AbstractTransformer {
+class MatrixActionTransformer extends AbstractTransformer {
 	/**
 	 * @param array $powers
 	 *
 	 * @return array
 	 */
 	protected function transformAll(array $powers): array {
-		return $powers;
+		// TODO: Implement transformAll() method.
 	}
 	
 	/**
@@ -20,6 +20,7 @@ class LoginTransformer extends AbstractTransformer {
 	 * @return array
 	 */
 	protected function transformOne(array $records): array {
-		return $records;
+		// TODO: Implement transformOne() method.
 	}
+	
 }

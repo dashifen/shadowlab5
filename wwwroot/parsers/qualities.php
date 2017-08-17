@@ -96,7 +96,6 @@ foreach ($xml->qualities->quality as $quality) {
 	$metagenetic = isset($quality->metagenetic) ? "Y" : "N";
 	
 	$data = [
-		"quality"     => $name,
 		"minimum"     => $minimum,
 		"maximum"     => $maximum !== "NULL" ? $maximum : PDO::PARAM_NULL,
 		"metagenetic" => $metagenetic,
@@ -105,8 +104,9 @@ foreach ($xml->qualities->quality as $quality) {
 		"page"        => $page,
 	];
 	
+	$quality = ["quality" => $name];
 	$key = ["guid" => strtoupper($id)];
-	$db->upsert("qualities", array_merge($data, $key), $data);
+	$db->upsert("qualities", array_merge($quality, $data, $key), $data);
 }
 
 

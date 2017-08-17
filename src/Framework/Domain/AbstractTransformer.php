@@ -53,11 +53,11 @@ abstract class AbstractTransformer implements TransformerInterface {
 	}
 	
 	/**
-	 * @param array $records
+	 * @param array $powers
 	 *
 	 * @return array
 	 */
-	abstract protected function transformAll(array $records): array;
+	abstract protected function transformAll(array $powers): array;
 	
 	/**
 	 * @param array $records
@@ -199,10 +199,14 @@ abstract class AbstractTransformer implements TransformerInterface {
 		// regex here and the use it via closure in the anonymous
 		// function below.
 		
+		foreach ($descriptiveKeys as &$key) {
+			$key = '^' . $key . '$';
+		}
+		
 		$keys = array_merge($descriptiveKeys, ["sanitized", ".+_id$"]);
 		
 		$regex = "/" . join("|", $keys) . "/";
-		return array_filter($indices, function($index) use ($regex) {
+		return array_values(array_filter($indices, function($index) use ($regex) {
 			
 			// if we did not find a match against our $regex here, then
 			// this index should stay in.  to return true, we want to see
@@ -210,7 +214,7 @@ abstract class AbstractTransformer implements TransformerInterface {
 			
 			$matches = preg_match($regex, $index);
 			return $matches === 0;
-		});
+		}));
 	}
 	
 	protected function extractData(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
@@ -243,7 +247,7 @@ abstract class AbstractTransformer implements TransformerInterface {
 			];
 		}
 		
-		return $temp;
+		return array_values($temp);
 	}
 	
 	protected function extractDescription(array $record, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {

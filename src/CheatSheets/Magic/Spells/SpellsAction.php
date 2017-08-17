@@ -2,9 +2,9 @@
 
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
+use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
-use Dashifen\Domain\Payload\PayloadInterface;
 
 class SpellsAction extends AbstractAction {
 	/**
@@ -36,36 +36,12 @@ class SpellsAction extends AbstractAction {
 	}
 	
 	/**
-	 * @param PayloadInterface $payload
-	 *
-	 * @return string
-	 */
-	protected function getSearchbar(PayloadInterface $payload): string {
-		$searchbarHTML = "";
-		
-		if ($payload->getDatum("count") > 1) {
-			
-			// if we were selecting multiple spells, then we need to make
-			// the collection view's searchbar.  we can do so as follows,
-			// utilizing that object's parse method.
-			
-			/** @var SearchbarInterface $searchbar */
-			
-			$searchbar = $this->container->get("searchbar");
-			$searchbar = $this->constructSearchbar($searchbar, $payload);
-			$searchbarHTML = $searchbar->getBar();
-		}
-		
-		return $searchbarHTML;
-	}
-	
-	/**
 	 * @param SearchbarInterface $searchbar
 	 * @param PayloadInterface   $payload
 	 *
 	 * @return SearchbarInterface
 	 */
-	protected function constructSearchbar(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
+	protected function getSearchbarFields(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
 		
 		// first, we need to get the tags, books, and categories out of the
 		// $payload data so that we can add filters for these data.  then, we
@@ -75,14 +51,11 @@ class SpellsAction extends AbstractAction {
 		$spells = $payload->getDatum("original-records");
 		list($tags, $books, $categories) = $this->collectFilterOptions($spells);
 		
-		/** @var SearchbarInterface $searchbar */
-		
 		$searchbar->addSearch("Spells", "spell");
 		$searchbar->addFilter("Spell Categories", "spell-category", $categories, "", "All Spell Categories");
 		$searchbar->addFilter("Spell Tags", "spell-tags", $tags, "", "All Spell Tags");
 		$searchbar->addFilter("Books", "book", $books, "", "All Books");
 		$searchbar->addReset();
-		
 		return $searchbar;
 	}
 	

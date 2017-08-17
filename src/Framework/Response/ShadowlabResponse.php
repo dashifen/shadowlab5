@@ -1,10 +1,8 @@
 <?php
 
-namespace Shadowlab\CheatSheets\Other\Qualities;
+namespace Shadowlab\Framework\Response;
 
-use Shadowlab\Framework\Response\AbstractResponse;
-
-class QualitiesResponse extends AbstractResponse {
+class ShadowlabResponse extends AbstractResponse {
 	/**
 	 * @param string $template
 	 *

@@ -7,10 +7,12 @@ use Shadowlab\Framework\Domain\AbstractDomain;
 
 class SpellsDomain extends AbstractDomain {
 	/**
-	 * @return array
+	 * @param bool $view
+	 *
+	 * @return array [string, string, string]
 	 */
-	protected function getRecords(): array {
-		return $this->db->getCol("SELECT spell_id FROM spells");
+	protected function getRecordDetails($view = false): array {
+		return ["spell_id", (!$view ? "spells" : "spells_view"), "spell"];
 	}
 	
 	/**
@@ -61,50 +63,45 @@ class SpellsDomain extends AbstractDomain {
 	
 	/**
 	 * @param string $table
+	 * @param bool   $withFKOptions
 	 *
 	 * @return array
 	 */
-	protected function getTableDetails(string $table = "spells"): array {
+	protected function getTableDetails(string $table, bool $withFKOptions = true): array {
 		$schema = parent::getTableDetails($table);
 		
 		// spells have a one-to-many relationship with tags.  this means
 		// that the tags are actually located in their own table and their
 		// relationship with spells gets a table, too.  our parent's method
 		// can't get those data from the spells table, so we have to do
-		// that here by hand.  to do so, we get the schema for the table
-		// which stores our relationships (i.e. spells_spell_tags) and then
-		// get the spell_tag_id information out of it.  we set a MULTIPLE
-		// flag on it so that our form builder knows it should be a
-		// SelectMany field and not a SelectOne.
+		// that here by hand.
 		
 		$tags = parent::getTableDetails("spells_spell_tags");
 		$spell_tag_id = array_merge($tags["spell_tag_id"], [
-			"VALUES_KEY" => "spell_tags_ids",
-			"MULTIPLE"   => true,
+			
+			// these additions inform our FormBuilder about these data.
+			// first, we tell it where to find new values after data is
+			// posted to the server.  then, it needs to know both that
+			// these data are optional (e.g. Manablade) and that they
+			// should be presented as a SelectMany field on-screen.
+			
+			"VALUES_KEY"  => "spell_tags_ids",
+			"IS_NULLABLE" => "YES",
+			"MULTIPLE"    => true,
 		]);
 		
-		// some of our spells, e.g. Manablade in Hard Targets, don't use
-		// tags, so we'll make sure that these data are option when editing
-		// information.
-		
-		$spell_tag_id["IS_NULLABLE"] = "YES";
-		
-		// finally, we want to insert that new array into the $schema one
-		// after the description so it appears in the right place of our form.
-		
-		$temp = [];
-		foreach ($schema as $field => $value) {
-			$temp[$field] = $value;
-			
-			if ($field === "description") {
-				$temp["spell_tag_id"] = $spell_tag_id;
-			}
-		}
-		
-		return $temp;
+		$schema = $this->addToSchemaAfter($schema, "description", $spell_tag_id, "spell_tag_id");
+		return $schema;
 	}
 	
-	protected function saveRecord(string $table, PayloadInterface $payload, array $key) {
+	/**
+	 * @param string           $table
+	 * @param PayloadInterface $payload
+	 * @param array            $key
+	 *
+	 * @return int
+	 */
+	protected function saveRecord(string $table, PayloadInterface $payload, array $key): int {
 		
 		// saving a spell is a little more complicated because our information
 		// about tags is separated from the rest of the spell data.  so, we've
@@ -112,8 +109,16 @@ class SpellsDomain extends AbstractDomain {
 		// this one.
 		
 		$spell = $payload->getDatum("record");
-		$this->saveSpell($spell, $key);
+		$spellId = $this->saveSpell($spell, $key);
+		
+		// in case we were inserting a spell, we'll want to put that spell ID
+		// into our $key.  if it was already there, then there's no harm and
+		// no foul.  but, if it wasn't there, without it the following method
+		// would fail.
+		
+		$key["spell_id"] = $spellId;
 		$this->saveSpellTags($spell, $key);
+		return $spellId;
 	}
 	
 	/**
@@ -167,25 +172,16 @@ class SpellsDomain extends AbstractDomain {
 		}
 	}
 	
-	/**
-	 * @param array $spell
-	 *
-	 * @return int
-	 */
-	protected function getNextId(array $spell = []): int {
+	protected function getNextRecordCriteria(array $record) {
+		$criteria = parent::getNextRecordCriteria($record);
 		
-		// our next spell is the the next alphabetical spell without a
-		// description in the same book and category.  if we don't get a
-		// spell, then we just get first alphabetical one and the visitor
-		// can start from there.
+		// in addition to the default criteria, we want to try and select a
+		// spell from the same category as our current record:
 		
-		$statement = sizeof($spell) > 0
-			? "SELECT spell_id FROM spells WHERE description IS NULL
-					AND spell_category_id = :spell_category_id AND book_id = :book_id
-					ORDER BY spell"
-			
-			: "SELECT spell_id FROM spells WHERE description IS NULL ORDER BY spell";
+		if (isset($record["spell_category_id"])) {
+			$criteria[] = sprintf("spell_category_id = %d", $record["spell_category_id"]);
+		}
 		
-		return $this->db->getVar($statement, $spell);
+		return $criteria;
 	}
 }

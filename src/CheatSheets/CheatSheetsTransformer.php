@@ -6,17 +6,17 @@ use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class CheatSheetsTransformer extends AbstractTransformer {
 	/**
-	 * @param array $records
+	 * @param array $powers
 	 *
 	 * @return array
 	 */
-	protected function transformAll(array $records): array {
+	protected function transformAll(array $powers): array {
 		
 		// because the cheat sheets handler is different from our more
 		// regular collections, we can homogenize how we handle our read
 		// transformations.
 		
-		return $this->transform($records);
+		return $this->transform($powers);
 	}
 	
 	/**

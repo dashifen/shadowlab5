@@ -75,7 +75,7 @@ class SpellsTransformer extends AbstractTransformer {
 			// there's one more that we want to remove before we
 			// continue here:  the spell_tags_ids.
 			
-			if ($header === "spell_tags_ids" || $header === "book") {
+			if ($header === "spell_tags_ids") {
 				unset($headers[$i]);
 				break;
 			}
@@ -120,7 +120,7 @@ class SpellsTransformer extends AbstractTransformer {
 		// that our parent can't know to do.  these relate to the setup
 		// of our searchbar values.
 		
-		foreach ($data as $i => &$datum) {
+		foreach ($data as &$datum) {
 			switch ($datum["column"]) {
 				case "spell":
 					$datum["searchbarValue"] = strip_tags($datum["html"]);
@@ -134,14 +134,6 @@ class SpellsTransformer extends AbstractTransformer {
 				case "spell-tags":
 					$datum["searchbarValue"] = $spell["spell_tags_ids"];
 					$datum["searchbarValueList"] = 1;
-					break;
-					
-				case "book":
-					
-					// our parent Transformer will create a book column; we
-					// don't want that one.  we can unset it here.
-					
-					unset($data[$i]);
 			}
 		}
 		

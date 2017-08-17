@@ -449,16 +449,16 @@
         },
         {
             "name": "dashifen/form",
-            "version": "1.9.3",
+            "version": "1.9.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/form.git",
-                "reference": "cb55f6d803328704cf888d9366af46f694b002e3"
+                "reference": "21e194abddc469c85e98cb36783df5fd49f56067"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/form/zipball/cb55f6d803328704cf888d9366af46f694b002e3",
-                "reference": "cb55f6d803328704cf888d9366af46f694b002e3",
+                "url": "https://api.github.com/repos/dashifen/form/zipball/21e194abddc469c85e98cb36783df5fd49f56067",
+                "reference": "21e194abddc469c85e98cb36783df5fd49f56067",
                 "shasum": ""
             },
             "require": {
@@ -484,7 +484,7 @@
                 }
             ],
             "description": "A series of objects that build an HTML form in the way I like.",
-            "time": "2017-08-09T12:50:14+00:00"
+            "time": "2017-08-15T20:07:22+00:00"
         },
         {
             "name": "dashifen/request",
@@ -607,16 +607,16 @@
         },
         {
             "name": "dashifen/searchbar",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/searchbar.git",
-                "reference": "906aa2faa7895677e03c151b2a1ac53330323229"
+                "reference": "039f9811f51b060022b61547648fae32b4481419"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/906aa2faa7895677e03c151b2a1ac53330323229",
-                "reference": "906aa2faa7895677e03c151b2a1ac53330323229",
+                "url": "https://api.github.com/repos/dashifen/searchbar/zipball/039f9811f51b060022b61547648fae32b4481419",
+                "reference": "039f9811f51b060022b61547648fae32b4481419",
                 "shasum": ""
             },
             "require": {
@@ -642,7 +642,7 @@
                 }
             ],
             "description": "a class which produces a search bar to search within on-screen data",
-            "time": "2017-08-09T22:11:41+00:00"
+            "time": "2017-08-15T17:14:25+00:00"
         },
         {
             "name": "dashifen/session",

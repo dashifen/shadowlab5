@@ -6,10 +6,12 @@ use Shadowlab\Framework\Domain\AbstractDomain;
 
 class BooksDomain extends AbstractDomain {
 	/**
-	 * @return array
+	 * @param bool $view
+	 *
+	 * @return array [string, string, string]
 	 */
-	protected function getRecords(): array {
-		return $this->db->getCol("SELECT book_id FROM books");
+	protected function getRecordDetails($view = false): array {
+		return ["book_id", "books", "book"];
 	}
 	
 	/**
@@ -30,14 +32,6 @@ class BooksDomain extends AbstractDomain {
 	protected function readAll(): array {
 		return $this->db->getResults("SELECT book_id, book, description,
 			abbr, included FROM books WHERE deleted = 0 ORDER BY book");
-	}
-	
-	/**
-	 * @return int
-	 */
-	protected function getNextId(): int {
-		return $this->db->getVar("SELECT book_id FROM books
-			WHERE description IS NULL ORDER BY book");
 	}
 	
 	/**

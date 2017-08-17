@@ -7,7 +7,7 @@ $handlers = [
 	// Magic Sheets
 	
 	'Shadowlab\CheatSheets\Magic\Spells'      => ["BOTH" => "/cheat-sheets/magic/spells"],
-	'Shadowlab\CheatSheets\Magic\AdeptPowers' => ["BOTH" => "/cheat-sheets/magic/spells/adept-powers"],
+	'Shadowlab\CheatSheets\Magic\AdeptPowers' => ["BOTH" => "/cheat-sheets/magic/adept-powers"],
 	
 	// Other Sheets
 	

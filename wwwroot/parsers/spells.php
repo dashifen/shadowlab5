@@ -130,7 +130,6 @@ foreach ($xml->spells->spell as $xmlSpell) {
 	if (!empty($guid)) {
 		$spell = [
 			"spell_category_id" => $category_map[(string)$xmlSpell->category],
-			"spell"             => (string)$xmlSpell->name,
 			"type"              => (string)$xmlSpell->type,
 			"range"             => (string)$xmlSpell->range,
 			"damage"            => (string)$xmlSpell->damage,
@@ -145,7 +144,8 @@ foreach ($xml->spells->spell as $xmlSpell) {
 		}
 		
 		$key = ["guid" => $guid];
-		$db->upsert("spells", array_merge($spell, $key), $spell);
+		$spellName = ["spell" => (string)$xmlSpell->name];
+		$db->upsert("spells", array_merge($spellName, $spell, $key), $spell);
 		$spell_id = $db->getVar("SELECT spell_id FROM spells WHERE guid=:guid", $key);
 		
 		// now that we have a spell id for this spell, we're going to handle
