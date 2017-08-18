@@ -63,7 +63,7 @@ class AdeptPowersAction extends AbstractAction {
 	protected function getAdeptWayOptions(array $powers): array {
 		$ways = [];
 		foreach ($powers as $power) {
-			if (!empty($power["adept_power_way_ids"])) {
+			if (!empty($power["adept_power_ways_ids"])) {
 				
 				// now that we know we have them, we have to break up
 				// the way IDs and the list of ways and then combine them
@@ -72,7 +72,7 @@ class AdeptPowersAction extends AbstractAction {
 				// will need to remove blanks.  the names are just comma
 				// separated.
 				
-				$ids = array_filter(explode("_", $power["adept_power_way_ids"]));
+				$ids = array_filter(explode("_", $power["adept_power_ways_ids"]));
 				$names = explode(", ", $power["adept_power_ways"]);
 				$ways += array_combine($ids, $names);
 			}
@@ -100,8 +100,8 @@ class AdeptPowersAction extends AbstractAction {
 			// describing that for us.
 			
 			$books[$power["book_id"]] = json_encode([
+				"text"  => $power["abbreviation"],
 				"title" => $power["book"],
-				"text"  => $power["abbr"],
 			]);
 		}
 		

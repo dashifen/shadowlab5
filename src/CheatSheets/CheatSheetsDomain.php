@@ -8,14 +8,20 @@ use Shadowlab\Framework\Domain\AbstractDomain;
 class CheatSheetsDomain extends AbstractDomain {
 	public function read(array $data = []): PayloadInterface {
 		
-		// what we get from our Action is not a numeric ID, this time.
-		// instead, we get the word that represents a type of sheet in
-		// the database.  before we let our parent take over, we need
-		// to switch that sheet type to it's linked ID.
+		// there's actually no way to fail a read for cheat sheets.
+		// so, we'll create our payload and then, if we have a sheet
+		// type ID, we'll get it's menu and return it as a part of
+		// the payload.  otherwise, it'll just use the main menu to
+		// show the full list of sheets.
 		
-		$statement = "SELECT sheet_type_id FROM sheets_types WHERE sheet_type = :sheet_type";
-		$sheet_type_id = $this->db->getVar($statement, ["sheet_type" => $data["sheet_type"]]);
-		return parent::read(["sheet_type_id" => $sheet_type_id]);
+		$payload = $this->payloadFactory->newReadPayload(true);
+		
+		if (is_numeric($data["recordId"])) {
+			$sheetTypeMenu = $this->getSheetTypeMenu($data["recordId"]);
+			$payload->setDatum("sheetTypeMenu", $sheetTypeMenu);
+		}
+		
+		return $payload;
 	}
 	
 	/**

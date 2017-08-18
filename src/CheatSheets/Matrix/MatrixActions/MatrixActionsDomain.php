@@ -26,8 +26,8 @@ class MatrixActionsDomain extends AbstractDomain {
 	
 	protected function getQuery(): string {
 		return "SELECT matrix_action_id, matrix_action, ma.description,
-			test, marks, action, book_id, book, abbr, page FROM matrix_actions ma
-			INNER JOIN books USING (book_id) ";
+			test, marks, action, book_id, book, abbreviation, page
+			FROM matrix_actions ma INNER JOIN books USING (book_id)";
 	}
 	
 	/**

@@ -5,7 +5,7 @@ Shadowlab or the links below to continue using this site.</p>
 
 <ul>
 	<li><a :href="thisId | makeUpdateLink">Edit {{ item }} again</a></li>
-	<li><a :href="nextId | makeUpdateLink">Edit the next {{ singular }}</a></li>
+	<li v-if="nextId"><a :href="nextId | makeUpdateLink">Edit the next {{ singular }}</a></li>
 	<li><a :href="plural | makeCollectionLink">Back to the list of {{ plural }}</a></li>
 </ul>
 

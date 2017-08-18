@@ -21,33 +21,30 @@ class SpellsDomain extends AbstractDomain {
 	 * @return array
 	 */
 	protected function readOne(int $spell_id): array {
+		$sql = $this->getQuery() . " WHERE spell_id = :spell_id";
+		return $this->db->getRow($sql, ["spell_id" => $spell_id]);
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getQuery(): string {
 		
 		// we've prepared a spells_view in the database that makes our select
 		// query here more simple.  it handles the joins and other difficult
 		// stuff so that here we can simply select from the results thereof.
 		
-		$sql = "SELECT spell_id, spell, spell_category, spell_tags,
+		return "SELECT spell_id, spell, spell_category, spell_tags,
 			description, type, `range`, damage, duration, drain_value,
-			abbr, page, spell_tags_ids, spell_category_id, book_id, book
-			FROM spells_view WHERE spell_id = :spell_id";
-		
-		return $this->db->getRow($sql, ["spell_id" => $spell_id]);
+			abbreviation, page, spell_tags_ids, spell_category_id, book_id,
+			book FROM spells_view";
 	}
 	
 	/**
 	 * @return array
 	 */
 	protected function readAll(): array {
-		
-		// we've prepared a spells_view in the database that makes our select
-		// query here more simple.  it handles the joins and other difficult
-		// stuff so that here we can simply select from the results thereof.
-		
-		$sql = "SELECT spell_id, spell, spell_category, spell_tags,
-			description, type, `range`, damage, duration, drain_value,
-			abbr, page, spell_tags_ids, spell_category_id, book_id, book
-			FROM spells_view ORDER BY spell";
-		
+		$sql = $this->getQuery() . " ORDER BY spell";
 		return $this->db->getResults($sql);
 	}
 	

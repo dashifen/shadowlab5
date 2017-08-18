@@ -6,80 +6,69 @@ use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class AdeptPowersTransformer extends AbstractTransformer {
 	protected const HTML = "<h3>Ways</h3><p>This adept power receives a discount from the following Adept Ways:</p><ul><li>%s</li></ul>";
-	protected const REMOVABLE_KEYS = ["adept_power_ways", "adept_power_way_ids", "levels"];
 	
 	/**
-	 * @param array $powers
-	 *
 	 * @return array
 	 */
-	protected function transformAll(array $powers): array {
+	protected function getRemovableKeys(): array {
 		
-		// when we receive our adept powers, each index in $powers is a
-		// complete representation of our powers.  but, what we really
-		// want is the table-ready representation for our collection view.
-		// so here we separate our $powers into the table headers and
-		// bodies we need there.
+		// we know information about our IDs will automatically be removed,
+		// as will the data about our description.  but, we have additional
+		// data in our records that shouldn't become table columns.  those
+		// data are as follows:
 		
-		$transformed = [
-			"headers" => $this->constructHeaders($powers),
-			"bodies"  => $this->constructBodies($powers),
-		];
-		
-		return $transformed;
+		return ["adept_power_ways", "levels"];
 	}
 	
 	/**
-	 * @param $powers array
-	 *
 	 * @return array
 	 */
-	protected function constructHeaders(array $powers): array {
-		$headers = [];
-		$columns = $this->extractHeaders($powers);
-		foreach ($columns as $column) {
-			list($classes, $abbreviation) = $this->enhanceHeaders($column);
-			
-			// the collection view expects ID and display information, but
-			// we can also pass it an abbreviation for that display and
-			// classes for the HTML element.  we construct an array of those
-			// data here and add it to our list of $headers.
-			
-			$headers[] = [
-				"id"           => $this->sanitize($column),
-				"display"      => $this->unsanitize($column),
-				"abbreviation" => $abbreviation,
-				"classes"      => $classes,
-			];
-		}
+	protected function getDescriptiveKeys(): array {
 		
-		return $headers;
+		// in addition to the book, page, etc. data about our description,
+		// we want to consider the adept_power_ways descriptive as well.
+		
+		return ["adept_power_ways"];
 	}
 	
 	/**
-	 * @param string $column
+	 * @param string $header
+	 * @param array  $records
 	 *
-	 * @return array
+	 * @return string
 	 */
-	protected function enhanceHeaders(string $column): array {
-		$classes = $abbreviation = "";
+	protected function getHeaderAbbreviation(string $header, array $records): string {
+		$abbreviation = "";
 		
-		// here we want to loop over our our columns and for a number
-		// of them, specify classes that the collection view uses to
-		// help organize our screen.
-		
-		switch ($column) {
-			case "cost":
-				$classes = "w5 text-right";
-				break;
-			
+		switch ($header) {
 			case "cost_per_level":
 				$abbreviation = "C/L";
-				$classes = "w5 text-right";
 				break;
-			
+				
 			case "maximum_levels":
 				$abbreviation = "LVLs";
+				break;
+		}
+		
+		return $abbreviation;
+	}
+	
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	protected function getHeaderClasses(string $header, array $records): string {
+		$classes = "";
+		
+		switch ($header) {
+			case "cost":
+			case "cost_per_level":
+				$classes = "w5 text-right";
+				break;
+				
+			case "maximum_levels":
 				$classes = "w10 text-center";
 				break;
 				
@@ -88,141 +77,60 @@ class AdeptPowersTransformer extends AbstractTransformer {
 				break;
 		}
 		
-		return [$classes, $abbreviation];
+		return $classes;
 	}
 	
 	/**
-	 * @param array $data
-	 * @param array $descriptiveKeys
+	 * @param array $description
 	 *
 	 * @return array
 	 */
-	protected function extractHeaders(array $data, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
+	protected function transformRecordDescription(array $description): array {
 		
-		// the textual information about our adept ways would usually be left
-		// alone by our parent's method.  so, we'd better pass a slightly
-		// different list of keys to filter out of our results here to avoid
-		// these data becoming a column in our table.
+		// for adept powers, the $description array will contain both a
+		// description and an adept_power_ways index.  we want to take the
+		// latter and append it to the former after making it into an
+		// HTML section.
 		
-		$keys = array_merge($descriptiveKeys, self::REMOVABLE_KEYS);
-		return parent::extractHeaders($data, $keys);
-	}
-	
-	/**
-	 * @param array $powers
-	 *
-	 * @return array
-	 */
-	protected function constructBodies(array $powers): array {
-		$bodies = [];
-		foreach ($powers as $power) {
+		$ways = $description["adept_power_ways"] ?? "";
+		
+		if (!empty($ways) > 0) {
 			
-			// here's where we split one $power into two rows, a summary
-			// and a description, for our collection view.  luckily, much
-			// of the work happens in other methods.  we've carefully
-			// arranged the information about our powers so that the adept
-			// power ID is the first item in the array.  we can shift it
-			// off first, and then the remaining data gets passed to our
-			// extraction methods.
+			// now that we know this power gets discounted by at least one
+			// way, we can convert it from a comma separated list to an
+			// actual HTML list using the constant above.  then we add it
+			// to the general description, and remove the now superfluous
+			// index.
 			
-			$power_id = array_shift($power);
-			
-			// unlike some of our other records, an adept power's description
-			// is made up of both the actual description and then some
-			// information about the Adept Ways that reduce it's cost.  we
-			// want to merge them together using this first method.
-			
-			$power = $this->mergeDescriptions($power);
-			$description = $this->extractDescription($power);
-			$data = $this->extractSummary($power);
-			
-			foreach ($data as &$datum) {
-				$datum = $this->enhanceDatum($datum, $power["adept_power_way_ids"]);
-			}
-			
-			$bodies[] = [
-				"recordId"    => $power_id,
-				"bookId"      => $power["book_id"],
-				"description" => $description,
-				"data"        => $data,
-			];
+			$htmlWays = sprintf(self::HTML, str_replace(", ", "</li><li>", $ways));
+			$description["description"] .= $htmlWays;
+			unset($description["adept_power_ways"]);
 		}
 		
-		return $bodies;
+		return $description;
 	}
 	
 	/**
-	 * @param array $power
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
 	 *
-	 * @return array
+	 * @return string
 	 */
-	protected function mergeDescriptions(array $power): array {
+	protected function getSearchbarValue(string $column, string $value, array $record): string {
+		$sbValue = "";
 		
-		// if there are ways for this power, then we want to take the comma
-		// separated list of them that the database sends us and convert it
-		// using the HTML constant specified above.
-		
-		if (!empty($ways = $power["adept_power_ways"])) {
-			$ways = sprintf(self::HTML, str_replace(", ", "</li><li>", $ways));
-			
-			// now, we take the HTML be built for our information about
-			// adept ways and add it to our description.  and, we unset
-			// the original list of ways because we don't want it to be
-			// a part of our table body.
-			
-			unset($power["adept_power_ways"]);
-			$power["description"] .= $ways;
-		}
-		
-		return $power;
-	}
-	
-	/**
-	 * @param array $power
-	 * @param array $descriptiveKeys
-	 *
-	 * @return array
-	 */
-	protected function extractSummary(array $power, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		
-		// like our header method above, we want to make sure that the
-		// information about our adept ways is not a part of our table
-		// bodies.  we already removed the textual data in our merge
-		// method above, here we make sure that their IDs don't end up
-		// in our table body.
-		
-		$keys = array_merge($descriptiveKeys, self::REMOVABLE_KEYS);
-		return parent::extractSummary($power, $keys);
-	}
-	
-	/**
-	 * @param array  $datum
-	 * @param string $adept_power_way_ids
-	 *
-	 * @return array
-	 */
-	protected function enhanceDatum(array $datum, string $adept_power_way_ids = null): array {
-		
-		// like the method above which enhances our headers, this one
-		// determines additional information about our data that the view
-		// requires to display our collection.
-		
-		switch($datum["column"]) {
-			case "adept-power":
-				$datum["searchbarValue"] = strip_tags($datum["html"]);
-				
-				// the database doesn't add our <a> tag to the adept_power
-				// display.  we'll do so here to trigger the display of its
-				// description.
-				
-				$datum["html"] = sprintf('<a href="#">%s</a>', $datum["html"]);
+		switch ($column) {
+			case "adept_power":
+				$sbValue = strip_tags($value);
 				break;
 				
 			case "cost":
-				$datum["searchbarValue"] = $datum["html"];
+			case "action":
+				$sbValue = $value;
 				break;
 				
-			case "maximum-levels":
+			case "maximum_levels":
 				
 				// we've been very careful to remove information about
 				// our ways from our columns because we merged it into
@@ -232,26 +140,53 @@ class AdeptPowersTransformer extends AbstractTransformer {
 				// our searchbar, we can use it to inject these data
 				// into the DOM.
 				
-				$datum["searchbarValue"] = $adept_power_way_ids;
-				$datum["searchbarValueList"] = 1;
-				break;
+				if (!empty($record["adept_power_ways_ids"] ?? "")) {
+					$sbValue = $record["adept_power_ways_ids"];
+				}
 				
-			case "action":
-				$datum["searchbarValue"] = $datum["html"];
-				$datum["html"] = ucfirst($datum["html"]);
 				break;
 		}
 		
-		return $datum;
+		return $sbValue;
 	}
 	
 	/**
-	 * @param array $powers
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
 	 *
-	 * @return array
+	 * @return bool
 	 */
-	protected function transformOne(array $powers): array {
-		return $powers;
+	protected function isSearchbarValueList(string $column, string $value, array $record): bool {
+		
+		// just like the prior method, we can't rely on SOP for our
+		// searchbar values list for the adept ways because we've removed
+		// those data from our table.  therefore, we'll hijack the maximum
+		// levels of a power to get them into the DOM.  so, if this is that
+		// column and we have way data, then we want to return true.
+
+		return $column === "maximum_levels" && !empty($record["adept_power_ways_ids"] ??"");
 	}
 	
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	protected function getCellContent(string $column, string $value, array $record): string {
+		switch ($column) {
+			case "adept_power":
+				$value = sprintf('<a href="#">%s</a>', $value);
+				break;
+				
+			case "action":
+				$value = ucfirst($value);
+				break;
+		}
+		
+		return $value;
+	}
 }

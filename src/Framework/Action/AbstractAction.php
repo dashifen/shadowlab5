@@ -2,11 +2,14 @@
 
 namespace Shadowlab\Framework\Action;
 
+use Aura\Di\Container;
 use Dashifen\Action\AbstractAction as DashifenAbstractAction;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Form\Builder\FormBuilderInterface;
+use Dashifen\Request\RequestInterface;
 use Dashifen\Response\ResponseInterface;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\Domain\ShadowlabDomainInterface;
 
 /**
  * Class Action
@@ -30,6 +33,15 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 * @var int $recordId
 	 */
 	protected $recordId = 0;
+	
+	public function __construct(
+		RequestInterface $request,
+		ShadowlabDomainInterface $domain,
+		ResponseInterface $response,
+		Container $container
+	) {
+		parent::__construct($request, $domain, $response, $container);
+	}
 	
 	/**
 	 * @param array $parameter
@@ -78,33 +90,52 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			// it to 3 so that we homogenize that length.  then, we can use
 			// list() to get at those data.
 			
-			$parameter = array_pad($parameter, 3, "");
-			list($createAction, $otherAction, $recordId) = $parameter;
+			$parameter = array_pad($parameter, 4, "");
+			list($createAction, $otherAction, $recordId, $sheetType) = $parameter;
 			
-			// now, if our $otherAction is empty, we assume that we're
-			// reading.  then, to determine the action, if it's a create
-			// action, that takes precedence over the other actions.
+			// if we have a sheet type, then it takes precedence.  plus, our
+			// pattern only matches the sheet types we know about, so we don't
+			// need to test it beyond existence.
 			
-			$action = empty($createAction)
-				? (empty($otherAction) ? "read" : $otherAction)
-				: "create";
-			
-			$this->setAction($action);
-			
-			// finally, if we have a numeric record ID, we'll set that
-			// information, too.  otherwise, we'll assume that the record
-			// ID is unnecessary or, as with a create action, that it can
-			// remain the default of zero.
-			
-			if (!is_numeric($recordId) || floor($recordId) != $recordId) {
-				throw new ActionException(
-					"Invalid record ID: $recordId",
-					ActionException::INVALID_RECORD_ID
-				);
+			if (!empty($sheetType)) {
+				$this->setRecordId($this->domain->getSheetTypeId($sheetType));
+				$this->setAction("read");
+			} else {
+				
+				// now, if our $otherAction is empty, we assume that we're
+				// reading.  then, to determine the action, if it's a create
+				// action, that takes precedence over the other actions.
+				
+				$action = empty($createAction)
+					? (empty($otherAction) ? "read" : $otherAction)
+					: "create";
+				
+				$this->setAction($action);
+				
+				// finally, if we have a numeric record ID, we'll set that
+				// information, too.  otherwise, we'll assume that the record
+				// ID is unnecessary or, as with a create action, that it can
+				// remain the default of zero.
+				
+				if (!is_numeric($recordId) || floor($recordId) != $recordId) {
+					throw new ActionException(
+						"Invalid record ID: $recordId",
+						ActionException::INVALID_RECORD_ID
+					);
+				}
+				
+				$this->setRecordId($recordId);
 			}
-			
-			$this->setRecordId($recordId);
 		}
+	}
+	
+	/**
+	 * @param int $recordId
+	 *
+	 * @return void
+	 */
+	protected function setRecordId(int $recordId) {
+		$this->recordId = $recordId;
 	}
 	
 	/**
@@ -130,15 +161,6 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			"Unknown action: $action.",
 			ActionException::UNKNOWN_ACTION
 		);
-	}
-	
-	/**
-	 * @param int $recordId
-	 *
-	 * @return void
-	 */
-	protected function setRecordId(int $recordId) {
-		$this->recordId = $recordId;
 	}
 	
 	/**
@@ -213,13 +235,15 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 */
 	protected function respond(string $function, array $data): void {
 		
-		// the purpose of this method -- indeed this entire object -- is
-		// simply to ensure that we never forget to tell our response whether
-		// or not we're authentic.  we can ask that object what's up and then
-		// add it to our data.
+		// the purpose of this method is to ensure that we always tell the
+		// response whether or not we're authentic and to provide it the menu.
+		// our authentic state can be gathered from the session object in our
+		// request.  the menu is given to us by our Domain.
 		
-		$authentic = $this->request->getSessionObj()->isAuthenticated() ? 1 : 0;
-		$data = array_merge($data, ["authentic" => $authentic]);
+		$data = array_merge($data, [
+			"authentic"     => $this->request->getSessionObj()->isAuthenticated() ? 1 : 0,
+			"shadowlabMenu" => $this->domain->getShadowlabMenu(),
+		]);
 		
 		// we very specifically named our methods above so that they matched
 		// the public methods of our response object.  that way we can use

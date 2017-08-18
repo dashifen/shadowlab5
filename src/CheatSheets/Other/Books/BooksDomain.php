@@ -20,18 +20,26 @@ class BooksDomain extends AbstractDomain {
 	 * @return array
 	 */
 	protected function readOne(int $book_id): array {
-		$sql = "SELECT book_id, book, description, abbr, included FROM books
-			WHERE book_id = :book_id AND deleted = 0";
+		$sql = $this->getQuery() . " WHERE book_id = :book_id
+			AND deleted = 0";
 		
 		return $this->db->getRow($sql, ["book_id" => $book_id]);
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getQuery(): string {
+		return "SELECT book_id, book, description, abbreviation,
+			included FROM books";
 	}
 	
 	/**
 	 * @return array
 	 */
 	protected function readAll(): array {
-		return $this->db->getResults("SELECT book_id, book, description,
-			abbr, included FROM books WHERE deleted = 0 ORDER BY book");
+		$sql = $this->getQuery() . " WHERE deleted = 0 ORDER BY book";
+		return $this->db->getResults($sql);
 	}
 	
 	/**

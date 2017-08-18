@@ -44,23 +44,24 @@ main {
 	}
 
 	#cheatsheets {
-		display: flex;
-		flex-wrap: wrap;
-		margin-top: 1rem;
-
-		.sheet {
-			width: 33%;
-		}
-
-		ol {
+		ul {
 			list-style-type: none;
 			margin:  0;
 			padding: 0;
 		}
+
+		> ul {
+			display: flex;
+			flex-wrap: wrap;
+			margin-top: 1rem;
+
+			> li {
+				width: 33%;
+			}
+		}
 		
-		li.incomplete a {
-			color: palette(mono);
-			cursor: pointer;
+		h3 a {
+			color: palette(mono, text);
 			text-decoration: none;
 		}
 	}

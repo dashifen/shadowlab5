@@ -30,9 +30,9 @@ class AdeptPowersDomain extends AbstractDomain {
 	 * @return string
 	 */
 	protected function getQuery(): string {
-		return "SELECT adept_power_id, adept_power_way_ids, adept_power,
+		return "SELECT adept_power_id, adept_power_ways_ids, adept_power,
 			description, adept_power_ways, action, cost, maximum_levels,
-			cost_per_level, book_id, book, abbr, page, levels
+			cost_per_level, book_id, book, abbreviation, page, levels
 			FROM adept_powers_view";
 	}
 	

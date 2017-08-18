@@ -262,42 +262,21 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 	 * @return void
 	 */
 	public function handleNotFound(array $data = [], string $action = "read"): void {
+		$this->setStatusCode(404);
 		
 		// in addition to whatever data the calling scope sent us,
 		// we want to make sure to set the following so that they'll
 		// be correct when the page loads.
 		
 		$data = array_merge($data, [
-			"title"     => "Not Found",
-			"heading"   => "Critical Glitch",
-			"httpError" => "Not Found",
+			"title"            => "Not Found",
+			"heading"          => "Critical Glitch",
+			"httpErrorMessage" => $this->getErrorMessage(),
+			"httpError"        => "Not Found",
 		]);
 		
 		$this->setResponseType("notfound");
 		$this->setTemplate($data, $action);
-	}
-	
-	public function send(): void {
-		
-		// before we send this response, if we're printing our error
-		// message, we want to be sure we have a message to print.  we'll
-		// check for that now.
-		
-		$isError = $this->contentTemplate === "error.html";
-		$withMessage = isset($this->data["httpErrorMessage"]);
-		if ($isError && !$withMessage) {
-			
-			// if we need to set our httpErrorMessage, then we do so here.
-			// but, it's useless to set it in our data property because the
-			// view won't get it at this point.  so, we'll send it directly
-			// to the view instead.
-			
-			$this->view->setDatum("httpErrorMessage", $this->getErrorMessage());
-		}
-		
-		// and, now we can let the parent take over from here.
-		
-		parent::send();
 	}
 	
 	/**
@@ -328,6 +307,29 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 					persists, contact Dash because he clearly messed something
 					up.</p>";
 		}
+	}
+	
+	public function send(): void {
+		
+		// before we send this response, if we're printing our error
+		// message, we want to be sure we have a message to print.  we'll
+		// check for that now.
+		
+		$isError = $this->contentTemplate === "error.html";
+		$withMessage = isset($this->data["httpErrorMessage"]);
+		if ($isError && !$withMessage) {
+			
+			// if we need to set our httpErrorMessage, then we do so here.
+			// but, it's useless to set it in our data property because the
+			// view won't get it at this point.  so, we'll send it directly
+			// to the view instead.
+			
+			$this->view->setDatum("httpErrorMessage", $this->getErrorMessage());
+		}
+		
+		// and, now we can let the parent take over from here.
+		
+		parent::send();
 	}
 	
 }

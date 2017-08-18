@@ -9,16 +9,9 @@ use Dashifen\Domain\Payload\PayloadInterface;
 /**
  * Class Domain
  *
- * This default Domain implementation for the Shadowlab simply throws a
- * giant tantrum all of the place.  Floor kicking.  Screaming.  All the
- * good stuff.  Children can overwrite these methods to help calm things
- * down.  Once we get past the CRUD related tantrums, we see some ways
- * that we interact with the database specifically to understand the
- * schema of the database tables that we interact with.
- *
  * @package Shadowlab\Framework\Domain
  */
-abstract class AbstractDomain extends AbstractMysqlDomain {
+abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDomainInterface {
 	/**
 	 * @param array $data
 	 *
@@ -534,5 +527,81 @@ CONSTRAINT;
 		}
 		
 		return $id;
+	}
+	
+	public function getSheetTypeId(string $sheetType): int {
+		return $this->db->getVar("SELECT sheet_type_id FROM sheets_types
+			WHERE sheet_type = :sheet_type", ["sheet_type" => $sheetType]);
+	}
+	
+	public function getShadowlabMenu(): string {
+		$sheetTypeIds = $this->db->getCol("SELECT sheet_type_id
+			FROM sheets_types ORDER BY sheet_type");
+		
+		// we build the guts of our menu -- the views that use it include it
+		// into a <ul> element using the v-html vue binding.  as such, we
+		// start here with the <li> elements that will exist within
+		
+		$menu = "";
+		foreach ($sheetTypeIds as $sheetTypeId) {
+			$menu .= $this->getSheetTypeMenu($sheetTypeId);
+		}
+		
+		return $menu;
+	}
+	
+	/**
+	 * @param int $sheetTypeId
+	 *
+	 * @return string
+	 */
+	protected function getSheetTypeMenu(int $sheetTypeId): string {
+		
+		// given a sheet type ID, we want to build the <li> for that
+		// part of our menu.  we've separated this from the rest of
+		// the above method because our cheat sheet Domain needs this
+		// capability, too.
+		
+		$typeKey = ["sheet_type_id" => $sheetTypeId];
+		$type = $this->db->getVar("SELECT sheet_type FROM sheets_types
+			WHERE sheet_type_id = :sheet_type_id", $typeKey);
+
+		// we start this item here.  we don't close it because we might
+		// have a sub-menu of sheets to display within this type.
+		
+		$menu = sprintf('<li><h3><a href="/cheat-sheets/%s">%s</a></h3>', $type, ucwords($type));
+		
+		$sheets = $this->db->getResults("SELECT route, sheet_name
+			FROM sheets WHERE sheet_type_id = :sheet_type_id
+			ORDER BY sheet_name", $typeKey);
+		
+		if (sizeof($sheets) > 0) {
+			$menu .= $this->getSheetTypeSubMenu($sheets);
+		}
+		
+		$menu .= "</li>";
+		return $menu;
+	}
+	
+	/**
+	 * @param array $sheets
+	 *
+	 * @return string
+	 */
+	protected function getSheetTypeSubMenu(array $sheets): string {
+		$subMenu = '<ul class="sub-menu">';
+		
+		// our $sheets array should be an array of arrays, with each
+		// value being the route to a given sheet (see the second query
+		// in the prior method).  armed with them, we can use vsprintf()
+		// to quickly create list items for our sub-menu.
+		
+		foreach ($sheets as $sheet) {
+			$subMenu .= vsprintf('<li><a href="%s">%s</a></li>',
+				array_values($sheet));
+		}
+		
+		$subMenu .= "</ul>";
+		return $subMenu;
 	}
 }

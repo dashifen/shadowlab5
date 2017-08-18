@@ -20,22 +20,24 @@ class QualitiesDomain extends AbstractDomain {
 	 * @return array
 	 */
 	protected function readOne(int $qualityId): array {
-		$sql = "SELECT quality_id, quality, description, metagenetic,
-			freakish, cost, minimum, maximum, book_id, book, abbr, page
-			FROM qualities_view WHERE quality_id = :quality_id
-			ORDER BY quality";
-		
+		$sql = $this->getQuery() . " WHERE quality_id = :quality_id ORDER BY quality";
 		return $this->db->getRow($sql, ["quality_id" => $qualityId]);
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function getQuery(): string {
+		return "SELECT quality_id, quality, description, metagenetic,
+			freakish, cost, minimum, maximum, book_id, book, abbreviation,
+			page FROM qualities_view";
 	}
 	
 	/**
 	 * @return array
 	 */
 	protected function readAll(): array {
-		return $this->db->getResults("SELECT quality_id, quality,
-			description, metagenetic, freakish, cost, minimum, maximum,
-			book_id, book, abbr, page FROM qualities_view
-			ORDER BY quality");
+		return $this->db->getResults($this->getQuery() . " ORDER BY quality");
 	}
 	
 	/**

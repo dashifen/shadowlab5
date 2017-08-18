@@ -28,7 +28,7 @@
 	<link href="/assets/styles/shadowlab.min.css" rel="stylesheet" type="text/css">
 
 	<script src="https://use.fontawesome.com/e1cf9918af.js"></script>
-	<script src="https://unpkg.com/vue"></script>
+	<script src="/assets/scripts/vue.js"></script>
 	
 	<!--[if gte IE 9]> <style type="text/css"> .gradient { filter: none; } </style> <![endif]-->
 
@@ -41,24 +41,7 @@
 		
 			<nav role="navigation" class="menu mainmenu gradient">
 				<h2 class="visuallyhidden">Main Menu</h2>
-				<ul v-if="authentic" class="menu">
-					<li><a href="/cheat-sheets/combat">Combat</a></li>
-					<li>
-						<a href="/cheat-sheets/magic">Magic</a>
-						<ul class="sub-menu">
-							<li><a href="/cheat-sheets/magic/adept-powers">Adept Powers</a></li>
-							<li><a href="/cheat-sheets/magic/spells">Spells</a></li>
-						</ul>
-					</li>
-					<li><a href="/cheat-sheets/matrix">Matrix</a></li>
-					<li>
-						<a href="/cheat-sheets/other">Other</a>
-						<ul class="sub-menu">
-							<li><a href="/cheat-sheets/other/books">Books</a></li>
-							<li><a href="/cheat-sheets/other/qualities">Qualities</a></li>
-						</ul>
-					</li>
-				</ul>
+				<ul v-if="authentic" class="menu" v-html="shadowlabMenu"></ul>
 			</nav>
 		</header>
 		

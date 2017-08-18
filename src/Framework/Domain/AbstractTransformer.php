@@ -8,16 +8,10 @@ use Dashifen\Domain\Transformer\TransformerInterface;
 /**
  * Class Transformer
  *
- * This is a default Transformer for our app.  It simply returns
- * the exact payload that it receives in all cases.  Children of
- * this class will be able to override only the methods they need
- * to use without cluttering up their definitions with the other
- * stuff that isn't important to them.
- *
  * @package Shadowlab\Framework\Domain
  */
 abstract class AbstractTransformer implements TransformerInterface {
-	public const DESCRIPTIVE_KEYS = ["description", "book", "abbr", "page"];
+	public const DESCRIPTIVE_KEYS = ["description", "book", "abbreviation", "page"];
 	
 	/**
 	 * @param PayloadInterface $payload
@@ -42,10 +36,12 @@ abstract class AbstractTransformer implements TransformerInterface {
 		// original, untransformed data in case it's useful to our Action.
 		
 		$original = $payload->getDatum("records");
-		$method = $payload->getDatum("count") > 1 ? "transformAll" : "transformOne";
+		$transformed = $payload->getDatum("count") > 1
+			? $this->transformCollectionForDisplay($original)
+			: $this->transformRecordForDisplay($original);
 		
 		$payload->setData([
-			"records"          => $this->{$method}($original),
+			"records"          => $transformed,
 			"original-records" => $original,
 		]);
 		
@@ -53,84 +49,126 @@ abstract class AbstractTransformer implements TransformerInterface {
 	}
 	
 	/**
-	 * @param array $powers
+	 * @param array $records
 	 *
 	 * @return array
 	 */
-	abstract protected function transformAll(array $powers): array;
+	protected function transformCollectionForDisplay(array $records): array {
+		
+		// transforming an entire collection for display means taking our
+		// records and splitting them into table headers and bodies:
+		
+		return [
+			"headers" => $this->transformTableHeaders($records),
+			"bodies"  => $this->transformTableBodies($records),
+		];
+	}
 	
 	/**
 	 * @param array $records
 	 *
 	 * @return array
 	 */
-	abstract protected function transformOne(array $records): array;
-	
-	/**
-	 * @param PayloadInterface $payload
-	 *
-	 * @return PayloadInterface
-	 */
-	public function transformUpdate(PayloadInterface $payload): PayloadInterface {
+	protected function transformTableHeaders(array $records): array {
 		
-		// when we transform a payload for updating, what we're really doing
-		// is removing information from our data that we don't need to insert.
-		// we can identify these data because they'll be optional (i.e.
-		// nullable) and empty in our record.
+		// the headers we construct here have the following information:
+		// an ID and display, and then optional classes and an abbreviation
+		// (e.g. like DV for Drain Value).  first, we want to extract the
+		// pertinent header information out of our $records.
 		
-		$schema = $payload->getDatum("schema");
-		$record = $payload->getDatum("record");
-		foreach ($schema as $column => $columnData) {
-			if ($columnData["IS_NULLABLE"] === "YES") {
-				
-				// now that we know our column is nullable, we need to see
-				// if the record's value for that column is empty.  we use
-				// empty in addition to our null coalescing operator so that
-				// values like zero and the empty string won't be read as
-				// real values.
-				
-				$value = $record[$column] ?? "";
-				if (empty($value)) {
-				
-					// if our value is empty, we actually unset it from our
-					// record.  that'll allow the database to store the default
-					// value (NULL or otherwise) in its place.
-					
-					unset($record[$column]);
-				}
-			}
+		$transformed = [];
+		$headers = $this->extractHeaders($records);
+		foreach ($headers as $header) {
+			$temp = [
+				"id"           => $this->sanitize($header),
+				"display"      => $this->unsanitize($header),
+				"abbreviation" => $this->getHeaderAbbreviation($header, $records),
+				"classes"      => $this->getHeaderClasses($header, $records),
+			];
+			
+			// to avoid sending "extra" data to the client, we'll simply
+			// remove empty indices from our $temp array.  then, we can add
+			// it to our list of transformed headers.
+			
+			$transformed[] = array_filter($temp);
 		}
 		
-		// now, we store our transformed $record back in the payload and
-		// send it back to our Domain for processing.  we don't worry about
-		// sending back the original record since, if we need it, it's
-		// already there.
+		return $transformed;
+	}
+	
+	protected function extractHeaders(array $records): array {
 		
-		$payload->setDatum("record", $record);
-		return $payload;
+		// here, we want to filter and remove information from our $data
+		// that shouldn't be used to display table headers.  to do that we
+		// want to remove some of our data and return the rest.  but, to
+		// do so, we need a specific record and not the set of them.  so
+		// we grab the first one and hand it over to another method.
+		
+		$record = $records[0];
+		return $this->extractRecordCells($record);
 	}
 	
 	/**
-	 * @param PayloadInterface $payload
+	 * @param array $record
 	 *
-	 * @return PayloadInterface
+	 * @return array
 	 */
-	public function transformDelete(PayloadInterface $payload): PayloadInterface {
-		return $payload;
+	protected function extractRecordCells(array $record): array {
+		
+		// the cells of our table, whether they be in the header or the body
+		// of it, are made up of the record data less what we consider to be
+		// descriptive keys or keys needed in a record's form.  we start that
+		// list with the constant above, but let Domains add to that list
+		// when necessary.
+		
+		$removeThese = array_unique(array_merge(...[
+			$this->getDescriptiveKeys(),
+			$this->getRemovableKeys(),
+			self::DESCRIPTIVE_KEYS,
+		]));
+		
+		return array_values(array_filter(array_keys($record), function($index) use ($removeThese) {
+			
+			// now, we want to keep the data whose index is not in the
+			// $removeThese array and when the field doesn't end in either
+			// _id or _ids.  the following conditional tells us when that's
+			// the case.
+			
+			return !in_array($index, $removeThese) && !preg_match("/_ids?$/", $index);
+		}));
 	}
 	
-	protected function abbreviate(string $string): string {
+	/**
+	 * @return array
+	 */
+	protected function getDescriptiveKeys(): array {
 		
-		// it's common that we want to abbreviate information that we
-		// display in table headers using our collection view.  this
-		// method uses a regex to identify the first character of
-		// $string as well as any character after an underscore. so,
-		// drain_value would be come DV and type would become T.
+		// like when we gte additional removable keys for our headers, here
+		// we want to get more keys that describe this specific record.  most
+		// of the time, this won't matter, so we'll implement that common
+		// case here.
 		
-		preg_match_all("/(?:^|_)([a-z])/", $string, $matches);
-		return strtoupper(join("", $matches[1]));
+		return [];
 	}
 	
+	/**
+	 * @return array
+	 */
+	protected function getRemovableKeys(): array {
+		
+		// most of the time, we won't have any more descriptive keys to
+		// remove from our table.  but, sometimes we will.  so, we'll
+		// implement the common case here and let children override it
+		// when we need to.
+		
+		return [];
+	}
+	
+	/**
+	 * @param string $unsanitary
+	 *
+	 * @return string
+	 */
 	protected function sanitize(string $unsanitary): string {
 		
 		// we take this essentially from WordPress to produce ID attribute
@@ -159,10 +197,293 @@ abstract class AbstractTransformer implements TransformerInterface {
 		return preg_replace("/[\W-_]+/", " ", $sanitary);
 	}
 	
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	abstract protected function getHeaderAbbreviation(string $header, array $records): string;
+	
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	abstract protected function getHeaderClasses(string $header, array $records): string;
+	
+	/**
+	 * @param array $records
+	 *
+	 * @return array
+	 */
+	protected function transformTableBodies(array $records): array {
+		
+		// transforming our table bodies is more complicated than our
+		// headers because we want to take each record and produce a summary
+		// and a description.  so, we loop over our $records and extract
+		// information from each of them for these data sets.  then, like
+		// our table headers, we also send back information about the
+		// record's ID and the book in which the record is found.
+		
+		$transformed = [];
+		foreach ($records as $record) {
+			
+			// we cheat here:  we always select our ID first from the
+			// database, so we can use array_shift() to get that information
+			// out of $record.
+			
+			$transformed[] = [
+				"recordId"    => array_shift($record),
+				"bookId"      => $record["book_id"] ?? 0,
+				"description" => $this->extractDescription($record),
+				"summary"     => $this->extractSummary($record),
+			];
+		}
+		
+		return $transformed;
+	}
+	
+	protected function extractDescription(array $record): array {
+		
+		// the description of a record is made up of the actual description
+		// as well as the book reference for our record.  the keys within
+		// $record that describe these data are stored in our DESCRIPTIVE_KEYS
+		// constant.  so, we can filter out those data as follows:
+		
+		$keys = array_merge(self::DESCRIPTIVE_KEYS, $this->getDescriptiveKeys());
+		$description = array_filter($record, function($field) use ($keys) {
+			return in_array($field, $keys);
+		}, ARRAY_FILTER_USE_KEY);
+		
+		// now, if our description includes both a book and an abbreviation,
+		// we're going to combine them into one field using an <abbr> tag.
+		// then, we provide the chance for our children to do an additional
+		// descriptive transform and return those results.
+		
+		if (isset($description["abbr"]) && isset($description["book"])) {
+			$description = $this->combineBookAndAbbreviation($description);
+		}
+		
+		return $this->transformRecordDescription($description);
+	}
+	
+	/**
+	 * @param array $desc
+	 *
+	 * @return array
+	 */
+	protected function combineBookAndAbbreviation(array $desc): array {
+		
+		// we tested for the existence of our abbr and book indices in the
+		// prior method.  here we want to combine them into an <abbr> tag
+		// and then remove the book entirely.
+		
+		$abbr = '<abbr title="%s">%s</abbr>';
+		$desc["abbr"] = sprintf($abbr, $desc["book"], $desc["abbr"]);
+		unset($desc["book"]);
+		return $desc;
+	}
+	
+	/**
+	 * @param array $description
+	 *
+	 * @return array
+	 */
+	protected function transformRecordDescription(array $description): array {
+		
+		// most of the time, we don't need to do any more work on our
+		// descriptions.  but especially for items that are described in
+		// multiple fields (e.g. the adept power description and then the
+		// list of ways that reduce its cost), this function can be
+		// overwritten to do that extra work.
+		
+		return $description;
+	}
+	
+	protected function extractSummary(array $record): array {
+		
+		// the summary is made up of the for the columns we identified when
+		// extracting headers above.  so, we want to pass our record through
+		// the same filter as we did for that method.
+		
+		$summary = [];
+		$columns = $this->extractRecordCells($record);
+		$cells = array_filter($record, function($index) use ($columns) {
+			return in_array($index, $columns);
+		}, ARRAY_FILTER_USE_KEY);
+		
+		foreach ($cells as $column => $contents) {
+			$contents = (string)$contents;
+			
+			// it stands to reason that individual Domains might have work
+			// to do here, especially with respect to information about the
+			// searchability of these data.  so, we'll provide functions
+			// herein that'll provide children the ability to mess with
+			// these data.
+			
+			$temp = [
+				"column"             => $this->sanitize($column),
+				"searchbarValue"     => $this->getSearchbarValue($column, $contents, $record),
+				"searchbarValueList" => $this->isSearchbarValueList($column, $contents, $record) ? "1" : "0",
+				"html"               => $this->getCellContent($column, $contents, $record),
+			];
+			
+			// now, we don't want to send "extra" data to the client, so we're
+			// going to remove empty indices in our $temp array before adding
+			// it to our summary.
+			
+			$summary[] = array_filter($temp);
+		}
+		
+		return $summary;
+	}
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	abstract protected function getSearchbarValue(string $column, string $value, array $record): string;
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return bool
+	 */
+	protected function isSearchbarValueList(string $column, string $value, array $record): bool {
+		
+		// for most Domains that need a searchbar value list, those lists
+		// are made up of underscore separated lists that are prefixed and
+		// suffixed by underscores (e.g. _1_2_3_4_5_).  that's a pattern
+		// we can match with a regex.  however, those columns aren't often
+		// a part of our table display; i.e. they've been removed.  so, if
+		// we have an index in our record that matches this column but with
+		// "_ids" added to it, and the value of that index matches our
+		// pattern, we'll assume this is a searchbar list.  we'll also test
+		// our value parameter, just in case.
+		
+		$idsCol = $column . "_ids";
+		$idsVal = $record[$idsCol] ?? "";
+		
+		$possibilities = [$idsVal, $value];
+		foreach ($possibilities as $possibility) {
+			if (preg_match("/_(\d+_)+/", $possibility)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	abstract protected function getCellContent(string $column, string $value, array $record): string;
+	
+	/**
+	 * @param array $record
+	 *
+	 * @return array
+	 */
+	protected function transformRecordForDisplay(array $record): array {
+		return $record;
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return PayloadInterface
+	 */
+	public function transformUpdate(PayloadInterface $payload): PayloadInterface {
+		
+		// when we transform a payload for updating, what we're really doing
+		// is removing information from our data that we don't need to insert.
+		// we can identify these data because they'll be optional (i.e.
+		// nullable) and empty in our record.
+		
+		$schema = $payload->getDatum("schema");
+		$record = $payload->getDatum("record");
+		foreach ($schema as $column => $columnData) {
+			if ($columnData["IS_NULLABLE"] === "YES") {
+				
+				// now that we know our column is nullable, we need to see
+				// if the record's value for that column is empty.  we use
+				// empty in addition to our null coalescing operator so that
+				// values like zero and the empty string won't be read as
+				// real values.
+				
+				$value = $record[$column] ?? "";
+				if (empty($value)) {
+					
+					// if our value is empty, we actually unset it from our
+					// record.  that'll allow the database to store the default
+					// value (NULL or otherwise) in its place.
+					
+					unset($record[$column]);
+				}
+			}
+		}
+		
+		// now, we store our transformed $record back in the payload and
+		// send it back to our Domain for processing.  we don't worry about
+		// sending back the original record since, if we need it, it's
+		// already there.
+		
+		$payload->setDatum("record", $record);
+		return $payload;
+	}
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return PayloadInterface
+	 */
+	public function transformDelete(PayloadInterface $payload): PayloadInterface {
+		return $payload;
+	}
+	
+	/**
+	 * @param string $string
+	 *
+	 * @return string
+	 */
+	protected function abbreviate(string $string): string {
+		
+		// it's common that we want to abbreviate information that we
+		// display in table headers using our collection view.  this
+		// method uses a regex to identify the first character of
+		// $string as well as any letter after an underscore. so,
+		// drain_value would be come DV and type would become T.
+		
+		preg_match_all("/(?:^|_)([a-z])/", $string, $matches);
+		return strtoupper(join("", $matches[1]));
+	}
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return array
+	 */
 	protected function deduplicateAndSort(array $data): array {
 		return $this->deduplicate($data, true);
 	}
 	
+	/**
+	 * @param array $data
+	 * @param bool  $sort
+	 *
+	 * @return array
+	 */
 	protected function deduplicate(array $data, bool $sort = false): array {
 		
 		// the $data array is assumed to be non-unique.  so, we want to
@@ -182,105 +503,5 @@ abstract class AbstractTransformer implements TransformerInterface {
 		}
 		
 		return $data;
-	}
-	
-	protected function extractHeaders(array $data, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		
-		// our $data is a set of data selected from the database.  if we're
-		// transforming it, then we've already confirmed that there's at least
-		// one datum in our array, and we can use it to work with its indices.
-		
-		$indices = array_keys($data[0]);
-		
-		// the data we want to filter and remove from our array are any
-		// of our descriptive keys in the constant above, the sanitized
-		// column usually used for URL matching, and any column ending in
-		// "_id" to skip numeric keys in the database.  we'll make our
-		// regex here and the use it via closure in the anonymous
-		// function below.
-		
-		foreach ($descriptiveKeys as &$key) {
-			$key = '^' . $key . '$';
-		}
-		
-		$keys = array_merge($descriptiveKeys, ["sanitized", ".+_id$"]);
-		
-		$regex = "/" . join("|", $keys) . "/";
-		return array_values(array_filter($indices, function($index) use ($regex) {
-			
-			// if we did not find a match against our $regex here, then
-			// this index should stay in.  to return true, we want to see
-			// that our count of matches is exactly zero.
-			
-			$matches = preg_match($regex, $index);
-			return $matches === 0;
-		}));
-	}
-	
-	protected function extractSummary(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		
-		// this method is used by transformers that prepare data for our
-		// collection view.  in that view, any key not listed in our constant
-		// above is considered data.  using array_filter, we can return true
-		// for all fields not in that constant as follows which'll remove
-		// the descriptive data from our $record.
-		
-		$filtered = array_filter($spell, function($field) use ($descriptiveKeys) {
-			return !in_array($field, $descriptiveKeys);
-		}, ARRAY_FILTER_USE_KEY);
-		
-		// now that we've removed our descriptive keys from our data, we need
-		// to arrange what's left so that our Vue can access both the field
-		// and value information rather than just the value.  plus, we'll also
-		// remove anything that ends in _id since those shouldn't be in our
-		// data either.
-		
-		$temp = [];
-		foreach ($filtered as $field => $value) {
-			if (preg_match("/_id$/", $field)) {
-				continue;
-			}
-			
-			$temp[] = [
-				"column" => $this->sanitize($field),
-				"html"   => $value,
-			];
-		}
-		
-		return array_values($temp);
-	}
-	
-	protected function extractDescription(array $record, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		
-		// this is the opposite, effectively of the prior method.  the logic
-		// is the same, but this time we want to filter out the data.  so we
-		// want to return true from our filter callback when our fields are
-		// in the constant above so that we're left with only them.
-		
-		$desc = array_filter($record, function($field) use ($descriptiveKeys) {
-			return in_array($field, $descriptiveKeys);
-		}, ARRAY_FILTER_USE_KEY);
-		
-		// now, we do one other thing:  if our description includes both a
-		// book and an abbreviation, we're going to combine them into one
-		// field using an <abbr> tag.
-		
-		if (isset($desc["abbr"]) && isset($desc["book"])) {
-			$desc = $this->combineBookAndAbbreviation($desc);
-		}
-		
-		return $desc;
-	}
-	
-	protected function combineBookAndAbbreviation(array $desc): array {
-		
-		// we tested for the existence of our abbr and book indices in the
-		// prior method.  here we want to combine them into an <abbr> tag
-		// and then remove the book entirely.
-		
-		$abbr = '<abbr title="%s">%s</abbr>';
-		$desc["abbr"] = sprintf($abbr, $desc["book"], $desc["abbr"]);
-		unset($desc["book"]);
-		return $desc;
 	}
 }

@@ -5,142 +5,117 @@ namespace Shadowlab\CheatSheets\Magic\Spells;
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
 class SpellsTransformer extends AbstractTransformer {
-	protected function transformAll(array $spells): array {
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	protected function getHeaderAbbreviation(string $header, array $records): string {
+		$abbreviation = "";
 		
-		// our full list of spells is displayed using our collection view.
-		// so, we need to transform our array of spells into the structure
-		// that it requires to produce our display.  first, we'll construct
-		// our headers:
+		// for this collection, we actually have a lot of data that we want
+		// to abbreviate in the header.  so, if our $header isn't in the
+		// list we specify here, we'll abbreviate it; it's easier to say what
+		// not to abbreviate than to specify what we do!
 		
-		$headers = $this->constructHeaders($spells);
-		$bodies = $this->constructBodies($spells);
-		
-		return [
-			"headers"   => $headers,
-			"bodies"    => $bodies,
-		];
-	}
-	
-	protected function constructHeaders(array $spells): array {
-		$headers = [];
-		
-		// the headers for our view are the spell itself, its category, and
-		// then a bunch of icons for range, duration, etc.  we'll up an array
-		// for all that now.
-		
-		$columns = $this->extractHeaders($spells);
-		
-		foreach ($columns as $column) {
-			$abbreviation = "";
-			$classes = "";
-			
-			switch ($column) {
-				case "spell":
-				case "spell_tags":
-					
-					// these two require nothing, but we don't want them
-					// to get caught in the default case below.
-					
+		if (!in_array($header, ["spell", "spell_tags", "spell_category"])) {
+			switch ($header) {
+				case "damage":
+					$abbreviation = "DMG";
 					break;
 				
-				case "spell_category":
-					$classes = "w25";
+				case "duration":
+					$abbreviation = "DUR";
 					break;
 				
 				default:
-					$classes = "nowrap text-center";
-					$abbreviation = $column !== "damage"
-						? $this->abbreviate($column)
-						: "DMG";
-					
+					$abbreviation = $this->abbreviate($header);
 					break;
 			}
-			
-			$headers[] = [
-				"id"           => $this->sanitize($column),
-				"display"      => $this->unsanitize($column),
-				"abbreviation" => $abbreviation,
-				"classes"      => $classes,
-			];
 		}
 		
-		return $headers;
+		return $abbreviation;
 	}
 	
-	protected function extractHeaders(array $data, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		$headers = parent::extractHeaders($data);
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	protected function getHeaderClasses(string $header, array $records): string {
+		$classes = "";
 		
-		foreach ($headers as $i => $header) {
+		if ($header === "spell_category") {
+			$classes = "w25";
+		} elseif ($header !== "spell" && $header !== "spell_tags") {
 			
-			// there's one more that we want to remove before we
-			// continue here:  the spell_tags_ids.
+			// if this was the category header, we handled things above.
+			// now, if what we're looking at is neither the spells nor the
+			// spell tags header, we're looking at one of our thinner data
+			// columns.
 			
-			if ($header === "spell_tags_ids") {
-				unset($headers[$i]);
+			$classes = "nowrap text-center";
+		}
+		
+		return $classes;
+	}
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	protected function getSearchbarValue(string $column, string $value, array $record): string {
+		$sbValue = "";
+		
+		// our search bar provides the means to search for a spell or filter
+		// on categories and tags.  so, we'll need to make sure that our
+		// cells can tell the searchbar about their contents.
+		
+		switch ($column) {
+			case "spell":
+				$sbValue = strip_tags($value);
 				break;
-			}
-		}
-		
-		return $headers;
-	}
-	
-	protected function constructBodies(array $spells): array {
-		$bodies = [];
-		
-		foreach ($spells as $spell) {
-			$rows = [];
-			
-			// each spell is currently a single record; we want to
-			// split it into two rows within a single <tbody> element
-			// on-screen.  the first row is for our data, the second
-			// for our description.  we select from the database so
-			// that our first array index is the ID for our spell.
-			// then, we want to add our book ID as a part of the row,
-			// too.
-			
-			$rows["recordId"] = array_shift($spell);
-			$rows["bookId"] = $spell["book_id"];
-			
-			// now, the parent class can help separate data from
-			// description:
-			
-			$rows["description"] = $this->extractDescription($spell);
-			$rows["data"] = $this->extractSummary($spell);
-			$bodies[] = $rows;
-		}
-		
-		return $bodies;
-	}
-	
-	protected function extractSummary(array $spell, array $descriptiveKeys = AbstractTransformer::DESCRIPTIVE_KEYS): array {
-		$descriptiveKeys = array_merge($descriptiveKeys, ["spell_tags_ids"]);
-		$data = parent::extractSummary($spell, $descriptiveKeys);
-		
-		// there's additional modifications for this specific record set
-		// that our parent can't know to do.  these relate to the setup
-		// of our searchbar values.
-		
-		foreach ($data as &$datum) {
-			switch ($datum["column"]) {
-				case "spell":
-					$datum["searchbarValue"] = strip_tags($datum["html"]);
-					$datum["html"] = sprintf('<a href="#">%s</a>', $datum["html"]);
-					break;
 				
-				case "spell-category":
-					$datum["searchbarValue"] = $spell["spell_category_id"];
-					break;
-					
-				case "spell-tags":
-					$datum["searchbarValue"] = $spell["spell_tags_ids"];
-					$datum["searchbarValueList"] = 1;
-			}
+			case "spell_tags":
+			case "spell_category":
+				
+				// our $value is the text of our tags and categories.
+				// but, we want the numeric ID of those data.  luckily,
+				// we can get that information out of our $record.  but,
+				// we need to construct the right index.
+				
+				$index = $column === "spell_category"
+					? "spell_category_id"
+					: "spell_tags_ids";
+				
+				$sbValue = $record[$index];
+				break;
 		}
 		
-		return $data;
+		return $sbValue;
 	}
 	
-	protected function transformOne(array $spells): array {
-		return $spells;
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	protected function getCellContent(string $column, string $value, array $record): string {
+	
+		// the only alteration we need to do here is to our spell's name.  we
+		// want to make it a clicker for the display toggling behavior for
+		// our descriptive row as follows:
+		
+		return $column === "spell"
+			? sprintf('<a href="#">%s</a>', $value)
+			: $value;
+			
 	}
 }

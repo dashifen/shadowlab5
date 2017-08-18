@@ -92,8 +92,8 @@ class SpellsAction extends AbstractAction {
 			// they're one-to-many.  we'll handle them in the next method.
 			
 			$books[$spell["book_id"]] = json_encode([
+				"text"  => $spell["abbreviation"],
 				"title" => $spell["book"],
-				"text"  => $spell["abbr"],
 			]);
 			
 			$categories[$spell["spell_category_id"]] = $spell["spell_category"];

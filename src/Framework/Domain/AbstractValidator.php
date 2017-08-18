@@ -7,10 +7,6 @@ use Dashifen\Domain\Validator\AbstractValidator AS DashifenAbstractValidator;
 /**
  * Class Validator
  *
- * This default validator simply invalidates all the things.  As children
- * need more specific validation, they can overwrite only those methods that
- * they need based on the expected behaviors of their domain.
- *
  * @package Shadowlab\Framework\Domain
  */
 abstract class AbstractValidator extends DashifenAbstractValidator {
@@ -133,7 +129,7 @@ abstract class AbstractValidator extends DashifenAbstractValidator {
 		
 		$foundErrors = false;
 		foreach ($schema as $column => $columnData) {
-			if ($column !== "guid") {
+			if ($column !== "guid" && $column !== "deleted") {
 				$value = $posted[$column] ?? null;
 				$this->validationErrors[$column] = false;
 				

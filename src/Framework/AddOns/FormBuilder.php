@@ -160,14 +160,12 @@ class FormBuilder implements FormBuilderInterface {
 		
 		foreach ($payload["schema"] as $column => $columnData) {
 			
-			// there are GUIDs throughout the database to help with
-			// uniquely identifying database rows that might otherwise
-			// have had the same name (like two versions of a spell from
-			// a splat book and a core rulebook).  we don't want to mess
-			// with those, so we only add fields when it's not the GUID.
+			// there are two columns that we do not want to be a part of
+			// our forms:  the guid from chummer and the deleted flag.  if
+			// we mess with the former, then future parses get funky, and
+			// we have delete processes to handle the latter.
 			
-			
-			if ($column !== "guid") {
+			if ($column !== "guid" && $column !== "deleted") {
 				
 				// the way our Domains send us table data is a map of column
 				// names to column data.  we've constructed our addField()

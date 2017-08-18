@@ -10,7 +10,7 @@ class CheatSheetsTransformer extends AbstractTransformer {
 	 *
 	 * @return array
 	 */
-	protected function transformAll(array $powers): array {
+	protected function transformCollectionForDisplay(array $powers): array {
 		
 		// because the cheat sheets handler is different from our more
 		// regular collections, we can homogenize how we handle our read
@@ -24,7 +24,7 @@ class CheatSheetsTransformer extends AbstractTransformer {
 	 *
 	 * @return array
 	 */
-	protected function transformOne(array $records): array {
+	protected function transformRecordForDisplay(array $records): array {
 		
 		// because the cheat sheets handler is different from our more
 		// regular collections, we can homogenize how we handle our read
@@ -69,6 +69,48 @@ class CheatSheetsTransformer extends AbstractTransformer {
 		
 		$transformed[] = ["type" => $currentType, "links" => $links];
 		return $transformed;
+	}
+	
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	protected function getHeaderAbbreviation(string $header, array $records): string {
+		return "";
+	}
+	
+	/**
+	 * @param string $header
+	 * @param array  $records
+	 *
+	 * @return string
+	 */
+	protected function getHeaderClasses(string $header, array $records): string {
+		return "";
+	}
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	protected function getSearchbarValue(string $column, string $value, array $record): string {
+		return "";
+	}
+	
+	/**
+	 * @param string $column
+	 * @param string $value
+	 * @param array  $record
+	 *
+	 * @return string
+	 */
+	protected function getCellContent(string $column, string $value, array $record): string {
+		return $value;
 	}
 }
 

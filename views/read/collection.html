@@ -21,7 +21,7 @@
 	class="searchable-row removable"
 >
 	<tr class="data summary">
-		<td v-for="(cell, index) in body.data"
+		<td v-for="(cell, index) in body.summary"
 			:headers="cell.column"
 			:class="table.headers[index].classes"
 			:data-searchbar-value="cell.searchbarValue"
@@ -30,19 +30,19 @@
 		></td>
 	</tr>
 	<tr v-if="body.description.description || capabilities.fixer" class="description">
-		<td :colspan="body.data.length">
+		<td :colspan="body.summary.length">
 			<p v-html="body.description.description"></p>
 			
 			<footer>
-				<div v-if="body.description.abbr" class="reference">
+				<div v-if="body.description.abbreviation" class="reference">
 					<span class="page" v-text="body.description.page"></span>
-					<span class="book" v-html="body.description.abbr"></span>
+					<span class="book" v-html="body.description.abbreviation"></span>
 				</div>
 				<div v-if="capabilities.fixer || capabilities.johnson" class="record-controls">
-					<a v-if="capabilities.fixer" :href="body.recordId | makeUpdateLink" :title="'Update ' + body.data[0].html | stripTags">
+					<a v-if="capabilities.fixer" :href="body.recordId | makeUpdateLink" :title="'Update ' + body.summary[0].html | stripTags">
 						<i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
 					</a>
-					<a v-if="capabilities.johnson" :href="body.recordId | makeDeleteLink" class="deleter" :data-id="body.recordId" :title="'Delete ' + body.data[0].html | stripTags">
+					<a v-if="capabilities.johnson" :href="body.recordId | makeDeleteLink" class="deleter" :data-id="body.recordId" :title="'Delete ' + body.summary[0].html | stripTags">
 						<i class="fa fa-fw fa-times" aria-hidden="true" title="Delete Record"></i>
 					</a>
 				</div>

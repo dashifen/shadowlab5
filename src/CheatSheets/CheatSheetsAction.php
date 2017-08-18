@@ -8,36 +8,21 @@ use Shadowlab\Framework\AddOns\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
 
 class CheatSheetsAction extends AbstractAction {
-	public function execute(array $parameter = []): ResponseInterface {
+	protected function read(): ResponseInterface {
+		$payload = $this->domain->read(["recordId" => $this->recordId]);
 		
-		// the cheat sheet action is different from the others.  so,
-		// we're just going to overwrite the default execute() method
-		// to do exactly what we need it to do here.
+		// there's actually no failure case here.  either we had a record ID
+		// and get the menu for that sheet type, or we didn't and we use the
+		// whole menu.  so, we can just make some $data for our response and
+		// call handleSuccess().
 		
-		$sheet_type = sizeof($parameter) !== 0 ? $parameter[0] : "";
-		$payload = $this->domain->read(["sheet_type" => $sheet_type]);
-		
-		if ($payload->getSuccess()) {
-			
-			// a successful payload provides us with information about
-			// which sheets to display on-screen.  that, the title, and
-			// our menu is all we need here.
-			
-			$this->handleSuccess([
-				"sheets"    => $payload->getDatum("records"),
-				"title"     => $payload->getDatum("title"),
-				"parameter" => $parameter,
-			]);
-		} else {
-			
-			// other than success, the only thing that could have happened
-			// is that our $parameter specified a type of sheet that doesn't
-			// exist.  this feels more like a 404 situation rather than
-			// failure or an error.
-			
-			$this->response->handleNotFound();
+		$data = ["title" => "ShadowLab Cheat Sheets"];
+		$sheetTypeMenu = $payload->getDatum("sheetTypeMenu");
+		if (!empty($sheetTypeMenu)) {
+			$data["sheetTypeMenu"] = $sheetTypeMenu;
 		}
 		
+		$this->handleSuccess($data);
 		return $this->response;
 	}
 	
