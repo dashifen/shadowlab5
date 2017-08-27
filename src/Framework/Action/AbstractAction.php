@@ -34,6 +34,24 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 */
 	protected $recordId = 0;
 	
+	/**
+	 * @var ShadowlabDomainInterface $domain
+	 *
+	 * we don't have to redeclare this property, but doing so helps the
+	 * IDE understand that we've extended the DomainInterface to create
+	 * the ShadowlabDomainInterface, and we need an object that implements
+	 * the latter.
+	 */
+	protected $domain;
+	
+	/**
+	 * AbstractAction constructor.
+	 *
+	 * @param RequestInterface         $request
+	 * @param ShadowlabDomainInterface $domain
+	 * @param ResponseInterface        $response
+	 * @param Container                $container
+	 */
 	public function __construct(
 		RequestInterface $request,
 		ShadowlabDomainInterface $domain,
@@ -86,12 +104,14 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		if (sizeof($parameter) > 0) {
 			
 			// the wildcard pattern we use to identify our action parameters
-			// results in either one or three matching groups.  first, we pad
-			// it to 3 so that we homogenize that length.  then, we can use
-			// list() to get at those data.
+			// as four matching groups.  but, they're not always present
+			// depending on our route.  so, we'll pad it to the expected
+			// length.  notice we use zero since (a) zero is still empty()
+			// and (b) it'll be a good record ID for create actions.
 			
-			$parameter = array_pad($parameter, 4, "");
+			$parameter = array_pad($parameter, 4, 0);
 			list($createAction, $otherAction, $recordId, $sheetType) = $parameter;
+			
 			
 			// if we have a sheet type, then it takes precedence.  plus, our
 			// pattern only matches the sheet types we know about, so we don't
@@ -178,44 +198,108 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		return isset($capabilities[$capability]);
 	}
 	
+	protected function create(): ResponseInterface {
+		
+		// creation is a two step process:  collect data from the visitor
+		// and then save it in the database.  we can tell which step we're
+		// on based on the method of this request.
+		
+		$method = $this->request->getServerVar("REQUEST_METHOD") !== "POST"
+			? "getDataToCreate"
+			: "createNewRecord";
+		
+		return $this->{$method}();
+	}
 	
-	protected function read(): ResponseInterface {
-		$payload = $this->domain->read([
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function getDataToCreate(): ResponseInterface {
+		
+		// when we're creating a new record, what we need from our domain
+		// is the schema about our table. there's actually nothing else
+		// that it needs from us, so we don't need to send it any data.
+		
+		$payload = $this->domain->create([
 			"recordId" => $this->recordId,
+			"table"    => $this->getTable(),
 		]);
 		
+		// now, the only failure is if it could read the table, which
+		// probably means the DB is offline.  regardless, we can pass our
+		// payload's data to the failure case.  for success, we send back
+		// the schema we selected as well as some information
+		
+		$data = $payload->getData();
+		$singular = $this->getSingular();
+		
 		if ($payload->getSuccess()) {
-			$this->handleSuccess([
-				"table"        => $payload->getDatum("records"),
-				"title"        => $payload->getDatum("title"),
-				"count"        => $payload->getDatum("count"),
-				"nextId"       => $payload->getDatum("nextId"),
-				"searchbar"    => $this->getSearchbar($payload),
-				"capabilities" => $this->request->getSessionVar("capabilities"),
-				"singular"     => $this->getSingular(),
+			$data = array_merge($data, [
+				"title"        => "Create New " . ucwords($singular),
+				"instructions" => $payload->getDatum("instructions", ""),
 				"plural"       => $this->getPlural(),
-				"caption"      => $this->getCaption(),
+				"singular"     => $singular,
+				"errors"       => "",
 			]);
-		} else {
-			$noun = $payload->getDatum("count") === 1
-				? $this->getSingular()
-				: $this->getPlural();
 			
-			$this->handleFailure([
-				"title" => "Perception Failed",
-				"noun"  => $noun,
-			]);
+			$payload->setData($data);
+			$data["form"] = $this->getForm($payload);
+			return $this->handleSuccess($data);
 		}
 		
-		return $this->response;
+		// if we weren't successful above, then we must have failed.  we'll
+		// send back what our payload sends us and let the Action take over.
+		
+		return $this->handleFailure($data);
+	}
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getTable(): string;
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getSingular(): string;
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getPlural(): string;
+	
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return string
+	 */
+	protected function getForm(PayloadInterface $payload): string {
+		
+		// when one of our actions needs to show a form, it can call this
+		// method along with a payload that describes the form needed to
+		// produce it.
+		
+		/** @var FormBuilderInterface $formBuilder */
+		
+		$payloadData = $payload->getData();
+		$formBuilder = $this->container->get("formBuilder");
+		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
+		$formBuilder->openForm($payloadData);
+		$form = $formBuilder->getForm();
+		
+		// the $form that we have now, is the actual FormInterface object,
+		// but what we want to send as a part of our response is the HTML for
+		// it.  therefore, we call the form's getForm() method now, too.
+		
+		return $form->getForm(false);
 	}
 	
 	/**
 	 * @param array $data
 	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	protected function handleSuccess(array $data = []): void {
+	protected function handleSuccess(array $data = []): ResponseInterface {
 		
 		// each of our handle* methods simply passes control down to the
 		// respond method below.  that's the one that does our work, these
@@ -224,16 +308,16 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// because the latter includes the class name and we don't want
 		// that.
 		
-		$this->respond(__FUNCTION__, $data);
+		return $this->respond(__FUNCTION__, $data);
 	}
 	
 	/**
 	 * @param string $function
 	 * @param array  $data
 	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	protected function respond(string $function, array $data): void {
+	protected function respond(string $function, array $data): ResponseInterface {
 		
 		// the purpose of this method is to ensure that we always tell the
 		// response whether or not we're authentic and to provide it the menu.
@@ -252,6 +336,103 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// response; it's optional, but sometimes they need it.
 		
 		$this->response->{$function}($data, $this->action);
+		return $this->response;
+	}
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return ResponseInterface
+	 */
+	protected function handleFailure(array $data = []): ResponseInterface {
+		return $this->respond(__FUNCTION__, $data);
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function createNewRecord(): ResponseInterface {
+		$payload = $this->domain->create([
+			"posted" => $this->request->getPost(),
+			"idName" => $this->getRecordIdName(),
+			"table"  => $this->getTable(),
+		]);
+		
+		// our payload's success is determined by whether or not there
+		// were errors discovered within the data posted to us from the
+		// visitor.  regardless of whether we're in a success or error
+		// state, we can merge in our nouns and send our data back to
+		// the client using the appropriate method.
+		
+		$data = array_merge($payload->getData(), [
+			"success"  => $payload->getSuccess(),
+			"singular" => $this->getSingular(),
+			"plural"   => $this->getPlural(),
+		]);
+		
+		return $payload->getSuccess()
+			? $this->handleSuccess($data)
+			: $this->handleError(array_merge($data, [
+				"title"        => "Unable to Save " . ucwords($this->getSingular()),
+				"instructions" => $payload->getDatum("instructions", ""),
+				"form"         => $this->getForm($payload),
+			]));
+		
+	}
+	
+	/**
+	 * @return string
+	 */
+	abstract protected function getRecordIdName(): string;
+	
+	/**
+	 * @param array $data
+	 *
+	 * @return ResponseInterface
+	 */
+	protected function handleError(array $data = []): ResponseInterface {
+		return $this->respond(__FUNCTION__, $data);
+	}
+	
+	/**
+	 * @return ResponseInterface
+	 */
+	protected function read(): ResponseInterface {
+		$payload = $this->domain->read([
+			"recordId" => $this->recordId,
+		]);
+		
+		// a successful read involves sending back a bunch of data to
+		// our client.  much of it comes from our payload, but the rest
+		// can be gathered either from other methods here or from our
+		// request.
+		
+		if ($payload->getSuccess()) {
+			return $this->handleSuccess([
+				"table"        => $payload->getDatum("records"),
+				"title"        => $payload->getDatum("title"),
+				"count"        => $payload->getDatum("count"),
+				"nextId"       => $payload->getDatum("nextId"),
+				"searchbar"    => $this->getSearchbar($payload),
+				"capabilities" => $this->request->getSessionVar("capabilities"),
+				"singular"     => $this->getSingular(),
+				"plural"       => $this->getPlural(),
+				"caption"      => $this->getCaption(),
+			]);
+		}
+		
+		// if we didn't return above, then we're a failure.  there's not
+		// much to report to the client in this case, but there's a little
+		// bit of work to do before we're done.
+		
+		$noun = $payload->getDatum("count") === 1
+			? $this->getSingular()
+			: $this->getPlural();
+		
+		return $this->handleFailure([
+			"title" => "Perception Failed",
+			"noun"  => $noun,
+		]);
 	}
 	
 	/**
@@ -287,16 +468,6 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	/**
 	 * @return string
 	 */
-	abstract protected function getSingular(): string;
-	
-	/**
-	 * @return string
-	 */
-	abstract protected function getPlural(): string;
-	
-	/**
-	 * @return string
-	 */
 	protected function getCaption(): string {
 		
 		// most of our collection tables don't need a caption.  so, by
@@ -305,15 +476,6 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		// they need to.
 		
 		return "";
-	}
-	
-	/**
-	 * @param array $data
-	 *
-	 * @return void
-	 */
-	protected function handleFailure(array $data = []): void {
-		$this->respond(__FUNCTION__, $data);
 	}
 	
 	/**
@@ -338,8 +500,14 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			"table"    => $this->getTable(),
 		]);
 		
-		if ($payload->getSuccess()) {
-			$this->handleSuccess([
+		// when we fail getting data to update, we'll just send whatever
+		// the domain tells us back to the client.  otherwise, there's
+		// data to help describe the content of our form and information
+		// from other methods here.
+		
+		return !$payload->getSuccess()
+			? $this->handleFailure($payload->getData())
+			: $this->handleSuccess([
 				"title"        => "Edit " . $payload->getDatum("title"),
 				"instructions" => $payload->getDatum("instructions", ""),
 				"form"         => $this->getForm($payload),
@@ -347,42 +515,6 @@ abstract class AbstractAction extends DashifenAbstractAction {
 				"plural"       => $this->getPlural(),
 				"errors"       => "",
 			]);
-		} else {
-			$this->handleFailure([]);
-		}
-		
-		return $this->response;
-	}
-	
-	/**
-	 * @return string
-	 */
-	abstract protected function getTable(): string;
-	
-	/**
-	 * @param PayloadInterface $payload
-	 *
-	 * @return string
-	 */
-	protected function getForm(PayloadInterface $payload): string {
-		
-		// when one of our actions needs to show a form, it can call this
-		// method along with a payload that describes the form needed to
-		// produce it.
-		
-		/** @var FormBuilderInterface $formBuilder */
-		
-		$payloadData = $payload->getData();
-		$formBuilder = $this->container->get("formBuilder");
-		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
-		$formBuilder->openForm($payloadData);
-		$form = $formBuilder->getForm();
-		
-		// the $form that we have now, is the actual FormInterface object,
-		// but what we want to send as a part of our response is the HTML for
-		// it.  therefore, we call the form's getForm() method now, too.
-		
-		return $form->getForm(false);
 	}
 	
 	protected function savePostedData(): ResponseInterface {
@@ -407,40 +539,23 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			]);
 			
 			$data["title"] .= " Saved";
-			$this->handleSuccess($data);
-		} else {
-			
-			// if we encountered errors when validating our data before
-			// putting it back into the database, we end up here.  we send
-			// back the same information as we do when we first present the
-			// form, but
-			
-			$this->handleError([
-				"title"        => "Unable to Save Changes",
-				"posted"       => $payload->getDatum("posted"),
-				"errors"       => $payload->getDatum("errors"),
-				"form"         => $this->getForm($payload),
-				"singular"     => $this->getSingular(),
-				"plural"       => $this->getPlural(),
-				"instructions" => $this->getErrorInstructions(),
-			]);
+			return $this->handleSuccess($data);
 		}
 		
-		return $this->response;
-	}
-	
-	/**
-	 * @return string
-	 */
-	abstract protected function getRecordIdName(): string;
-	
-	/**
-	 * @param array $data
-	 *
-	 * @return void
-	 */
-	protected function handleError(array $data = []): void {
-		$this->respond(__FUNCTION__, $data);
+		// if we encountered errors when validating our data before
+		// putting it back into the database, we end up here.  we send
+		// back the same information as we do when we first present the
+		// form, but
+		
+		return $this->handleError([
+			"title"        => "Unable to Save Changes",
+			"posted"       => $payload->getDatum("posted"),
+			"errors"       => $payload->getDatum("errors"),
+			"form"         => $this->getForm($payload),
+			"singular"     => $this->getSingular(),
+			"plural"       => $this->getPlural(),
+			"instructions" => $this->getErrorInstructions(),
+		]);
 	}
 	
 	/**
@@ -465,29 +580,27 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			"table"    => $this->getTable(),
 		]);
 		
-		if ($payload->getSuccess()) {
-			
-			// when we successfully delete, we just want to re-show the
-			// collection.  we can do this with a redirect response as
-			// follows.
-			
-			$host = $this->request->getServerVar("HTTP_HOST");
-			$url = $this->request->getServerVar("REQUEST_URI");
-			$url = "http://$host" . substr($url, 0, strpos($url, "/delete"));
-			$this->response->redirect($url);
-		} else {
-			$this->handleFailure([]);
+		if (!$payload->getSuccess()) {
+			return $this->handleFailure($payload->getData());
 		}
 		
+		// when we successfully delete, we just want to re-show the
+		// collection.  we can do this with a redirect response as
+		// follows.
+		
+		$host = $this->request->getServerVar("HTTP_HOST");
+		$url = $this->request->getServerVar("REQUEST_URI");
+		$url = "http://$host" . substr($url, 0, strpos($url, "/delete"));
+		$this->response->redirect($url);
 		return $this->response;
 	}
 	
 	/**
 	 * @param array $data
 	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	protected function handleNotFound(array $data = []): void {
-		$this->respond(__FUNCTION__, $data);
+	protected function handleNotFound(array $data = []): ResponseInterface {
+		return $this->respond(__FUNCTION__, $data);
 	}
 }

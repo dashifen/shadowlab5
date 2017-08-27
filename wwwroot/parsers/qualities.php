@@ -23,7 +23,7 @@ function debug(...$x) {
 
 $db = new Database();
 $xml = new SimpleXMLElement(file_get_contents("data/qualities.xml"));
-$books = $db->getMap("SELECT abbr, book_id FROM books");
+$books = $db->getMap("SELECT abbreviation, book_id FROM books");
 
 $freakish = [
 	"360-degree eyesight",

@@ -331,16 +331,16 @@
         },
         {
             "name": "dashifen/domain",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/domain.git",
-                "reference": "5436144ecf050ad67d18ca15ba109a2b664c842d"
+                "reference": "990c99a780b0949aede124d476ae77f9b4428f75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/domain/zipball/5436144ecf050ad67d18ca15ba109a2b664c842d",
-                "reference": "5436144ecf050ad67d18ca15ba109a2b664c842d",
+                "url": "https://api.github.com/repos/dashifen/domain/zipball/990c99a780b0949aede124d476ae77f9b4428f75",
+                "reference": "990c99a780b0949aede124d476ae77f9b4428f75",
                 "shasum": ""
             },
             "require": {
@@ -367,7 +367,7 @@
                 }
             ],
             "description": "interfaces and implementation for domains and payload delivery",
-            "time": "2017-05-05T12:45:51+00:00"
+            "time": "2017-08-23T14:51:11+00:00"
         },
         {
             "name": "dashifen/exception",
@@ -1037,17 +1037,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "aadde8887e33fc19d4ee201b8fdb53c18c1d3598"
+                "reference": "5f0c491736afbe07a4599eb778fbb6d9729a10d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/aadde8887e33fc19d4ee201b8fdb53c18c1d3598",
-                "reference": "aadde8887e33fc19d4ee201b8fdb53c18c1d3598",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/5f0c491736afbe07a4599eb778fbb6d9729a10d6",
+                "reference": "5f0c491736afbe07a4599eb778fbb6d9729a10d6",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.4 || ^7.0",
-                "psr/http-message": "~1.0"
+                "php": "^5.6 || ^7.0",
+                "psr/http-message": "^1.0"
             },
             "provide": {
                 "psr/http-message-implementation": "1.0"
@@ -1055,14 +1055,14 @@
             "require-dev": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
-                "phpunit/phpunit": "^4.6 || ^5.5",
-                "zendframework/zend-coding-standard": "~1.0.0"
+                "phpunit/phpunit": "^5.7.16 || ^6.0.8",
+                "zendframework/zend-coding-standard": "~1.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.4-dev",
-                    "dev-develop": "1.5-dev"
+                    "dev-master": "1.5-dev",
+                    "dev-develop": "1.6-dev"
                 }
             },
             "autoload": {
@@ -1081,7 +1081,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2017-04-12 19:29:56"
+            "time": "2017-08-22 20:40:13"
         }
     ],
     "packages-dev": [],

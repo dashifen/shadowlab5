@@ -25,7 +25,7 @@ function debug(...$x) {
 $db = new Database();
 $xml = new SimpleXMLElement(file_get_contents("data/powers.xml"));
 $ways = $db->getMap("SELECT quality, quality_id FROM adept_ways_view");
-$books = $db->getMap("SELECT abbr, book_id FROM books");
+$books = $db->getMap("SELECT abbreviation, book_id FROM books");
 
 $actions = [];
 $allProperties = [];

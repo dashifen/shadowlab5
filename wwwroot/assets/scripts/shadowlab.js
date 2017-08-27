@@ -69,6 +69,17 @@ var Shadowlab = new Vue({
 			return href + "/delete/" + id;
 		},
 
+		makeCreateLink: function() {
+
+			// like the prior ones except we don't need an ID and we'll add
+			// the create Action verb.
+
+			var hrefParts = window.location.href.split("/");
+			var endpoint = array_search(["create", "read", "update", "delete"], hrefParts);
+			var href = endpoint !== false ? join("/", hrefParts, endpoint-1) : window.location.href;
+			return href + "/create";
+		},
+
 		makeCollectionLink: function(endpoint) {
 			var hrefParts = window.location.href.split("/");
 

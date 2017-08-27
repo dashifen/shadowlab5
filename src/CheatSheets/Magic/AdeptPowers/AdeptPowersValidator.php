@@ -6,12 +6,13 @@ use Shadowlab\Framework\Domain\AbstractValidator;
 
 class AdeptPowersValidator extends AbstractValidator {
 	/**
-	 * @param array $posted
-	 * @param array $schema
+	 * @param array  $posted
+	 * @param array  $schema
+	 * @param string $action
 	 *
 	 * @return bool
 	 */
-	protected function checkForOtherErrors(array $posted, array $schema): bool {
+	protected function checkForOtherErrors(array $posted, array $schema, string $action): bool {
 		
 		// there are two "other" errors in this form:  if this power uses
 		// levels to track costs and efficacy, then we need to know the

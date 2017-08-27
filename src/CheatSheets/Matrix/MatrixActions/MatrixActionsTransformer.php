@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets\Matrix\MatrixActions;
 
 use Shadowlab\Framework\Domain\AbstractTransformer;
 
-class MatrixActionTransformer extends AbstractTransformer {
+class MatrixActionsTransformer extends AbstractTransformer {
 	/**
 	 * @param string $header
 	 * @param array  $records
@@ -12,7 +12,11 @@ class MatrixActionTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getHeaderAbbreviation(string $header, array $records): string {
-		// TODO: Implement getHeaderAbbreviation() method.
+
+		// for this one, oddly, there's no need for abbreviations.  all of
+		// the header columns are good just the way they are.
+
+		return "";
 	}
 	
 	/**
@@ -22,7 +26,20 @@ class MatrixActionTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getHeaderClasses(string $header, array $records): string {
-		// TODO: Implement getHeaderClasses() method.
+		$classes = "";
+		
+		switch ($header) {
+			case "marks":
+			case "actions":
+				$classes = "w5 text-center";
+				break;
+				
+			case "matrix_action":
+				$classes = "w20";
+				break;
+		}
+		
+		return $classes;
 	}
 	
 	/**
@@ -33,7 +50,20 @@ class MatrixActionTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getSearchbarValue(string $column, string $value, array $record): string {
-		// TODO: Implement getSearchbarValue() method.
+		$sbValue = "";
+		
+		switch ($column) {
+			case "matrix_action":
+				$sbValue = strip_tags($column);
+				break;
+				
+			case "marks":
+			case "action":
+				$sbValue = $value;
+				break;
+		}
+		
+		
 	}
 	
 	/**

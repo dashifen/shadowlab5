@@ -1,4 +1,5 @@
 <div class="controls">
+	<a v-if="capabilities.fixer" class="data-control create button" :href="0 | makeCreateLink">Add {{ singular | capitalize }}</a>
 	<a v-if="nextId && capabilities.fixer" class="data-control edit-next button" :href="nextId | makeUpdateLink">Edit Next {{ singular | capitalize }}</a>
 </div>
 

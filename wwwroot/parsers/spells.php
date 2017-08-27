@@ -23,7 +23,7 @@ function debug(...$x) {
 
 $db = new Database();
 $xml = new SimpleXMLElement(file_get_contents("data/spells.xml"));
-$books = $db->getMap("SELECT abbr, book_id FROM books");
+$books = $db->getMap("SELECT abbreviation, book_id FROM books");
 
 // there's a few steps to handle before we actually start inserting
 // our spells.  the first thing we'll do is see if there's anything

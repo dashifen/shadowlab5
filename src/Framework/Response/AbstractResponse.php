@@ -118,7 +118,12 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 				break;
 			
 			case "error":
-				$template = "update/form.html";
+		
+				// for this app, an error is when we have a problem within
+				// data posted to us by the visitor.  so, we'll want to re-
+				// display the form so they can fix it.
+				
+				$template = "write/form.html";
 				break;
 			
 			case "failure":
@@ -195,16 +200,17 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 				
 				break;
 			
+			case "create":
 			case "update":
 				
-				// when updating, if we have a record of our success, then
-				// we'll want to share that success with our visitor.
-				// otherwise, we give them the form so they can enter data
-				// we use to perform our update.
+				// when creating and updating , if we have a record of
+				// success, we'll want to share that success with our
+				// visitor.  otherwise, we give them the form so they can
+				// enter data we use to perform our update.
 				
 				$template = isset($data["success"]) && $data["success"]
-					? "update/success.html"
-					: "update/form.html";
+					? "write/success.html"
+					: "write/form.html";
 		}
 		
 		return $this->getHandlerSuccessTemplate($template);

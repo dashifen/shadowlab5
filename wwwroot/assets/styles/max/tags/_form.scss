@@ -209,3 +209,42 @@ select {
 		column-gap: 1rem;
 	}
 }
+
+.create-new-matrix-action {
+	& > fieldset {
+		padding-bottom: rem(30);
+	}
+
+	li {
+		&.offensive_skill_id,
+		&.offensive_limit_id,
+		&.offensive_attribute_id,
+		&.defensive_attribute_id,
+		&.defensive_other_attr_id {
+			float: left;
+			width: 30%;
+
+			select {
+				width: 100%;
+			}
+		}
+
+		&.offensive_limit_id,
+		&.offensive_attribute_id,
+		&.defensive_other_attr_id {
+			margin-left: rem(24);
+		}
+
+		&.marks,
+		&.defensive_attribute_id {
+			clear: left;
+		}
+
+		&.marks {
+			&, & ~ li {
+				position: relative;
+				top: rem(12);
+			}
+		}
+	}
+}

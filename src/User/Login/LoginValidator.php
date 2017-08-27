@@ -25,12 +25,13 @@ class LoginValidator extends AbstractValidator {
 	}
 	
 	/**
-	 * @param array $posted
-	 * @param array $schema
+	 * @param array  $posted
+	 * @param array  $schema
+	 * @param string $action
 	 *
 	 * @return bool
 	 */
-	protected function checkForOtherErrors(array $posted, array $schema): bool {
+	protected function checkForOtherErrors(array $posted, array $schema, string $action): bool {
 		
 		// at this time, we're not updating or creating accounts, so we
 		// can't have other errors beyond what the parent object can handle.

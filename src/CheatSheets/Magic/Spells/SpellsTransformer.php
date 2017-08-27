@@ -93,7 +93,7 @@ class SpellsTransformer extends AbstractTransformer {
 					? "spell_category_id"
 					: "spell_tags_ids";
 				
-				$sbValue = $record[$index];
+				$sbValue = $record[$index] ?? "";
 				break;
 		}
 		
