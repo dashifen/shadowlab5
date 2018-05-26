@@ -5,6 +5,8 @@ namespace Shadowlab\CheatSheets\Magic\AdeptPowers;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Dashifen\Searchbar\SearchbarException;
+use Aura\Di\Exception\ServiceNotFound;
 
 class AdeptPowersAction extends AbstractAction {
 	/**
@@ -12,13 +14,14 @@ class AdeptPowersAction extends AbstractAction {
 	 * @param PayloadInterface   $payload
 	 *
 	 * @return SearchbarInterface
+	 * @throws SearchbarException
+	 * @throws ServiceNotFound
 	 */
 	protected function getSearchbarFields(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
 		$powers = $payload->getDatum("original-records");
 		$costs = $this->getPowerCostOptions($powers);
 		$ways = $this->getAdeptWayOptions($powers);
-		$books = $this->getBookOptions($powers);
-		
+
 		/** @var SearchbarInterface $searchbar */
 		
 		$searchbar = $this->container->get("searchbar");
@@ -32,7 +35,7 @@ class AdeptPowersAction extends AbstractAction {
 		// until we design a better way.
 		
 		$searchbar->addFilter("Ways", "maximum-levels", $ways, "", "All ways");
-		$searchbar->addFilter("Books", "book", $books, "", "All books");
+		$searchbar->addFilter("Books", "book", $this->getBookOptions($payload), "", "All books");
 		$searchbar->addReset();
 		return $searchbar;
 	}
@@ -83,30 +86,6 @@ class AdeptPowersAction extends AbstractAction {
 		
 		asort($ways);
 		return $ways;
-	}
-	
-	/**
-	 * @param array $powers
-	 *
-	 * @return array
-	 */
-	protected function getBookOptions(array $powers): array {
-		$books = [];
-		foreach ($powers as $power) {
-			
-			// we want to use the abbreviation as the option text for
-			// our books, but the title should be the book's name.
-			// luckily, our searchbar can handle a JSON string
-			// describing that for us.
-			
-			$books[$power["book_id"]] = json_encode([
-				"text"  => $power["abbreviation"],
-				"title" => $power["book"],
-			]);
-		}
-		
-		asort($books);
-		return $books;
 	}
 	
 	/**

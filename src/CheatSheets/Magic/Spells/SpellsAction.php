@@ -5,6 +5,7 @@ namespace Shadowlab\CheatSheets\Magic\Spells;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Dashifen\Searchbar\SearchbarException;
 
 class SpellsAction extends AbstractAction {
 	/**
@@ -34,12 +35,13 @@ class SpellsAction extends AbstractAction {
 	protected function getRecordIdName(): string {
 		return "spell_id";
 	}
-	
+
 	/**
 	 * @param SearchbarInterface $searchbar
 	 * @param PayloadInterface   $payload
 	 *
 	 * @return SearchbarInterface
+	 * @throws SearchbarException
 	 */
 	protected function getSearchbarFields(SearchbarInterface $searchbar, PayloadInterface $payload): SearchbarInterface {
 		
@@ -49,12 +51,12 @@ class SpellsAction extends AbstractAction {
 		// other criteria that doesn't rely on our $payload.
 		
 		$spells = $payload->getDatum("original-records");
-		list($tags, $books, $categories) = $this->collectFilterOptions($spells);
+		list($tags, $categories) = $this->collectFilterOptions($spells);
 		
 		$searchbar->addSearch("Spells", "spell");
 		$searchbar->addFilter("Spell Categories", "spell-category", $categories, "", "All Spell Categories");
 		$searchbar->addFilter("Spell Tags", "spell-tags", $tags, "", "All Spell Tags");
-		$searchbar->addFilter("Books", "book", $books, "", "All Books");
+		$searchbar->addFilter("Books", "book", $this->getBookOptions($payload), "", "All Books");
 		$searchbar->addReset();
 		return $searchbar;
 	}

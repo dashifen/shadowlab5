@@ -3,6 +3,7 @@
 namespace Shadowlab\Framework\Action;
 
 use Aura\Di\Container;
+use Aura\Di\Exception\ServiceNotFound;
 use Dashifen\Action\AbstractAction as DashifenAbstractAction;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Form\Builder\FormBuilderInterface;
@@ -10,6 +11,8 @@ use Dashifen\Request\RequestInterface;
 use Dashifen\Response\ResponseInterface;
 use Shadowlab\Framework\AddOns\SearchbarInterface;
 use Shadowlab\Framework\Domain\ShadowlabDomainInterface;
+use Dashifen\Domain\MysqlDomainException;
+use Dashifen\Response\ResponseException;
 
 /**
  * Class Action
@@ -157,6 +160,31 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function setRecordId(int $recordId) {
 		$this->recordId = $recordId;
 	}
+
+	/**
+	 * @param PayloadInterface $payload
+	 *
+	 * @return array
+	 */
+	protected function getBookOptions(PayloadInterface $payload): array {
+		$records = $payload->getDatum("original-records");
+		foreach ($records as $record) {
+
+			// we want to use the abbreviation as the option text for
+			// our books, but the title should be the book's name.
+			// luckily, our searchbar can handle a JSON string
+			// describing that for us.
+
+			$books[$record["book_id"]] = json_encode([
+				"text"  => $record["abbreviation"],
+				"title" => $record["book"],
+			]);
+		}
+
+		$books = $books ?? [];
+		asort($books);
+		return $books;
+	}
 	
 	/**
 	 * @param string $action
@@ -210,9 +238,11 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		
 		return $this->{$method}();
 	}
-	
+
 	/**
 	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ServiceNotFound
 	 */
 	protected function getDataToCreate(): ResponseInterface {
 		
@@ -267,11 +297,12 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	 * @return string
 	 */
 	abstract protected function getPlural(): string;
-	
+
 	/**
 	 * @param PayloadInterface $payload
 	 *
 	 * @return string
+	 * @throws ServiceNotFound
 	 */
 	protected function getForm(PayloadInterface $payload): string {
 		
@@ -347,9 +378,11 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function handleFailure(array $data = []): ResponseInterface {
 		return $this->respond(__FUNCTION__, $data);
 	}
-	
+
 	/**
 	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ServiceNotFound
 	 */
 	protected function createNewRecord(): ResponseInterface {
 		$payload = $this->domain->create([
@@ -393,9 +426,11 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	protected function handleError(array $data = []): ResponseInterface {
 		return $this->respond(__FUNCTION__, $data);
 	}
-	
+
 	/**
 	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ServiceNotFound
 	 */
 	protected function read(): ResponseInterface {
 		$payload = $this->domain->read([
@@ -434,11 +469,12 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			"noun"  => $noun,
 		]);
 	}
-	
+
 	/**
 	 * @param PayloadInterface $payload
 	 *
 	 * @return string
+	 * @throws ServiceNotFound
 	 */
 	protected function getSearchbar(PayloadInterface $payload): string {
 		$searchbarHtml = "";
@@ -493,7 +529,12 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		
 		return $this->{$method}();
 	}
-	
+
+	/**
+	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ServiceNotFound
+	 */
 	protected function getDataToUpdate(): ResponseInterface {
 		$payload = $this->domain->update([
 			"recordId" => $this->recordId,
@@ -516,7 +557,12 @@ abstract class AbstractAction extends DashifenAbstractAction {
 				"errors"       => "",
 			]);
 	}
-	
+
+	/**
+	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ServiceNotFound
+	 */
 	protected function savePostedData(): ResponseInterface {
 		$payload = $this->domain->update([
 			"posted" => $this->request->getPost(),
@@ -569,9 +615,11 @@ abstract class AbstractAction extends DashifenAbstractAction {
 			email Dash.  It probably means he messed up the code
 			somehow.";
 	}
-	
+
 	/**
 	 * @return ResponseInterface
+	 * @throws MysqlDomainException
+	 * @throws ResponseException
 	 */
 	protected function delete(): ResponseInterface {
 		$payload = $this->domain->delete([
