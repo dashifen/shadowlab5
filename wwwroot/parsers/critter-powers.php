@@ -26,7 +26,7 @@ try {
 			// and if the database blocks us, it'll throw an exception.
 			// we catch it below and simple do nothing with it.
 
-			$db->insert("critters_powers_types", [
+			$db->insert("critter_powers_types", [
 				"critter_power_type" => $category
 			]);
 		} catch (DatabaseException $e) {
@@ -34,7 +34,7 @@ try {
 		}
 	}
 
-	$powerTypes = $db->getMap("SELECT critter_power_type, critter_power_type_id FROM critters_powers_types");
+	$powerTypes = $db->getMap("SELECT critter_power_type, critter_power_type_id FROM critter_powers_types");
 
 	// for our first pass through our critter powers, we want to enumerate
 	// the types, actions, ranges, and durations.  we'll gather them all
@@ -67,10 +67,10 @@ try {
 		// the database list and the one we collected above.  if so, we
 		// print instructions and then quit after this loop.
 
-		$enum_values = $db->getEnumValues("critters_powers", $list);
+		$enum_values = $db->getEnumValues("critter_powers", $list);
 		$difference = array_diff($data, $enum_values);
 		if (sizeof($difference) !== 0) {
-			echo "Must add the following to critters_powers.$list:";
+			echo "Must add the following to critter_powers.$list:";
 			debug($difference);
 			$quit = true;
 		}
@@ -111,7 +111,7 @@ try {
 
 		$guid["guid"] = strtolower((string) $power->id);
 		$critter_power["critter_power"] = (string) $power->name;
-		$db->upsert("critters_powers", array_merge($guid, $critter_power, $data), $data);
+		$db->upsert("critter_powers", array_merge($guid, $critter_power, $data), $data);
 	}
 
 	echo "done";
