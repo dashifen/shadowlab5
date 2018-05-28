@@ -19,9 +19,9 @@ $xml = new SimpleXMLElement(file_get_contents("data/books.xml"));
 $books = [];
 foreach ($xml->books->book as $book) {
 	$books[] = [
-		"book" => (string) $book->name,
-		"abbr" => (string) $book->code,
-		"guid" => strtoupper((string) $book->id),
+		"book"         => (string) $book->name,
+		"abbreviation" => (string) $book->code,
+		"guid"         => strtoupper((string) $book->id),
 	];
 }
 
@@ -32,8 +32,8 @@ try {
 	if (sizeof($books) > 0) {
 		foreach ($books as $book) {
 			$db->upsert("books", $book, [
-				"book" => $book["book"],
-				"abbr" => $book["abbr"]
+				"book"         => $book["book"],
+				"abbreviation" => $book["abbreviation"]
 			]);
 		}
 	}
