@@ -1,45 +1,51 @@
 <?php
 require("../../vendor/autoload.php");
 
+use Shadowlab\Parser\AbstractParser;
 use Shadowlab\Framework\Database\Database;
+use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Database\DatabaseException;
+use Dashifen\Exception\Exception;
 
-function debug(...$x) {
-	$dumps = [];
-	foreach ($x as $y) {
-		$dumps[] = print_r($y, true);
-	}
-	
-	echo "<pre>" . join("</pre><pre>", $dumps) . "</pre>";
-}
+class BooksParser extends AbstractParser {
+	/**
+	 * @return void
+	 * @throws MysqlException
+	 */
+	public function parse(): void {
+		$xmlBooks = $this->getBooks();
 
-$db  = new Database();
-$xml = new SimpleXMLElement(file_get_contents("data/books.xml"));
-
-$books = [];
-foreach ($xml->books->book as $book) {
-	$books[] = [
-		"book"         => (string) $book->name,
-		"abbreviation" => (string) $book->code,
-		"guid"         => strtoupper((string) $book->id),
-	];
-}
-
-$db_books = $db->getCol("SELECT book FROM books");
-$new_books = array_diff(array_column($books, "book"), $db_books);
-
-try {
-	if (sizeof($books) > 0) {
-		foreach ($books as $book) {
-			$db->upsert("books", $book, [
+		foreach ($xmlBooks as $book) {
+			$this->db->upsert("books", $book, [
 				"book"         => $book["book"],
 				"abbreviation" => $book["abbreviation"]
 			]);
 		}
 	}
-	
-	debug($new_books);
-	echo "done";
-} catch (DatabaseException $e) {
-	echo "Failed: " . $e->getQuery() . "<pre>" . print_r($e, true) . "</pre>";
+
+	/**
+	 * @return array
+	 */
+	protected function getBooks(): array {
+		foreach ($this->xml->books->book as $book) {
+			$books[] = [
+				"book" => (string) $book->name,
+				"abbreviation" => (string) $book->code,
+				"guid" => strtoupper((string) $book->id),
+			];
+		}
+
+		return $books ?? [];
+	}
+}
+
+try {
+	$parser = new BooksParser("data/books.xml", new Database());
+	$parser->parse();
+} catch (Exception $e) {
+	if ($e instanceof DatabaseException) {
+		echo "Failed: " . $e->getQuery();
+	}
+
+	$parser->debug($e);
 }

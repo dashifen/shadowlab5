@@ -2,9 +2,11 @@
 
 namespace Shadowlab\Parser;
 
+use Dashifen\Database\Mysql\MysqlException;
 use SimpleXMLElement;
+use Dashifen\Database\Mysql\MysqlInterface;
 
-class Parser {
+abstract class AbstractParser {
 	/**
 	 * @var string
 	 */
@@ -16,17 +18,25 @@ class Parser {
 	protected $xml;
 
 	/**
+	 * @var MysqlInterface
+	 */
+	protected $db;
+
+	/**
 	 * Parser constructor.
 	 *
-	 * @param string $dataFile
+	 * @param string         $dataFile
+	 * @param MysqlInterface $db
 	 *
 	 * @throws ParserException
 	 */
-	public function __construct(string $dataFile = "") {
+	public function __construct(string $dataFile = "", MysqlInterface $db) {
 		if (!empty($dataFile)) {
 			$this->setDataFile($dataFile);
 			$this->loadDataFile();
 		}
+
+		$this->db = $db;
 	}
 
 	/**
@@ -56,4 +66,22 @@ class Parser {
 			throw new ParserException("Bad XML", ParserException::BAD_XML, $e);
 		}
 	}
+
+	/**
+	 * @param mixed ...$x
+	 */
+	public function debug(...$x) {
+		$dumps = [];
+		foreach ($x as $y) {
+			$dumps[] = print_r($y, true);
+		}
+
+		echo "<pre>" . join("</pre><pre>", $dumps) . "</pre>";
+	}
+
+	/**
+	 * @return void
+	 * @throws MysqlException
+	 */
+	abstract public function parse(): void;
 }
