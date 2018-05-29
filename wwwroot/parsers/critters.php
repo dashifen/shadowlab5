@@ -13,7 +13,7 @@ function debug(...$x) {
 	echo "<pre>" . join("</pre><pre>", $dumps) . "</pre>";
 }
 
-function getMovement(object $critter) {
+function getMovement(SimpleXMLElement $critter) {
 	if (isset($critter->movement)) {
 		$temp = (string) $critter->movement;
 		return $temp === "Special" ? $temp : "x2/x4/+2";
@@ -53,6 +53,15 @@ function getMovement(object $critter) {
 
 			return $movement;
 	}
+}
+
+function hasRecords(SimpleXMLElement $xml, string $property) {
+
+	// empty XML nodes are still set.  so, a XML tag as follows would
+	// pass the first test below but not the second:  <x><y /></x>.
+	// but, something like <x><y>foo</y></x> would pass both of them.
+
+	return isset($xml->{$property}) && $xml->{$property}->count() > 0;
 }
 
 try {
@@ -112,9 +121,9 @@ try {
 
 		$critterData = [
 			"critter_type_id" => $types[(string) $critter->category],
-			"movement" => getMovement($critter),
-			"page" => (int) $critter->page,
-			"book_id" => $bookId,
+			"movement"        => getMovement($critter),
+			"page"            => (int) $critter->page,
+			"book_id"         => $bookId,
 		];
 
 		$guid["guid"] = strtolower((string) $critter->id);
@@ -133,10 +142,31 @@ try {
 		foreach ($attrMap as $property => $attribute) {
 			if (isset($critter->{$property})) {
 				$db->insert("critters_attributes", [
-					"critter_id" => $critterId,
+					"critter_id"   => $critterId,
 					"attribute_id" => $attributes[$attribute],
-					"rating" => (string) $critter->{$property}
+					"rating"       => (string) $critter->{$property},
 				]);
+			}
+		}
+
+		$properties = [
+			"powers"         => "critters_critter_powers",
+			"optionalpowers" => "critters_critter_powers",
+			"skills"         => "critters_skills",
+			"qualities"      => "critters_qualities",
+			"complexforms"   => "critters_programs",
+		];
+
+		foreach ($properties as $property => $table) {
+			if (hasRecords($critter, $property)) {
+
+				// if we're in this block, then we've confirmed that this
+				// critter has at least one record withing the specified
+				// property (e.g. they have at least one power or skill).
+				// so, now we want to add those records to the database.
+				// we have functions for that defined below.
+
+
 			}
 		}
 
@@ -146,13 +176,13 @@ try {
 		// so, we'll loop over the property's children building
 		// the information we need before we delete.
 
-		if (isset($critter->powers) ) {
+		if (isset($critter->powers)) {
 			$powers = [];
 			foreach ($critter->powers->power as $power) {
 				$temp = [
-					"critter_id" => $critterId,
+					"critter_id"       => $critterId,
 					"critter_power_id" => $powers[(string) $power],
-					"optional" => "N",
+					"optional"         => "N",
 				];
 
 				$powerAttributes = $power->attributes();
