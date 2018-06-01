@@ -2,6 +2,7 @@
 
 namespace Shadowlab\Parser;
 
+use Dashifen\Database\DatabaseException;
 use Dashifen\Database\Mysql\MysqlException;
 use SimpleXMLElement;
 use Dashifen\Database\Mysql\MysqlInterface;
@@ -23,12 +24,18 @@ abstract class AbstractParser {
 	protected $db;
 
 	/**
+	 * @var array
+	 */
+	protected $bookMap;
+
+	/**
 	 * Parser constructor.
 	 *
 	 * @param string         $dataFile
 	 * @param MysqlInterface $db
 	 *
 	 * @throws ParserException
+	 * @throws DatabaseException
 	 */
 	public function __construct(string $dataFile = "", MysqlInterface $db) {
 		if (!empty($dataFile)) {
@@ -37,6 +44,15 @@ abstract class AbstractParser {
 		}
 
 		$this->db = $db;
+		$this->getBooksMap();
+	}
+
+	/**
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	protected function getBooksMap(): void {
+		$this->bookMap = $this->db->getMap("SELECT abbreviation, book_id FROM books");
 	}
 
 	/**
@@ -84,4 +100,43 @@ abstract class AbstractParser {
 	 * @throws MysqlException
 	 */
 	abstract public function parse(): void;
+
+	/**
+	 * @param string $plural
+	 * @param string $key
+	 * @param string $table
+	 *
+	 * @return void
+	 */
+	protected function updateCategoryTable(string $plural, string $key, string $table): void {
+		if (isset($this->xml->{$plural})) {
+
+			// if our $plural property is set, and it should be or we wouldn't
+			// have called this function, then we'll get its children.  looping
+			// over them will tell us what we need to insert into the database
+
+			$children = $this->xml->{$plural}->children();
+
+			try {
+
+				// for each of our children, we insert.  the $key is expected
+				// to be a UNIQUE column, so re-inserting an old category will
+				// simply fail.
+
+				foreach ($children as $child) {
+					$this->db->insert($table, [
+						$key => (string) $child
+					]);
+				}
+			} catch (DatabaseException $e) {
+
+				// it's assumed that the above loop will encounter previously
+				// inserted categories and, therefore, throw exceptions.  but,
+				// since we expect that to happen, we'll just ignore them and
+				// hope that one isn't something other than a re-insertion
+				// warning.
+
+			}
+		}
+	}
 }

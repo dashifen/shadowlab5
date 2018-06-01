@@ -1,55 +1,54 @@
 <?php
 require("../../vendor/autoload.php");
 
-use Dashifen\Database\DatabaseException;
+use Shadowlab\Parser\AbstractParser;
 use Shadowlab\Framework\Database\Database;
+use Dashifen\Database\Mysql\MysqlException;
+use Dashifen\Database\DatabaseException;
+use Dashifen\Exception\Exception;
 
-function debug(...$x) {
-	$dumps = [];
-	foreach ($x as $y) {
-		$dumps[] = print_r($y, true);
+class AdeptPowersParser extends AbstractParser {
+
+	/**
+	 * @return void
+	 * @throws MysqlException
+	 * @throws DatabaseException
+	 */
+	public function parse(): void {
+		$this->updateCategoryTable("programs", "program_type", "programs_types");
+		$types = $this->db->getMap("SELECT program_type, program_type_id FROM programs_types");
+
+		foreach ($this->xml->programs->program as $program) {
+			$data = [
+				"availability"    => (string) $program->avail,
+				"max_rating"      => (string) ($program->rating ?? 0),
+				"program_type_id" => $types[(string) $program->category],
+				"book_id"         => $this->bookMap[(string) $program->source],
+				"page"            => (int) $program->page,
+			];
+
+			// the insert data for must include the programs name and guid
+			// as well as the program information we collected in $data.
+			// but, if we already inserted this program, then all we want
+			// to do is update its $data.
+
+			$insertData = array_merge($data, [
+				"program" => (string) $program->name,
+				"guid"    => strtolower((string) $program->id),
+			]);
+
+			$this->db->upsert("programs", $insertData, $data);
+		}
 	}
-
-	echo "<pre>" . join("</pre><pre>", $dumps) . "</pre>";
 }
 
 try {
-	$db = new Database();
-	$xml = file_get_contents("data/programs.xml");
-	$xml = new SimpleXMLElement($xml);
-
-	foreach ($xml->categories->category as $category) {
-		try {
-
-			// critter type is a unique key, so we can just insert
-			// and if the database blocks us, it'll throw an exception.
-			// we catch it below and simple do nothing with it.
-
-			$db->insert("programs_types", [
-				"program_type" => $category,
-			]);
-		} catch (DatabaseException $e) {
-			continue;
-		}
+	$parser = new AdeptPowersParser("data/programs.xml", new Database());
+	$parser->parse();
+} catch (Exception $e) {
+	if ($e instanceof DatabaseException) {
+		echo "Failed: " . $e->getQuery();
 	}
 
-	$books = $db->getMap("SELECT abbreviation, book_id FROM books");
-	$types = $db->getMap("SELECT program_type, program_type_id FROM programs_types");
-
-	foreach ($xml->programs->program as $program) {
-		$data = [
-			"availability"    => (string) $program->avail,
-			"max_rating"      => (string) ($program->rating ?? 0),
-			"program_type_id" => $types[(string) $program->category],
-			"book_id"         => $books[(string) $program->source],
-			"page"            => (int) $program->page,
-		];
-
-		$programName["program"] = (string) $program->name;
-		$guid["guid"] = strtolower((string) $program->id);
-		$db->upsert("programs", array_merge($programName, $data, $guid), $data);
-	}
-
-} catch (DatabaseException $e) {
-	die($e->getMessage());
+	$parser->debug($e);
 }

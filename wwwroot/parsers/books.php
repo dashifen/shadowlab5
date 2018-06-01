@@ -18,7 +18,7 @@ class BooksParser extends AbstractParser {
 		foreach ($xmlBooks as $book) {
 			$this->db->upsert("books", $book, [
 				"book"         => $book["book"],
-				"abbreviation" => $book["abbreviation"]
+				"abbreviation" => $book["abbreviation"],
 			]);
 		}
 	}
@@ -29,9 +29,9 @@ class BooksParser extends AbstractParser {
 	protected function getBooks(): array {
 		foreach ($this->xml->books->book as $book) {
 			$books[] = [
-				"book" => (string) $book->name,
+				"book"         => (string) $book->name,
 				"abbreviation" => (string) $book->code,
-				"guid" => strtoupper((string) $book->id),
+				"guid"         => strtoupper((string) $book->id),
 			];
 		}
 
