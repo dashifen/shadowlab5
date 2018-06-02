@@ -7,7 +7,7 @@ use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Database\DatabaseException;
 use Dashifen\Exception\Exception;
 
-class AdeptPowersParser extends AbstractParser {
+class ProgramsParser extends AbstractParser {
 
 	/**
 	 * @return void
@@ -43,7 +43,7 @@ class AdeptPowersParser extends AbstractParser {
 }
 
 try {
-	$parser = new AdeptPowersParser("data/programs.xml", new Database());
+	$parser = new ProgramsParser("data/programs.xml", new Database());
 	$parser->parse();
 } catch (Exception $e) {
 	if ($e instanceof DatabaseException) {

@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Di.git",
-                "reference": "f676b38a0d1c3b0d7897b0a082f4811eb8b08faa"
+                "reference": "4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Di/zipball/f676b38a0d1c3b0d7897b0a082f4811eb8b08faa",
-                "reference": "f676b38a0d1c3b0d7897b0a082f4811eb8b08faa",
+                "url": "https://api.github.com/repos/auraphp/Aura.Di/zipball/4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5",
+                "reference": "4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5",
                 "shasum": ""
             },
             "require": {
@@ -57,7 +57,7 @@
                 "di",
                 "di container"
             ],
-            "time": "2017-07-30 04:14:30"
+            "time": "2017-10-12 20:08:46"
         },
         {
             "name": "aura/router",
@@ -65,12 +65,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Router.git",
-                "reference": "bfcb784f112a11d3841e609f8a6eae1cbc9b7ae0"
+                "reference": "bf5e6ca5d6ad431c17d4a4868bb3c9413667bc27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Router/zipball/bfcb784f112a11d3841e609f8a6eae1cbc9b7ae0",
-                "reference": "bfcb784f112a11d3841e609f8a6eae1cbc9b7ae0",
+                "url": "https://api.github.com/repos/auraphp/Aura.Router/zipball/bf5e6ca5d6ad431c17d4a4868bb3c9413667bc27",
+                "reference": "bf5e6ca5d6ad431c17d4a4868bb3c9413667bc27",
                 "shasum": ""
             },
             "require": {
@@ -106,7 +106,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2017-07-21 23:53:49"
+            "time": "2018-02-15 02:17:11"
         },
         {
             "name": "aura/sql",
@@ -114,12 +114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Sql.git",
-                "reference": "596fc78aa20c434d5ac95a6d234ffad17f6df4a0"
+                "reference": "82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/596fc78aa20c434d5ac95a6d234ffad17f6df4a0",
-                "reference": "596fc78aa20c434d5ac95a6d234ffad17f6df4a0",
+                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e",
+                "reference": "82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2017-06-28 15:21:43"
+            "time": "2018-04-30 23:56:24"
         },
         {
             "name": "authy/php",
@@ -449,21 +449,22 @@
         },
         {
             "name": "dashifen/form",
-            "version": "1.9.4",
+            "version": "1.13.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/form.git",
-                "reference": "21e194abddc469c85e98cb36783df5fd49f56067"
+                "reference": "b344e163cd4c8c6c89f8261eab26664b29439a86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/form/zipball/21e194abddc469c85e98cb36783df5fd49f56067",
-                "reference": "21e194abddc469c85e98cb36783df5fd49f56067",
+                "url": "https://api.github.com/repos/dashifen/form/zipball/b344e163cd4c8c6c89f8261eab26664b29439a86",
+                "reference": "b344e163cd4c8c6c89f8261eab26664b29439a86",
                 "shasum": ""
             },
             "require": {
                 "dashifen/exception": "^1",
-                "php": "^7.1"
+                "php": "^7.1",
+                "ralouphie/mimey": "^1.0"
             },
             "type": "library",
             "autoload": {
@@ -484,7 +485,7 @@
                 }
             ],
             "description": "A series of objects that build an HTML form in the way I like.",
-            "time": "2017-08-15T20:07:22+00:00"
+            "time": "2018-02-08T12:55:31+00:00"
         },
         {
             "name": "dashifen/request",
@@ -646,19 +647,20 @@
         },
         {
             "name": "dashifen/session",
-            "version": "1.0.5",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/session.git",
-                "reference": "5e5d8455afc5c4d854e96be94c17807bb52cf99a"
+                "reference": "c9e57326d2c490f7d3465732d4cfd6370e1992e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/session/zipball/5e5d8455afc5c4d854e96be94c17807bb52cf99a",
-                "reference": "5e5d8455afc5c4d854e96be94c17807bb52cf99a",
+                "url": "https://api.github.com/repos/dashifen/session/zipball/c9e57326d2c490f7d3465732d4cfd6370e1992e5",
+                "reference": "c9e57326d2c490f7d3465732d4cfd6370e1992e5",
                 "shasum": ""
             },
             "require": {
+                "dashifen/exception": "^1",
                 "php": "^7.1"
             },
             "type": "library",
@@ -683,7 +685,7 @@
             "keywords": [
                 "session"
             ],
-            "time": "2017-05-03T18:17:47+00:00"
+            "time": "2018-02-13T01:29:40+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -691,12 +693,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "9c1d1e20a2ab54b9188198d96c7fab9252c770e2"
+                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/9c1d1e20a2ab54b9188198d96c7fab9252c770e2",
-                "reference": "9c1d1e20a2ab54b9188198d96c7fab9252c770e2",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f9acb4761844317e626a32259205bec1f1bc60d2",
+                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2",
                 "shasum": ""
             },
             "require": {
@@ -736,7 +738,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2017-05-01 09:23:13"
+            "time": "2018-01-15 07:18:01"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -944,12 +946,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
+                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
+                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
                 "shasum": ""
             },
             "require": {
@@ -983,7 +985,47 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10 12:19:37"
+            "time": "2018-04-03 15:59:15"
+        },
+        {
+            "name": "ralouphie/mimey",
+            "version": "1.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ralouphie/mimey.git",
+                "reference": "d69688d4856daa13a9124c819d148ccc2235dea2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ralouphie/mimey/zipball/d69688d4856daa13a9124c819d148ccc2235dea2",
+                "reference": "d69688d4856daa13a9124c819d148ccc2235dea2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3|^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~3.7.0",
+                "satooshi/php-coveralls": ">=1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mimey\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ralph Khattar",
+                    "email": "ralph.khattar@gmail.com"
+                }
+            ],
+            "description": "PHP package for converting file extensions to MIME types and vice versa.",
+            "time": "2017-01-27T20:57:22+00:00"
         },
         {
             "name": "react/promise",
@@ -991,12 +1033,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "ec953894782a0366a5533677c68972eea848d848"
+                "reference": "308b9165ccfc65c01002b5a678297161786cae4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/ec953894782a0366a5533677c68972eea848d848",
-                "reference": "ec953894782a0366a5533677c68972eea848d848",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/308b9165ccfc65c01002b5a678297161786cae4a",
+                "reference": "308b9165ccfc65c01002b5a678297161786cae4a",
                 "shasum": ""
             },
             "require": {
@@ -1029,7 +1071,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2017-05-08 18:49:20"
+            "time": "2018-05-07 08:34:03"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1037,12 +1079,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "5f0c491736afbe07a4599eb778fbb6d9729a10d6"
+                "reference": "26efe2451bc3c282cddfb8acfb182c9a38966fd1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/5f0c491736afbe07a4599eb778fbb6d9729a10d6",
-                "reference": "5f0c491736afbe07a4599eb778fbb6d9729a10d6",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/26efe2451bc3c282cddfb8acfb182c9a38966fd1",
+                "reference": "26efe2451bc3c282cddfb8acfb182c9a38966fd1",
                 "shasum": ""
             },
             "require": {
@@ -1061,8 +1103,9 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.5-dev",
-                    "dev-develop": "1.6-dev"
+                    "dev-master": "1.7.x-dev",
+                    "dev-develop": "1.8.x-dev",
+                    "dev-release-2.0": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -1081,7 +1124,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2017-08-22 20:40:13"
+            "time": "2018-05-29 18:52:59"
         }
     ],
     "packages-dev": [],

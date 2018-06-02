@@ -97,7 +97,7 @@ abstract class AbstractParser {
 
 	/**
 	 * @return void
-	 * @throws MysqlException
+	 * @throws DatabaseException
 	 */
 	abstract public function parse(): void;
 
