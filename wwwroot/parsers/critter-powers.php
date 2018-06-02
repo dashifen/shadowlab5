@@ -13,7 +13,7 @@ class CritterPowersParser extends AbstractParser {
 	 * @throws DatabaseException
 	 */
 	public function parse(): void {
-		$this->updateCategoryTable("categories", "critter_power_type", "critter_powers_types");
+		$this->updateIdTable("categories", "critter_power_type", "critter_powers_types");
 
 		if ($this->canContinue()) {
 			$powerTypes = $this->db->getMap("SELECT critter_power_type, critter_power_type_id FROM critter_powers_types");

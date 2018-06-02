@@ -1,11 +1,11 @@
 <?php
 require("../../vendor/autoload.php");
 
-use Shadowlab\Parser\AbstractParser;
-use Shadowlab\Framework\Database\Database;
-use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Database\DatabaseException;
+use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Exception\Exception;
+use Shadowlab\Framework\Database\Database;
+use Shadowlab\Parser\AbstractParser;
 
 class ProgramsParser extends AbstractParser {
 
@@ -15,7 +15,7 @@ class ProgramsParser extends AbstractParser {
 	 * @throws DatabaseException
 	 */
 	public function parse(): void {
-		$this->updateCategoryTable("programs", "program_type", "programs_types");
+		$this->updateIdTable("programs", "program_type", "programs_types");
 		$types = $this->db->getMap("SELECT program_type, program_type_id FROM programs_types");
 
 		foreach ($this->xml->programs->program as $program) {

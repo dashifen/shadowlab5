@@ -1,12 +1,12 @@
 <?php
 require("../../vendor/autoload.php");
 
+use Dashifen\Database\DatabaseException;
+use Dashifen\Database\Mysql\MysqlInterface;
+use Dashifen\Exception\Exception;
+use Shadowlab\Framework\Database\Database;
 use Shadowlab\Parser\AbstractParser;
 use Shadowlab\Parser\ParserException;
-use Shadowlab\Framework\Database\Database;
-use Dashifen\Database\Mysql\MysqlInterface;
-use Dashifen\Database\DatabaseException;
-use Dashifen\Exception\Exception;
 
 class AdeptPowersParser extends AbstractParser {
 	/**
@@ -44,7 +44,7 @@ class AdeptPowersParser extends AbstractParser {
 
 			$insertData = array_merge($powerData, [
 				"adept_power" => (string) $power->name,
-				"guid" => strtolower((string) $power->id)
+				"guid"        => strtolower((string) $power->id),
 			]);
 
 			$this->db->upsert("adept_powers", $insertData, $powerData);
@@ -62,11 +62,11 @@ class AdeptPowersParser extends AbstractParser {
 	 */
 	protected function getPowerData(SimpleXMLElement $power): array {
 		$data = [
-			"cost"        => (float) $power->points + (float) ($power->extrapointcost ?? 0),
-			"levels"      => (string) $power->levels === "true" ? "Y" : "N",
-			"action"      => strtolower((string) $power->action),
-			"book_id"     => $this->bookMap[(string) $power->source],
-			"page"        => (int) $power->page,
+			"cost"    => (float) $power->points + (float) ($power->extrapointcost ?? 0),
+			"levels"  => (string) $power->levels === "true" ? "Y" : "N",
+			"action"  => strtolower((string) $power->action),
+			"book_id" => $this->bookMap[(string) $power->source],
+			"page"    => (int) $power->page,
 		];
 
 		if ($data["levels"] === "Y") {
@@ -91,12 +91,12 @@ class AdeptPowersParser extends AbstractParser {
 		$adept_power_id = $this->db->getVar("SELECT adept_power_id FROM adept_powers WHERE guid = :guid", $key);
 
 		$this->db->delete("adept_powers_ways", [
-			"adept_power_id" => $adept_power_id
+			"adept_power_id" => $adept_power_id,
 		]);
 
 		$insertions = $this->getWayInsertions($power, $adept_power_id);
 
-		if(sizeof($insertions) > 0) {
+		if (sizeof($insertions) > 0) {
 			$this->db->insert("adept_powers_ways", $insertions);
 		}
 	}
@@ -158,7 +158,6 @@ try {
 
 	$parser->debug($e);
 }
-
 
 
 $actions = [];

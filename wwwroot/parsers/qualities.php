@@ -2,7 +2,6 @@
 require("../../vendor/autoload.php");
 
 use Dashifen\Database\DatabaseException;
-use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Exception\Exception;
 use Shadowlab\Framework\Database\Database;
 use Shadowlab\Parser\AbstractParser;
@@ -105,28 +104,6 @@ class QualitiesParser extends AbstractParser {
 	}
 
 	/**
-	 * @param string $quality
-	 *
-	 * @return bool
-	 */
-	protected function isFreakish(string $quality): bool {
-		foreach (self::FREAKISH as $freakishQuality) {
-
-			// some of our freakish qualities have additional
-			// information after the text included in the constant
-			// above.  so, we'll look to see if our $quality can
-			// be found within any of the freakish qualities.  if
-			// it can be, then we return "Y"
-
-			if (strpos($quality, $freakishQuality) !== false) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * @param SimpleXMLElement $quality
 	 *
 	 * @return array
@@ -155,7 +132,7 @@ class QualitiesParser extends AbstractParser {
 
 		return [
 			"minimum" => $minimum,
-			"maximum" => $maximum
+			"maximum" => $maximum,
 		];
 	}
 
@@ -170,6 +147,28 @@ class QualitiesParser extends AbstractParser {
 		// can continue as long as the minimum isn't "NULL."
 
 		return ($costs["minimum"] ?? "") === "NULL";
+	}
+
+	/**
+	 * @param string $quality
+	 *
+	 * @return bool
+	 */
+	protected function isFreakish(string $quality): bool {
+		foreach (self::FREAKISH as $freakishQuality) {
+
+			// some of our freakish qualities have additional
+			// information after the text included in the constant
+			// above.  so, we'll look to see if our $quality can
+			// be found within any of the freakish qualities.  if
+			// it can be, then we return "Y"
+
+			if (strpos($quality, $freakishQuality) !== false) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 

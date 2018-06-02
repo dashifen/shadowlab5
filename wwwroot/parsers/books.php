@@ -1,11 +1,11 @@
 <?php
 require("../../vendor/autoload.php");
 
-use Shadowlab\Parser\AbstractParser;
-use Shadowlab\Framework\Database\Database;
-use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Database\DatabaseException;
+use Dashifen\Database\Mysql\MysqlException;
 use Dashifen\Exception\Exception;
+use Shadowlab\Framework\Database\Database;
+use Shadowlab\Parser\AbstractParser;
 
 class BooksParser extends AbstractParser {
 	/**

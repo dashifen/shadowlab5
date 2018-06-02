@@ -3,9 +3,8 @@
 namespace Shadowlab\Parser;
 
 use Dashifen\Database\DatabaseException;
-use Dashifen\Database\Mysql\MysqlException;
-use SimpleXMLElement;
 use Dashifen\Database\Mysql\MysqlInterface;
+use SimpleXMLElement;
 
 abstract class AbstractParser {
 	/**
@@ -48,14 +47,6 @@ abstract class AbstractParser {
 	}
 
 	/**
-	 * @return void
-	 * @throws DatabaseException
-	 */
-	protected function getBooksMap(): void {
-		$this->bookMap = $this->db->getMap("SELECT abbreviation, book_id FROM books");
-	}
-
-	/**
 	 * @param string $dataFile
 	 *
 	 * @return void
@@ -84,6 +75,14 @@ abstract class AbstractParser {
 	}
 
 	/**
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	protected function getBooksMap(): void {
+		$this->bookMap = $this->db->getMap("SELECT abbreviation, book_id FROM books");
+	}
+
+	/**
 	 * @param mixed ...$x
 	 */
 	public function debug(...$x) {
@@ -108,7 +107,7 @@ abstract class AbstractParser {
 	 *
 	 * @return void
 	 */
-	protected function updateCategoryTable(string $plural, string $key, string $table): void {
+	protected function updateIdTable(string $plural, string $key, string $table): void {
 		if (isset($this->xml->{$plural})) {
 
 			// if our $plural property is set, and it should be or we wouldn't
@@ -125,7 +124,7 @@ abstract class AbstractParser {
 
 				foreach ($children as $child) {
 					$this->db->insert($table, [
-						$key => (string) $child
+						$key => (string) $child,
 					]);
 				}
 			} catch (DatabaseException $e) {
@@ -138,5 +137,15 @@ abstract class AbstractParser {
 
 			}
 		}
+	}
+
+	/**
+	 * @param SimpleXMLElement $xml
+	 * @param string           $property
+	 *
+	 * @return bool
+	 */
+	protected function hasProperty(SimpleXMLElement $xml, string $property): bool {
+		return isset($xml->{$property}) && $xml->{$property}->count() > 0;
 	}
 }
