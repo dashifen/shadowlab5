@@ -1,95 +1,16 @@
 <?php
 require("../../vendor/autoload.php");
 
+use Dashifen\Exception\Exception;
 use Dashifen\Database\DatabaseException;
+use Dashifen\Database\Mysql\MysqlInterface;
+use Dashifen\Database\Mysql\MysqlException;
 use Shadowlab\Framework\Database\Database;
+use Shadowlab\Parser\AbstractParser;
+use Shadowlab\Parser\ParserException;
 
-function debug(...$x) {
-	$dumps = [];
-	foreach ($x as $y) {
-		$dumps[] = print_r($y, true);
-	}
-
-	echo "<pre>" . join("</pre><pre>", $dumps) . "</pre>";
-}
-
-function getMovement(SimpleXMLElement $critter) {
-	if (isset($critter->movement)) {
-		$temp = (string) $critter->movement;
-		return $temp === "Special" ? $temp : "x2/x4/+2";
-	}
-
-	// if we're still here, then we want to decipher the walk,
-	// run, and sprint information in our $critter to determine
-	// our movement string.  if these three properties don't
-	// exist, then we'll return the default above.
-
-	switch ((string) $critter->name) {
-		case "Spirit of Air":
-			return "x2/x4/+10";
-
-		case "Spirit of Fire":
-			return "x2/x4/+5";
-
-		default:
-			$walk = explode("/", (string) ($critter->walk ?? ""));
-			$run = explode("/", (string) ($critter->run ?? ""));
-			$sprint = explode("/", (string) ($critter->sprint ?? ""));
-
-			$format = "x%d/x%d/+%d";
-			$ground = [$walk[0], $run[0], $sprint[0]];
-			$water = [$walk[1], $run[1], $sprint[1]];
-			$air = [$walk[2], $run[2], $sprint[2]];
-
-			$movement = vsprintf($format, $ground);
-
-			if ($water != [0, 0, 0] && $water != [1, 0, 1] && $water != [2, 4, 2]) {
-				$movement .= " (" . vsprintf($format, $water) . " swimming)";
-			}
-
-			if ($air != [0, 0, 0] && $air != [2, 4, 2]) {
-				$movement .= " (" . vsprintf($format, $air) . " flying)";
-			}
-
-			return $movement;
-	}
-}
-
-function hasRecords(SimpleXMLElement $xml, string $property) {
-
-	// empty XML nodes are still set.  so, a XML tag as follows would
-	// pass the first test below but not the second:  <x><y /></x>.
-	// but, something like <x><y>foo</y></x> would pass both of them.
-
-	return isset($xml->{$property}) && $xml->{$property}->count() > 0;
-}
-
-try {
-	$db = new Database();
-	$xml = file_get_contents("data/critters.xml");
-	$xml = new SimpleXMLElement($xml);
-
-	foreach ($xml->categories->category as $category) {
-		try {
-
-			// critter type is a unique key, so we can just insert
-			// and if the database blocks us, it'll throw an exception.
-			// we catch it below and simple do nothing with it.
-
-			$db->insert("critters_types", [
-				"critter_type" => $category,
-			]);
-		} catch (DatabaseException $e) {
-			continue;
-		}
-	}
-
-	$books = $db->getMap("SELECT abbreviation, book_id FROM books");
-	$types = $db->getMap("SELECT critter_type, critter_type_id FROM critters_types");
-	$attributes = $db->getMap("SELECT attribute, attribute_id FROM attributes");
-	$powers = $db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
-
-	$attrMap = [
+class CrittersParser extends AbstractParser {
+	protected const ATTRIBUTE_MAP = [
 		"bodmin" => "body",
 		"agimin" => "agility",
 		"reamin" => "reaction",
@@ -106,108 +27,282 @@ try {
 		"essmin" => "essence",
 	];
 
-	$movements = [];
-	foreach ($xml->metatypes->metatype as $critter) {
+	/**
+	 * @var array
+	 */
+	protected $types = [];
+
+	/**
+	 * @var array
+	 */
+	protected $attributes = [];
+
+	/**
+	 * @var array
+	 */
+	protected $powers = [];
+
+	/**
+	 * @var array
+	 */
+	protected $skills = [];
+
+	/**
+	 * @var array
+	 */
+	protected $programs = [];
+
+	/**
+	 * @var array
+	 */
+	protected $qualities = [];
+
+	/**
+	 * CrittersParser constructor.
+	 *
+	 * @param string         $dataFile
+	 * @param MysqlInterface $db
+	 *
+	 * @throws DatabaseException
+	 * @throws ParserException
+	 */
+	public function __construct(string $dataFile = "", MysqlInterface $db) {
+		parent::__construct($dataFile, $db);
+
+		// before we parse individual critters, we need to update the list
+		// of critter types and make sure we gather the necessary data to
+		// understand what we're going to be looking at.
+
+		$this->updateIdTable("categories", "critter_type", "critters_types");
+		$this->types = $this->db->getMap("SELECT critter_type, critter_type_id FROM critters_types");
+		$this->attributes = $this->db->getMap("SELECT attribute, attribute_id FROM attributes");
+		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
+		$this->programs = $this->db->getMap("SELECT program, program_id FROM programs");
+		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
+		$this->skills = $this->db->getMap("SELECT skill, skill_id FROM skills");
+	}
+
+	/**
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	public function parse(): void {
+		foreach ($this->xml->metatypes->metatype as $critter) {
+			if ($this->isSR5($critter)) {
+				$critterId = $this->upsertCritter($critter);
+				$this->handleCritterAttributes($critter, $critterId);
+				$this->handleOptionalProperties($critter, $critterId);
+			}
+		}
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 *
+	 * @return bool
+	 */
+	protected function isSR5(SimpleXMLElement $critter): bool {
 
 		// the critters.xml file includes critters from SR4
 		// as well as SR5.  we're only listing SR5 stats at
 		// this time, so we'll skip any of them that cannot
 		// be found in the $books map.
 
-		$bookId = $books[(string) $critter->source] ?? false;
-		if ($bookId === false) {
-			continue;
-		}
+		$bookId = $this->bookMap[(string) $critter->source] ?? "";
+		return is_numeric($bookId);
+	}
 
+	/**
+	 * @param SimpleXmlElement $critter
+	 *
+	 * @return int
+	 * @throws MysqlException
+	 * @throws DatabaseException
+	 */
+	protected function upsertCritter(SimpleXmlElement $critter): int {
 		$critterData = [
-			"critter_type_id" => $types[(string) $critter->category],
-			"movement"        => getMovement($critter),
+			"movement"        => $this->getMovement($critter),
+			"critter_type_id" => $this->types[(string) $critter->category],
+			"book_id"         => $this->bookMap[(string) $critter->source],
 			"page"            => (int) $critter->page,
-			"book_id"         => $bookId,
 		];
 
-		$guid["guid"] = strtolower((string) $critter->id);
-		$critterName["critter"] = (string) $critter->name;
-		$critterId = $db->upsert("critters", array_merge($critterName, $critterData, $guid), $critterData);
+		$insertData = array_merge($critterData, [
+			"guid"    => ($guid = strtolower((string) $critter->id)),
+			"critter" => (string) $critter->name,
+		]);
 
-		// now, we have a lot of work to do to connect this new
-		// critter in the database to its attributes, skills, powers,
-		// and programs.  to make things as easy as possible, we'll
-		// simply delete information in the database when we have
-		// data to insert from the XML.  we'll start with attributes
-		// since they all have that.
+		$this->db->upsert("critters", $insertData, $critterData);
+		$statement = "SELECT critter_id FROM critters WHERE guid = :guid";
+		return $this->db->getVar($statement, ["guid" => $guid]);
+	}
 
-		$db->delete("critters_attributes", ["critter_id" => $critterId]);
+	/**
+	 * @param SimpleXMLElement $critter
+	 *
+	 * @return string
+	 */
+	protected function getMovement(SimpleXMLElement $critter): string {
+		if (isset($critter->movement)) {
+			$temp = (string) $critter->movement;
+			return $temp === "Special" ? $temp : "x2/x4/+2";
+		}
 
-		foreach ($attrMap as $property => $attribute) {
+		// if we're still here, then we want to decipher the walk,
+		// run, and sprint information in our $critter to determine
+		// our movement string.  if these three properties don't
+		// exist, then we'll return the default above.
+
+		switch ((string) $critter->name) {
+			case "Spirit of Air":
+				return "x2/x4/+10";
+
+			case "Spirit of Fire":
+				return "x2/x4/+5";
+
+			default:
+				$walk = explode("/", (string) ($critter->walk ?? ""));
+				$run = explode("/", (string) ($critter->run ?? ""));
+				$sprint = explode("/", (string) ($critter->sprint ?? ""));
+
+				$format = "x%d/x%d/+%d";
+				$ground = [$walk[0], $run[0], $sprint[0]];
+				$water = [$walk[1], $run[1], $sprint[1]];
+				$air = [$walk[2], $run[2], $sprint[2]];
+
+				$movement = vsprintf($format, $ground);
+
+				if ($water != [0, 0, 0] && $water != [1, 0, 1] && $water != [2, 4, 2]) {
+					$movement .= " (" . vsprintf($format, $water) . " swimming)";
+				}
+
+				if ($air != [0, 0, 0] && $air != [2, 4, 2]) {
+					$movement .= " (" . vsprintf($format, $air) . " flying)";
+				}
+
+				return $movement;
+		}
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param int              $critterId
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	protected function handleCritterAttributes(SimpleXMLElement $critter, int $critterId): void {
+
+		// to make things easy, we'll just delete the old attributes
+		// and then add the new ones in.  we'll build a list of
+		// insertions so that we can do both of these operations in
+		// two queries.
+
+		$insertions = [];
+
+		foreach (self::ATTRIBUTE_MAP as $property => $attribute) {
 			if (isset($critter->{$property})) {
-				$db->insert("critters_attributes", [
+				$insertions[] = [
 					"critter_id"   => $critterId,
-					"attribute_id" => $attributes[$attribute],
+					"attribute_id" => $this->attributes[$attribute],
 					"rating"       => (string) $critter->{$property},
-				]);
+				];
 			}
 		}
 
+		$this->db->delete("critters_attributes", ["critter_id" => $critterId]);
+		$this->db->insert("critters_attributes", $insertions);
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param int              $critterId
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	protected function handleOptionalProperties(SimpleXMLElement $critter, int $critterId): void {
+
+		// the following properties are all optional:  some critters
+		// have more than others, but all of them have at least one
+		// of the following.  since we don't know which has what,  we
+		// loop over the properties and check each of them for every
+		// critter.
+
 		$properties = [
-			"powers"         => "critters_critter_powers",
-			"optionalpowers" => "critters_critter_powers",
-			"skills"         => "critters_skills",
-			"qualities"      => "critters_qualities",
-			"complexforms"   => "critters_programs",
+			"skills"         => ["skill_id", "critters_skills"],
+			"powers"         => ["critter_power_id", "critters_critter_powers"],
+			"optionalpowers" => ["critter_power_id", "critters_critter_powers"],
+			"complexforms"   => ["program_id", "critters_programs"],
 		];
 
-		foreach ($properties as $property => $table) {
-			if (hasRecords($critter, $property)) {
+		foreach ($properties as $property => list($propertyId, $table)) {
+			if ($this->hasProperty($critter, $property)) {
 
 				// if we're in this block, then we've confirmed that this
 				// critter has at least one record withing the specified
 				// property (e.g. they have at least one power or skill).
-				// so, now we want to add those records to the database.
-				// we have functions for that defined below.
+				// now, we want to start adding those powers, etc. to
+				// this critter's database record.
+
+				$insertions = [];
+				$thisPropName = $property !== "optionalpowers"
+					? $property
+					: "powers";
+
+				$map = $this->{$thisPropName};
+				foreach ($critter->{$property} as $elements) {
+					foreach ($elements as $element) {
+
+						// way in here, we're looking at a specific, single
+						// XML element related to the power, skill, etc. that
+						// we're working on.  we'll want to extract its
+						// attributes, get it's ID and add that to those,
+						// and collect our insertions for the database.
 
 
-			}
-		}
-
-		// for our other information, the XML sometimes uses
-		// self-closing tags (like <optionalpowers /> which
-		// might result in a set property with no information.
-		// so, we'll loop over the property's children building
-		// the information we need before we delete.
-
-		if (isset($critter->powers)) {
-			$powers = [];
-			foreach ($critter->powers->power as $power) {
-				$temp = [
-					"critter_id"       => $critterId,
-					"critter_power_id" => $powers[(string) $power],
-					"optional"         => "N",
-				];
-
-				$powerAttributes = $power->attributes();
-				if (isset($powerAttributes["select"])) {
-					$temp["description"] = $powerAttributes["select"];
+						$insertion = $this->getElementAttributes($element);
+						$insertion[$propertyId] = $map[(string) $element];
+						$insertions[] = $insertion;
+					}
 				}
 
-				if (isset($powerAttributes["rating"])) {
-					$temp["rating"] = $powerAttributes["rating"];
-				}
-
-				$powers[] = $temp;
+				$this->db->delete($table, ["critter_id" => $critterId]);
+				$this->db->insert($table, $insertions);
 			}
-
-			if (sizeof($powers) > 0) {
-				$db->delete("critters_critter_powers", ["critter_id" => $critterId]);
-				foreach ($powers as $power) {
-					$db->insert("critters_critter_powers", $power);
-				}
-			}
-
 		}
 	}
 
-	echo "done";
-} catch (DatabaseException $e) {
-	die($e->getMessage());
+	/**
+	 * @param SimpleXMLElement $element
+	 *
+	 * @return array
+	 */
+	protected function getElementAttributes(SimpleXMLElement $element): array {
+		$attributes = ((array) $element->attributes())["@attributes"] ?? [];
+
+		// chummer labels the "select" attribute as the description of a
+		// power.  i think, elsewhere, it uses that attribute to indicate
+		// a selection between options, but in critters.xml, that doesn't
+		// seem to be the case.  we'll switch things here to keep the
+		// calling scope as clean as possible.
+
+		if (isset($attributes["select"])) {
+			$attributes["description"] = $attributes["select"];
+			unset($attributes["select"]);
+		}
+
+		return $attributes;
+	}
+}
+
+try {
+	$parser = new CrittersParser("data/critters.xml", new Database());
+	$parser->parse();
+} catch (Exception $e) {
+	if ($e instanceof DatabaseException) {
+		echo "Failed: " . $e->getQuery();
+	}
+
+	$parser->debug($e);
 }
