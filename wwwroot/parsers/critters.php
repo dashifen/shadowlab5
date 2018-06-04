@@ -227,7 +227,8 @@ class CrittersParser extends AbstractParser {
 		// have more than others, but all of them have at least one
 		// of the following.  since we don't know which has what,  we
 		// loop over the properties and check each of them for every
-		// critter.
+		// critter.  we link the name of the thing in the XML document
+		// to the information we need in the loop below.
 
 		$properties = [
 			"skills"         => ["skill_id", "critters_skills"],
@@ -242,35 +243,59 @@ class CrittersParser extends AbstractParser {
 				// if we're in this block, then we've confirmed that this
 				// critter has at least one record withing the specified
 				// property (e.g. they have at least one power or skill).
-				// now, we want to start adding those powers, etc. to
-				// this critter's database record.
+				// so, we gather that data with the method below, remove
+				// any existing information about it, and then insert the
+				// new stuff.
 
-				$insertions = [];
-				$thisPropName = $property !== "optionalpowers"
-					? $property
-					: "powers";
-
-				$map = $this->{$thisPropName};
-				foreach ($critter->{$property} as $elements) {
-					foreach ($elements as $element) {
-
-						// way in here, we're looking at a specific, single
-						// XML element related to the power, skill, etc. that
-						// we're working on.  we'll want to extract its
-						// attributes, get it's ID and add that to those,
-						// and collect our insertions for the database.
-
-
-						$insertion = $this->getElementAttributes($element);
-						$insertion[$propertyId] = $map[(string) $element];
-						$insertions[] = $insertion;
-					}
-				}
-
+				$insertions = $this->getInsertions($critter, $property, $propertyId);
 				$this->db->delete($table, ["critter_id" => $critterId]);
 				$this->db->insert($table, $insertions);
 			}
 		}
+	}
+
+	/**
+	 * @param string $property
+	 *
+	 * @return array
+	 */
+	protected function getMap(string $property): array {
+
+		// most of the time, the properties that we're accessing in the XML
+		// document are named the same as the name => ID maps that reside in
+		// the properties of this object.  but, for the "optionalpowers" XML
+		// property, we want to use the powers object property.  we'll handle
+		// that here.
+
+		$thisPropName = $property !== "optionalpowers" ? $property : "powers";
+		return $this->{$thisPropName};
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param string           $property
+	 * @param string           $propertyId
+	 *
+	 * @return array
+	 */
+	protected function getInsertions(SimpleXMLElement $critter, string $property, string $propertyId) {
+		$map = $this->getMap($property);
+		foreach ($critter->{$property} as $elements) {
+			foreach ($elements as $element) {
+
+				// in here, we're looking at a specific, single XML
+				// element related to the power, skill, etc. that we're
+				// working on.  we'll want to extract its attributes,
+				// get it's ID and add that to those, and collect our
+				// insertions for the database.
+
+				$insertion = $this->getElementAttributes($element);
+				$insertion[$propertyId] = $map[(string) $element];
+				$insertions[] = $insertion;
+			}
+		}
+
+		return $insertions ?? [];
 	}
 
 	/**
