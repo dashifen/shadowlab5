@@ -252,6 +252,13 @@ class CrittersParser extends AbstractParser {
 				$this->db->insert($table, $insertions);
 			}
 		}
+
+		// there's one set of optional properties for critters that are
+		// different in the XML than the others:  qualities.  in the XML
+		// they're split into positive and negative lists, so the loop
+		// above won't work.  so, we'll create another loop here.
+
+		$this->handleQualities($critter);
 	}
 
 	/**
@@ -318,6 +325,13 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return $attributes;
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 */
+	protected function handleQualities(SimpleXMLElement $critter) {
+		
 	}
 }
 
