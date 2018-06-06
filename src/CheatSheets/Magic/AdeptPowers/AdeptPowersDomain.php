@@ -3,6 +3,7 @@
 namespace Shadowlab\CheatSheets\Magic\AdeptPowers;
 
 use Shadowlab\Framework\Domain\AbstractDomain;
+use Dashifen\Database\DatabaseException;
 
 class AdeptPowersDomain extends AbstractDomain {
     /**
@@ -15,11 +16,12 @@ class AdeptPowersDomain extends AbstractDomain {
             "adept_power"];
     }
 
-    /**
-     * @param int $recordId
-     *
-     * @return array
-     */
+	/**
+	 * @param int $recordId
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function readOne(int $recordId): array {
         $sql = $this->getQuery() . " WHERE adept_power_id = :adept_power_id";
         return $this->db->getRow($sql, ["adept_power_id" => $recordId]);
@@ -32,12 +34,13 @@ class AdeptPowersDomain extends AbstractDomain {
         return "SELECT adept_power_id, adept_power_ways_ids, adept_power,
 			description, adept_power_ways, action, cost, maximum_levels,
 			cost_per_level, book_id, book, abbreviation, page, levels
-			FROM adept_powers_view";
+			FROM adept_powers_view ORDER BY adept_power";
     }
 
-    /**
-     * @return array
-     */
+	/**
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function readAll(): array {
         return $this->db->getResults($this->getQuery());
     }
@@ -52,12 +55,13 @@ class AdeptPowersDomain extends AbstractDomain {
         return $isCollection ? "Adept Powers" : $records[0]["adept_power"];
     }
 
-    /**
-     * @param string $table
-     * @param bool   $withFKOption
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param bool   $withFKOption
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function getTableDetails(string $table, bool $withFKOption = true): array {
         $schema = parent::getTableDetails($table);
 
@@ -106,13 +110,14 @@ class AdeptPowersDomain extends AbstractDomain {
         return $schema;
     }
 
-    /**
-     * @param string $table
-     * @param array  $record
-     * @param array  $key
-     *
-     * @return int
-     */
+	/**
+	 * @param string $table
+	 * @param array  $record
+	 * @param array  $key
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
     protected function saveRecord(string $table, array $record, array $key): int {
 
         // we split the information about our power into two tables:
@@ -130,12 +135,13 @@ class AdeptPowersDomain extends AbstractDomain {
         return $powerId;
     }
 
-    /**
-     * @param array $power
-     * @param array $key
-     *
-     * @return int
-     */
+	/**
+	 * @param array $power
+	 * @param array $key
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
 
     protected function savePower(array $power, array $key): int {
 
@@ -156,12 +162,13 @@ class AdeptPowersDomain extends AbstractDomain {
         return $power_id;
     }
 
-    /**
-     * @param array $power
-     * @param array $key
-     *
-     * @return void
-     */
+	/**
+	 * @param array $power
+	 * @param array $key
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 */
     protected function savePowerWays(array $power, array $key): void {
 
         // here we simply want to save the information about the ways

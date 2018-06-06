@@ -1,10 +1,10 @@
 <?php
 require("../../vendor/autoload.php");
 
-use Dashifen\Exception\Exception;
 use Dashifen\Database\DatabaseException;
-use Dashifen\Database\Mysql\MysqlInterface;
 use Dashifen\Database\Mysql\MysqlException;
+use Dashifen\Database\Mysql\MysqlInterface;
+use Dashifen\Exception\Exception;
 use Shadowlab\Framework\Database\Database;
 use Shadowlab\Parser\AbstractParser;
 use Shadowlab\Parser\ParserException;
@@ -247,7 +247,9 @@ class CrittersParser extends AbstractParser {
 				// any existing information about it, and then insert the
 				// new stuff.
 
-				$insertions = $this->getInsertions($critter, $property, $propertyId);
+				$insertions = $this->getInsertions($critter, $critterId, $property, $propertyId, $table);
+				$this->debug($insertions);
+
 				$this->db->delete($table, ["critter_id" => $critterId]);
 				$this->db->insert($table, $insertions);
 			}
@@ -258,7 +260,51 @@ class CrittersParser extends AbstractParser {
 		// they're split into positive and negative lists, so the loop
 		// above won't work.  so, we'll create another loop here.
 
-		$this->handleQualities($critter);
+		$this->handleQualities($critter, $critterId);
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param int              $critterId
+	 * @param string           $property
+	 * @param string           $propertyId
+	 *
+	 * @param string           $table
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
+	protected function getInsertions(SimpleXMLElement $critter, int $critterId, string $property, string $propertyId, string $table) {
+		$columns = $this->db->getTableColumns($table);
+		$map = $this->getMap($property);
+
+		foreach ($critter->{$property} as $elements) {
+			foreach ($elements as $element) {
+
+				// in here, we're looking at a specific, single XML
+				// element related to the power, skill, etc. that we're
+				// working on.  we'll want to extract its attributes,
+				// get it's ID and add that to those, and collect our
+				// insertions for the database.
+
+				$insertion = $this->getElementAttributes($element);
+				$insertion = array_merge($insertion, [
+					$propertyId  => $map[(string) $element],
+					"critter_id" => $critterId,
+				]);
+
+				// we're almost done.  now we just have to be sure
+				// that any column in the table that's not in insertion
+				// is set null.
+
+				$insertion = $this->setDefaults($insertion, $columns, $property);
+
+
+				$insertions[] = $insertion;
+			}
+		}
+
+		return $insertions ?? [];
 	}
 
 	/**
@@ -270,39 +316,23 @@ class CrittersParser extends AbstractParser {
 
 		// most of the time, the properties that we're accessing in the XML
 		// document are named the same as the name => ID maps that reside in
-		// the properties of this object.  but, for the "optionalpowers" XML
-		// property, we want to use the powers object property.  we'll handle
-		// that here.
+		// the properties of this object.  but, for some, we want to return
+		// something else.  this switch statement handles it all for us.
 
-		$thisPropName = $property !== "optionalpowers" ? $property : "powers";
-		return $this->{$thisPropName};
-	}
+		$temp = $property;
 
-	/**
-	 * @param SimpleXMLElement $critter
-	 * @param string           $property
-	 * @param string           $propertyId
-	 *
-	 * @return array
-	 */
-	protected function getInsertions(SimpleXMLElement $critter, string $property, string $propertyId) {
-		$map = $this->getMap($property);
-		foreach ($critter->{$property} as $elements) {
-			foreach ($elements as $element) {
+		switch ($property) {
+			case "optionalpowers":
+				$temp = "powers";
+				break;
 
-				// in here, we're looking at a specific, single XML
-				// element related to the power, skill, etc. that we're
-				// working on.  we'll want to extract its attributes,
-				// get it's ID and add that to those, and collect our
-				// insertions for the database.
-
-				$insertion = $this->getElementAttributes($element);
-				$insertion[$propertyId] = $map[(string) $element];
-				$insertions[] = $insertion;
-			}
+			case "positive":
+			case "negative":
+				$temp = "qualities";
+				break;
 		}
 
-		return $insertions ?? [];
+		return $this->{$temp};
 	}
 
 	/**
@@ -328,10 +358,63 @@ class CrittersParser extends AbstractParser {
 	}
 
 	/**
-	 * @param SimpleXMLElement $critter
+	 * @param array  $destination
+	 * @param array  $source
+	 * @param string $property
+	 *
+	 * @return array
 	 */
-	protected function handleQualities(SimpleXMLElement $critter) {
-		
+	protected function setDefaults(array $destination, array $source, string $property): array {
+
+		// to set our $source columns to null in $destination, we'll create
+		// a $temp array that indexed by $source with null values.  then, we
+		// merge that array and $destination.  since $destination is the
+		// second array, it's values overwrite $temp.
+
+		$temp = array_fill_keys($source, " ");
+
+		if (strpos($property, "powers") !== false) {
+
+			// for both the powers and optionalpowers properties, we'll have
+			// to fill-in the ENUM optional column.  since it's not-nullable,
+			// we'll set it's default value here.
+
+			$temp["optional"] = $property === "powers" ? "N" : "Y";
+		}
+
+		return array_merge($temp, $destination);
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param int              $critterId
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 */
+	protected function handleQualities(SimpleXMLElement $critter, int $critterId): void {
+
+		// qualities are broken down within critters into sub-lists of
+		// positive and negative qualities.  that means the above method
+		// handling other optional properties won't work out for them.
+		// instead, we handle them as follows.
+
+		if ($this->hasProperty($critter, "qualities")) {
+			$qualities = $critter->qualities;
+			$insertions = [];
+
+			foreach (["positive", "negative"] as $qualityType) {
+				if ($this->hasProperty($qualities, $qualityType)) {
+					$insertions[] = $this->getInsertions($qualities, $critterId, $qualityType, "quality_id");
+				}
+			}
+
+			$this->db->delete("critters_qualities", ["critter_id" => $critterId]);
+
+			if (sizeof($insertions) > 0) {
+				$this->db->insert("critters_qualities", $insertions);
+			}
+		}
 	}
 }
 
@@ -339,9 +422,5 @@ try {
 	$parser = new CrittersParser("data/critters.xml", new Database());
 	$parser->parse();
 } catch (Exception $e) {
-	if ($e instanceof DatabaseException) {
-		echo "Failed: " . $e->getQuery();
-	}
-
 	$parser->debug($e);
 }
