@@ -57,7 +57,7 @@
                 "di",
                 "di container"
             ],
-            "time": "2017-10-12 20:08:46"
+            "time": "2017-10-12T20:08:46+00:00"
         },
         {
             "name": "aura/router",
@@ -106,7 +106,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2018-02-15 02:17:11"
+            "time": "2018-02-15T02:17:11+00:00"
         },
         {
             "name": "aura/sql",
@@ -114,12 +114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Sql.git",
-                "reference": "82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e"
+                "reference": "dc31f3bc24d5c0e1b6d1b058807334fdd722ff01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e",
-                "reference": "82ecb9035dc41c36bcad44e75a462bf8a3e7ce7e",
+                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/dc31f3bc24d5c0e1b6d1b058807334fdd722ff01",
+                "reference": "dc31f3bc24d5c0e1b6d1b058807334fdd722ff01",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2018-04-30 23:56:24"
+            "time": "2018-06-07T11:34:54+00:00"
         },
         {
             "name": "authy/php",
@@ -738,7 +738,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-01-15 07:18:01"
+            "time": "2018-01-15T07:18:01+00:00"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -789,7 +789,7 @@
                 }
             ],
             "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function.",
-            "time": "2017-01-13 20:44:38"
+            "time": "2017-01-13T20:44:38+00:00"
         },
         {
             "name": "guzzlehttp/streams",
@@ -839,7 +839,7 @@
                 "Guzzle",
                 "stream"
             ],
-            "time": "2016-04-13 16:32:01"
+            "time": "2016-04-13T16:32:01+00:00"
         },
         {
             "name": "psr/container",
@@ -888,7 +888,7 @@
                 "container-interop",
                 "psr"
             ],
-            "time": "2017-06-28 15:35:32"
+            "time": "2017-06-28T15:35:32+00:00"
         },
         {
             "name": "psr/http-message",
@@ -938,7 +938,7 @@
                 "request",
                 "response"
             ],
-            "time": "2016-08-06 14:39:51"
+            "time": "2016-08-06T14:39:51+00:00"
         },
         {
             "name": "psr/log",
@@ -985,7 +985,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-04-03 15:59:15"
+            "time": "2018-04-03T15:59:15+00:00"
         },
         {
             "name": "ralouphie/mimey",
@@ -1033,12 +1033,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "308b9165ccfc65c01002b5a678297161786cae4a"
+                "reference": "5c777af59090e556b8fbb35cb11c9e41a512b972"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/308b9165ccfc65c01002b5a678297161786cae4a",
-                "reference": "308b9165ccfc65c01002b5a678297161786cae4a",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/5c777af59090e556b8fbb35cb11c9e41a512b972",
+                "reference": "5c777af59090e556b8fbb35cb11c9e41a512b972",
                 "shasum": ""
             },
             "require": {
@@ -1071,7 +1071,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2018-05-07 08:34:03"
+            "time": "2018-06-04T06:45:01+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1124,7 +1124,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2018-05-29 18:52:59"
+            "time": "2018-05-29T18:52:59+00:00"
         }
     ],
     "packages-dev": [],
