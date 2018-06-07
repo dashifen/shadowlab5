@@ -371,7 +371,7 @@ class CrittersParser extends AbstractParser {
 		// merge that array and $destination.  since $destination is the
 		// second array, it's values overwrite $temp.
 
-		$temp = array_fill_keys($source, " ");
+		$temp = array_fill_keys($source, null);
 
 		if (strpos($property, "powers") !== false) {
 
