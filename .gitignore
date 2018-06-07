@@ -111,16 +111,17 @@ composer.phar
 # composer.lock
 
 pma
-.idea/
-/src/Config/Credentials/
-/wwwroot/parsers/data/
+.idea
 *test*
+
+/src/Config/Credentials/
+
 /wwwroot/sandbox/
-/wwwroot/assets/scripts/tinymce/
 /wwwroot/assets/scripts/shadowlab.bundled.min.js
 /wwwroot/assets/scripts/shadowlab.bundled.js
 /wwwroot/assets/scripts/_old.zip
 /wwwroot/assets/scripts/vue.js
-wwwroot/assets/scripts/tinymce
-wwwroot/assets/scripts/vue.js
-/bash.exe.stackdump
+/wwwroot/assets/scripts/tinymce
+
+bash.exe.stackdump
+
