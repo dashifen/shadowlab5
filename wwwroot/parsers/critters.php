@@ -50,6 +50,11 @@ class CrittersParser extends AbstractParser {
 	/**
 	 * @var array
 	 */
+	protected $skillGroups = [];
+
+	/**
+	 * @var array
+	 */
 	protected $programs = [];
 
 	/**
@@ -76,6 +81,7 @@ class CrittersParser extends AbstractParser {
 		$this->updateIdTable("categories", "critter_type", "critters_types");
 		$this->types = $this->db->getMap("SELECT critter_type, critter_type_id FROM critters_types");
 		$this->attributes = $this->db->getMap("SELECT attribute, attribute_id FROM attributes");
+		$this->skillGroups = $this->db->getMap("SELECT skill_group, skill_group_id FROM skill_groups");
 		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
 		$this->programs = $this->db->getMap("SELECT program, program_id FROM programs");
 		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
@@ -85,6 +91,7 @@ class CrittersParser extends AbstractParser {
 	/**
 	 * @return void
 	 * @throws DatabaseException
+	 * @throws ParserException
 	 */
 	public function parse(): void {
 		foreach ($this->xml->metatypes->metatype as $critter) {
@@ -220,6 +227,7 @@ class CrittersParser extends AbstractParser {
 	 *
 	 * @return void
 	 * @throws DatabaseException
+	 * @throws ParserException
 	 */
 	protected function handleOptionalProperties(SimpleXMLElement $critter, int $critterId): void {
 
@@ -248,8 +256,7 @@ class CrittersParser extends AbstractParser {
 				// new stuff.
 
 				$insertions = $this->getInsertions($critter, $critterId, $property, $propertyId, $table);
-				$this->debug($insertions);
-
+				$insertions = $this->mergeInsertions($insertions, $propertyId);
 				$this->db->delete($table, ["critter_id" => $critterId]);
 				$this->db->insert($table, $insertions);
 			}
@@ -298,8 +305,6 @@ class CrittersParser extends AbstractParser {
 				// is set null.
 
 				$insertion = $this->setDefaults($insertion, $columns, $property);
-
-
 				$insertions[] = $insertion;
 			}
 		}
@@ -372,7 +377,6 @@ class CrittersParser extends AbstractParser {
 		// second array, it's values overwrite $temp.
 
 		$temp = array_fill_keys($source, null);
-
 		if (strpos($property, "powers") !== false) {
 
 			// for both the powers and optionalpowers properties, we'll have
@@ -383,6 +387,145 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return array_merge($temp, $destination);
+	}
+
+	/**
+	 * @param array  $insertions
+	 * @param string $propertyId
+	 *
+	 * @return array
+	 * @throws ParserException
+	 */
+	protected function mergeInsertions(array $insertions, string $propertyId): array {
+
+		// sometimes critters are listed with the same power, etc. twice
+		// with different descriptions.  here, we look for that problem and,
+		// if we find it, we fix it.
+
+		$duplicates = $this->getDuplicates($insertions, $propertyId);
+
+		if (sizeof($duplicates) > 0) {
+
+			// if we have duplicates, then we need to merge them.  the
+			// keys of our $duplicates array tell us which properties were
+			// duplicated.  first, we split the array into duplicates and
+			// not duplicates.
+
+			$duplicatedIds = array_keys($duplicates);
+			$singles = $this->filterUnduplicated($insertions, $propertyId, $duplicatedIds);
+			$duplicates = $this->filterDuplicated($insertions, $propertyId, $duplicatedIds);
+			$merged = $this->mergeDuplicates($duplicates, $duplicatedIds, $propertyId);
+			$insertions = array_merge($singles, $merged);
+		}
+
+		return $insertions;
+	}
+
+	/**
+	 * @param array  $insertions
+	 * @param string $propertyId
+	 *
+	 * @return array
+	 */
+	protected function getDuplicates(array $insertions, string $propertyId): array {
+
+		// the insertions array has a column named for this set of properties.
+		// we can extract that and then count the values within it.  if any
+		// of those counts are greater than one, that means that the property
+		// is duplicated.
+
+		$propertyIds = array_column($insertions, $propertyId);
+		$valueCounts = array_count_values($propertyIds);
+		return array_filter($valueCounts, function($count) {
+			return $count > 1;
+		});
+	}
+
+	/**
+	 * @param array  $insertions
+	 * @param string $propertyId
+	 * @param array  $duplicateIds
+	 *
+	 * @return array
+	 */
+	protected function filterUnduplicated(array $insertions, string $propertyId, array $duplicateIds): array {
+		return array_filter($insertions, function($insertion) use ($propertyId, $duplicateIds) {
+
+			// if one of our insertions is not duplicated, then it's property
+			// ID will not be found within the $duplicateIds array that is in
+			// scope here via closure.
+
+			return !in_array($insertion[$propertyId], $duplicateIds);
+		});
+	}
+
+	/**
+	 * @param array  $insertions
+	 * @param string $propertyId
+	 * @param array  $duplicateIds
+	 *
+	 * @return array
+	 */
+	protected function filterDuplicated(array $insertions, string $propertyId, array $duplicateIds): array {
+		return array_filter($insertions, function($insertion) use ($propertyId, $duplicateIds) {
+
+			// this is the opposite of the prior method.  which means
+			// we can perform the same basic operation but return the
+			// insertions in which our property id _is_ within the list
+			// of duplicate IDs.
+
+			return in_array($insertion[$propertyId], $duplicateIds);
+		});
+	}
+
+	/**
+	 * @param array  $duplicates
+	 * @param array  $duplicatedIds
+	 * @param string $propertyId
+	 *
+	 * @return array
+	 * @throws ParserException
+	 */
+	protected function mergeDuplicates(array $duplicates, array $duplicatedIds, string $propertyId): array {
+
+		// finally, we're looking at just the insertion data that is
+		// duplicated within the $insertions array that we're working on.
+		// the $duplicatedIds array lets us work on each of them one at
+		// a time.  then, we merge the descriptions of our duplicates to
+		// to remove fix the problem.
+
+		foreach ($duplicatedIds as $id) {
+			$temp = array_filter($duplicates, function($duplicate) use ($id, $propertyId) {
+				return (int) $duplicate[$propertyId] === $id;
+			});
+
+			$descriptions = $this->getDescriptions($temp);
+			if (sizeof($descriptions) === 0) {
+				throw new ParserException("Attempt to merge $propertyId without descriptions");
+			}
+
+			$description = join(", ", $descriptions);
+			$merged[] = array_merge(array_shift($temp), [
+				"description" => $description
+			]);
+		}
+
+		return $merged ?? [];
+	}
+
+	/**
+	 * @param array $duplicates
+	 *
+	 * @return array
+	 */
+	protected function getDescriptions(array $duplicates): array {
+
+
+		foreach ($duplicates as $duplicate) {
+			$descriptions[] = $duplicate["description"];
+		}
+
+		return $descriptions ?? [];
 	}
 
 	/**
@@ -405,7 +548,7 @@ class CrittersParser extends AbstractParser {
 
 			foreach (["positive", "negative"] as $qualityType) {
 				if ($this->hasProperty($qualities, $qualityType)) {
-					$insertions[] = $this->getInsertions($qualities, $critterId, $qualityType, "quality_id");
+					$insertions[] = $this->getInsertions($qualities, $critterId, $qualityType, "quality_id", "critters_qualities");
 				}
 			}
 

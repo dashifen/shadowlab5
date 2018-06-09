@@ -59,7 +59,11 @@ class SkillsParser extends AbstractParser {
 	 * @return string
 	 */
 	protected function groupNameConvert(SimpleXMLElement $skillGroup): string {
-		return strtolower((string) $skillGroup);
+
+		// for some reason, we were passing skill groups through
+		// strtolower().  i don't remember why, so i removed it.
+
+		return ((string) $skillGroup);
 	}
 
 	/**
