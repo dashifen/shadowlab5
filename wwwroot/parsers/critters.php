@@ -50,11 +50,6 @@ class CrittersParser extends AbstractParser {
 	/**
 	 * @var array
 	 */
-	protected $skillGroups = [];
-
-	/**
-	 * @var array
-	 */
 	protected $programs = [];
 
 	/**
@@ -85,6 +80,12 @@ class CrittersParser extends AbstractParser {
 		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
 		$this->programs = $this->db->getMap("SELECT program, program_id FROM programs");
 		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
+
+		// for our skills, we want to get the normal list of skills like we do
+		// above, but we also need to add skill groups to it.  but, where
+		// skills are mapped directly to their ID number, groups map to the
+		// skills that are in them.
+
 		$this->skills = $this->db->getMap("SELECT skill, skill_id FROM skills");
 	}
 
@@ -283,7 +284,6 @@ class CrittersParser extends AbstractParser {
 	 */
 	protected function getInsertions(SimpleXMLElement $critter, int $critterId, string $property, string $propertyId, string $table) {
 		$columns = $this->db->getTableColumns($table);
-		$map = $this->getMap($property);
 
 		foreach ($critter->{$property} as $elements) {
 			foreach ($elements as $element) {
@@ -296,7 +296,7 @@ class CrittersParser extends AbstractParser {
 
 				$insertion = $this->getElementAttributes($element);
 				$insertion = array_merge($insertion, [
-					$propertyId  => $map[(string) $element],
+					$propertyId  => $this->getPropertyId($element, $property),
 					"critter_id" => $critterId,
 				]);
 
@@ -310,6 +310,38 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return $insertions ?? [];
+	}
+
+	/**
+	 * @param SimpleXMLElement $element
+	 *
+	 * @return array
+	 */
+	protected function getElementAttributes(SimpleXMLElement $element): array {
+		$attributes = ((array) $element->attributes())["@attributes"] ?? [];
+
+		// chummer labels the "select" attribute as the description of a
+		// power.  i think, elsewhere, it uses that attribute to indicate
+		// a selection between options, but in critters.xml, that doesn't
+		// seem to be the case.  we'll switch things here to keep the
+		// calling scope as clean as possible.
+
+		if (isset($attributes["select"])) {
+			$attributes["description"] = $attributes["select"];
+			unset($attributes["select"]);
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * @param SimpleXMLElement $element
+	 * @param string           $property
+	 *
+	 * @return int
+	 */
+	protected function getPropertyId(SimpleXMLElement $element, string $property) {
+		$map = $this->getMap($property);
 	}
 
 	/**
@@ -338,28 +370,6 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return $this->{$temp};
-	}
-
-	/**
-	 * @param SimpleXMLElement $element
-	 *
-	 * @return array
-	 */
-	protected function getElementAttributes(SimpleXMLElement $element): array {
-		$attributes = ((array) $element->attributes())["@attributes"] ?? [];
-
-		// chummer labels the "select" attribute as the description of a
-		// power.  i think, elsewhere, it uses that attribute to indicate
-		// a selection between options, but in critters.xml, that doesn't
-		// seem to be the case.  we'll switch things here to keep the
-		// calling scope as clean as possible.
-
-		if (isset($attributes["select"])) {
-			$attributes["description"] = $attributes["select"];
-			unset($attributes["select"]);
-		}
-
-		return $attributes;
 	}
 
 	/**
