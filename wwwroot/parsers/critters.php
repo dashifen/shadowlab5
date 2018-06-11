@@ -80,13 +80,36 @@ class CrittersParser extends AbstractParser {
 		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
 		$this->programs = $this->db->getMap("SELECT program, program_id FROM programs");
 		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
+		$this->skills = $this->getSkillsMap();
+	}
+
+	/**
+	 * @return array
+	 * @throws DatabaseException
+	 */
+	protected function getSkillsMap(): array {
 
 		// for our skills, we want to get the normal list of skills like we do
 		// above, but we also need to add skill groups to it.  but, where
 		// skills are mapped directly to their ID number, groups map to the
 		// skills that are in them.
 
-		$this->skills = $this->db->getMap("SELECT skill, skill_id FROM skills");
+		$skills = $this->db->getMap("SELECT skill, skill_id FROM skills");
+		$groups = $this->db->getMap("SELECT skill_group, GROUP_CONCAT(skill)
+			FROM skill_groups INNER JOIN skills USING (skill_group_id)");
+
+		foreach ($groups as $group => $groupSkills) {
+
+			// the GROUP_CONCAT() function returns the list of skills as a
+			// comma separated values string.  we'll explode it into an array
+			// of skill names, and then add it to skills.  this allows us to
+			// find, for example, Athletics in the skills array linked to
+			// Running, Gymnastics, and Swimming.
+
+			$skills[$group] = explode(",", $groupSkills);
+		}
+
+		return $skills;
 	}
 
 	/**
@@ -281,6 +304,7 @@ class CrittersParser extends AbstractParser {
 	 *
 	 * @return array
 	 * @throws DatabaseException
+	 * @throws ParserException
 	 */
 	protected function getInsertions(SimpleXMLElement $critter, int $critterId, string $property, string $propertyId, string $table) {
 		$columns = $this->db->getTableColumns($table);
@@ -291,21 +315,29 @@ class CrittersParser extends AbstractParser {
 				// in here, we're looking at a specific, single XML
 				// element related to the power, skill, etc. that we're
 				// working on.  we'll want to extract its attributes,
-				// get it's ID and add that to those, and collect our
-				// insertions for the database.
+				// and use them to get our ID or IDs for insertion into
+				// the database.
 
 				$insertion = $this->getElementAttributes($element);
-				$insertion = array_merge($insertion, [
-					$propertyId  => $this->getPropertyId($element, $property),
-					"critter_id" => $critterId,
-				]);
+				$propertyIds = $this->getPropertyIds($element, $property);
+				foreach ($propertyIds as $propertyId) {
 
-				// we're almost done.  now we just have to be sure
-				// that any column in the table that's not in insertion
-				// is set null.
+					// most of the time, we get a single ID value in an array.
+					// but for skill groups, we might get multiple IDs; hence,
+					// the need for this loop.
 
-				$insertion = $this->setDefaults($insertion, $columns, $property);
-				$insertions[] = $insertion;
+					$modifiedInsertion = array_merge($insertion, [
+						$propertyId  => $propertyId,
+						"critter_id" => $critterId,
+					]);
+
+					// we're almost done.  now we just have to be sure that
+					// any column in the table that's not in insertion is
+					// set null.
+
+					$modifiedInsertion = $this->setDefaults($modifiedInsertion, $columns, $property);
+					$insertions[] = $modifiedInsertion;
+				}
 			}
 		}
 
@@ -338,10 +370,39 @@ class CrittersParser extends AbstractParser {
 	 * @param SimpleXMLElement $element
 	 * @param string           $property
 	 *
-	 * @return int
+	 * @return array
+	 * @throws ParserException
 	 */
-	protected function getPropertyId(SimpleXMLElement $element, string $property) {
+	protected function getPropertyIds(SimpleXMLElement $element, string $property) {
 		$map = $this->getMap($property);
+
+		// most of the time, our map links properties directly to their ID
+		// number.  but, for skill groups, the map is from the group name to
+		// the skills within the group.  so, when we grab a value out of our
+		// map, if it's numeric, we can return it right away.  but, when we
+		// do so, we do it as an array so it matches the return type for
+		// the skill group case.
+
+		$propertyId = $map[(string) $element];
+		if (is_numeric($propertyId)) {
+			return [$propertyId];
+		}
+
+		// if it wasn't an number, then it better be an array.  but, we can't
+		// return it directly because it's an array of names and we want
+		// numbers.  so, we'll loop over it and use our map to convert those
+		// names into their mapped ID numbers.
+
+		if (!is_array($propertyId)) {
+			throw new ParserException("Unable to find property ID for $property");
+		}
+
+		$propertyIds = [];
+		foreach ($propertyId as $name) {
+			$propertyIds[] = $map[$name];
+		}
+
+		return $propertyIds;
 	}
 
 	/**
