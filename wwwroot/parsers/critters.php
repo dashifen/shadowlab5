@@ -50,7 +50,7 @@ class CrittersParser extends AbstractParser {
 	/**
 	 * @var array
 	 */
-	protected $programs = [];
+	protected $complexforms = [];
 
 	/**
 	 * @var array
@@ -78,8 +78,18 @@ class CrittersParser extends AbstractParser {
 		$this->attributes = $this->db->getMap("SELECT attribute, attribute_id FROM attributes");
 		$this->skillGroups = $this->db->getMap("SELECT skill_group, skill_group_id FROM skill_groups");
 		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
-		$this->programs = $this->db->getMap("SELECT program, program_id FROM programs");
 		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
+
+		// the book calls the "programs" known by technocritters complex
+		// forms.  so, we will, too, even though we know they're not exactly
+		// the same as a TM's complex forms.
+
+		$this->complexforms = $this->db->getMap("SELECT program, program_id FROM programs");
+
+		// we mash-up skills and skill groups into one array.  since that's a
+		// little more complex than the queries we performed above, we'll move
+		// it all to the function below.
+
 		$this->skills = $this->getSkillsMap();
 	}
 
@@ -95,8 +105,9 @@ class CrittersParser extends AbstractParser {
 		// skills that are in them.
 
 		$skills = $this->db->getMap("SELECT skill, skill_id FROM skills");
-		$groups = $this->db->getMap("SELECT skill_group, GROUP_CONCAT(skill)
-			FROM skill_groups INNER JOIN skills USING (skill_group_id)");
+		$groups = $this->db->getMap("SELECT skill_group, GROUP_CONCAT(skill_id)
+			FROM skill_groups INNER JOIN skills USING (skill_group_id)
+			GROUP BY skill_group");
 
 		foreach ($groups as $group => $groupSkills) {
 
@@ -181,8 +192,8 @@ class CrittersParser extends AbstractParser {
 
 		// if we're still here, then we want to decipher the walk,
 		// run, and sprint information in our $critter to determine
-		// our movement string.  if these three properties don't
-		// exist, then we'll return the default above.
+		// our movement string.  the first two cases are listed oddly
+		// in the XML file, so we homogenize their information here.
 
 		switch ((string) $critter->name) {
 			case "Spirit of Air":
@@ -192,27 +203,152 @@ class CrittersParser extends AbstractParser {
 				return "x2/x4/+5";
 
 			default:
-				$walk = explode("/", (string) ($critter->walk ?? ""));
-				$run = explode("/", (string) ($critter->run ?? ""));
-				$sprint = explode("/", (string) ($critter->sprint ?? ""));
 
-				$format = "x%d/x%d/+%d";
-				$ground = [$walk[0], $run[0], $sprint[0]];
-				$water = [$walk[1], $run[1], $sprint[1]];
-				$air = [$walk[2], $run[2], $sprint[2]];
+				// in all other cases, we want to look at the walk, run,
+				// and sprint properties of our critter.  these are sets
+				// of three numbers separated by / characters.  we explode
+				// those to get arrays of numbers instead.
 
-				$movement = vsprintf($format, $ground);
-
-				if ($water != [0, 0, 0] && $water != [1, 0, 1] && $water != [2, 4, 2]) {
-					$movement .= " (" . vsprintf($format, $water) . " swimming)";
-				}
-
-				if ($air != [0, 0, 0] && $air != [2, 4, 2]) {
-					$movement .= " (" . vsprintf($format, $air) . " flying)";
-				}
-
-				return $movement;
+				$rates = $this->getMovementRates($critter);
+				$movements = $this->getMovementStrings($rates);
+				return $this->getMovementString($movements);
 		}
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 *
+	 * @return array
+	 */
+	protected function getMovementRates(SimpleXMLElement $critter): array {
+		$properties = ["walk", "run", "sprint"];
+		$locations = ["ground", "water", "air"];
+		$rates = [];
+
+		// the first thing we do to decipher our movement is to
+		// break up our $critter properties into arrays of movement
+		// rates in the different $locations listed above.  each
+		// property should be a set of three numbers separated by
+		// slash characters.
+
+		foreach ($properties as $property) {
+			$temp = (string) ($critter->{$property} ?? "");
+			$temp = array_pad(explode("/", $temp), 3, "");
+
+			// array_combine() uses the first array as keys and
+			// the second one as values.  so we'll create arrays
+			// that look like ["ground"=>x, "water"=>y, "air"=>z]
+			// here.
+
+			$rates[$property] = array_combine($locations, $temp);
+		}
+
+		return $rates;
+	}
+
+	/**
+	 * @param array $rates
+	 *
+	 * @return array
+	 */
+	protected function getMovementStrings(array $rates): array {
+
+		// our $rates are sets of three numbers corresponding to the
+		// rate of movement in the three $locations listed above.  we
+		// loop over those rates and build sets of location based
+		// movement arrays.
+
+		$locations = [
+			"ground" => "",
+			"water"  => "",
+			"air"    => "",
+		];
+
+		foreach (array_keys($locations) as $location) {
+
+			// since $rates is keyed by individual movement rates
+			// and those keys reference arrays of location-based
+			// actual numerical statistics, we can use vsprintf()
+			// to build movement strings based on location instead
+			// of speed as the XML stores them.
+
+			$locations[$location] = vsprintf("x%d/x%d/+%d", [
+				$rates["walk"][$location],
+				$rates["run"][$location],
+				$rates["sprint"][$location],
+			]);
+		}
+
+		return $locations;
+	}
+
+	/**
+	 * @param array $movements
+	 *
+	 * @return string
+	 */
+	protected function getMovementString(array $movements): string {
+		$verbs = [
+			"ground" => "",
+			"water"  => "swimming",
+			"air"    => "flying",
+		];
+
+		// $movements is keyed by our locations and the values are
+		// movement strings.  we need to flatten those into a single
+		// movement string as follows.
+
+		$retValue = "";
+		foreach ($movements as $location => $movement) {
+			if (!$this->skipMovementString($location, $movement)) {
+				$movement = trim($movement . " " . $verbs[$location]);
+				$retValue .= strlen($retValue) > 0
+					? " ($movement)"
+					: $movement;
+			}
+		}
+
+		return $retValue;
+	}
+
+	/**
+	 * @param string $location
+	 * @param string $movement
+	 *
+	 * @return bool
+	 */
+	protected function skipMovementString(string $location, string $movement): bool {
+		if ($movement === "x0/x0/+0") {
+
+			// if our movement string is, essentially, (0,0,0) then
+			// we can skip it regardless of what $location we're working
+			// on.  that a critter can't move in a certain medium isn't
+			// interesting to us.
+
+			return true;
+		}
+
+		$skipThese = [];
+		if ($location === "water") {
+
+			// while swimming, we skip two strings (in addition to the
+			// 0,0,0 string).  we add those to the $skipThese array now.
+
+			$skipThese[] = "x1/x0/+0";
+			$skipThese[] = "x1/x0/+1";
+			$skipThese[] = "x2/x4/+2";
+		} elseif ($location === "air") {
+
+			// for flight, we only skip the default 2,4,2.  we don't
+			// add that to the $skipThese array outside of our if-blocks
+			// because we _do_ want that one for ground movement.  by
+			// keeping it in these blocks, ground-based movement keeps
+			// an empty array.
+
+			$skipThese[] = "x2/x4/+2";
+		}
+
+		return in_array($movement, $skipThese);
 	}
 
 	/**
@@ -319,16 +455,21 @@ class CrittersParser extends AbstractParser {
 				// the database.
 
 				$insertion = $this->getElementAttributes($element);
+				if (in_array("category", array_keys($insertion))) {
+					continue;
+				}
+
 				$propertyIds = $this->getPropertyIds($element, $property);
-				foreach ($propertyIds as $propertyId) {
+
+				foreach ($propertyIds as $id) {
 
 					// most of the time, we get a single ID value in an array.
 					// but for skill groups, we might get multiple IDs; hence,
 					// the need for this loop.
 
 					$modifiedInsertion = array_merge($insertion, [
-						$propertyId  => $propertyId,
 						"critter_id" => $critterId,
+						$propertyId  => $id,
 					]);
 
 					// we're almost done.  now we just have to be sure that
@@ -388,21 +529,15 @@ class CrittersParser extends AbstractParser {
 			return [$propertyId];
 		}
 
-		// if it wasn't an number, then it better be an array.  but, we can't
-		// return it directly because it's an array of names and we want
-		// numbers.  so, we'll loop over it and use our map to convert those
-		// names into their mapped ID numbers.
+		// if it wasn't an number, then it better be an array.  if it is,
+		// then we can return it because it's a list of individual IDs. if
+		// it isn't an array, we throw a tantrum.
 
 		if (!is_array($propertyId)) {
 			throw new ParserException("Unable to find property ID for $property");
 		}
 
-		$propertyIds = [];
-		foreach ($propertyId as $name) {
-			$propertyIds[] = $map[$name];
-		}
-
-		return $propertyIds;
+		return $propertyId;
 	}
 
 	/**
@@ -506,6 +641,9 @@ class CrittersParser extends AbstractParser {
 		// is duplicated.
 
 		$propertyIds = array_column($insertions, $propertyId);
+
+
+
 		$valueCounts = array_count_values($propertyIds);
 		return array_filter($valueCounts, function($count) {
 			return $count > 1;
@@ -577,7 +715,7 @@ class CrittersParser extends AbstractParser {
 
 			$description = join(", ", $descriptions);
 			$merged[] = array_merge(array_shift($temp), [
-				"description" => $description
+				"description" => $description,
 			]);
 		}
 
@@ -605,6 +743,7 @@ class CrittersParser extends AbstractParser {
 	 *
 	 * @return void
 	 * @throws DatabaseException
+	 * @throws ParserException
 	 */
 	protected function handleQualities(SimpleXMLElement $critter, int $critterId): void {
 
@@ -619,7 +758,7 @@ class CrittersParser extends AbstractParser {
 
 			foreach (["positive", "negative"] as $qualityType) {
 				if ($this->hasProperty($qualities, $qualityType)) {
-					$insertions[] = $this->getInsertions($qualities, $critterId, $qualityType, "quality_id", "critters_qualities");
+					$insertions = array_merge($insertions, $this->getInsertions($qualities, $critterId, $qualityType, "quality_id", "critters_qualities"));
 				}
 			}
 
