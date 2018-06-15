@@ -3,6 +3,7 @@
 namespace Shadowlab\CheatSheets\Magic\Spells;
 
 use Shadowlab\Framework\Domain\AbstractDomain;
+use Dashifen\Database\DatabaseException;
 
 class SpellsDomain extends AbstractDomain {
     /**
@@ -14,11 +15,12 @@ class SpellsDomain extends AbstractDomain {
         return ["spell_id", (!$view ? "spells" : "spells_view"), "spell"];
     }
 
-    /**
-     * @param int $spell_id
-     *
-     * @return array
-     */
+	/**
+	 * @param int $spell_id
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function readOne(int $spell_id): array {
         $sql = $this->getQuery() . " WHERE spell_id = :spell_id";
         return $this->db->getRow($sql, ["spell_id" => $spell_id]);
@@ -39,9 +41,10 @@ class SpellsDomain extends AbstractDomain {
 			book FROM spells_view";
     }
 
-    /**
-     * @return array
-     */
+	/**
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function readAll(): array {
         $sql = $this->getQuery() . " ORDER BY spell";
         return $this->db->getResults($sql);
@@ -90,13 +93,14 @@ class SpellsDomain extends AbstractDomain {
         return $schema;
     }
 
-    /**
-     * @param string $table
-     * @param array  $record
-     * @param array  $key
-     *
-     * @return int
-     */
+	/**
+	 * @param string $table
+	 * @param array  $record
+	 * @param array  $key
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
     protected function saveRecord(string $table, array $record, array $key): int {
 
         // saving a spell is a little more complicated because our information
@@ -116,12 +120,13 @@ class SpellsDomain extends AbstractDomain {
         return $spellId;
     }
 
-    /**
-     * @param array $spell
-     * @param array $key
-     *
-     * @return int
-     */
+	/**
+	 * @param array $spell
+	 * @param array $key
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
     protected function saveSpell(array $spell, array $key): int {
 
         // our $key contains our spell_id.  if it's not zero, we
@@ -139,12 +144,13 @@ class SpellsDomain extends AbstractDomain {
         return $spellId;
     }
 
-    /**
-     * @param array $spell
-     * @param array $key
-     *
-     * @return void
-     */
+	/**
+	 * @param array $spell
+	 * @param array $key
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 */
     protected function saveSpellTags(array $spell, array $key): void {
         $tags = $spell["spell_tag_id"];
 

@@ -63,7 +63,7 @@ class MatrixActionsTransformer extends AbstractTransformer {
 				break;
 		}
 		
-		
+		return $sbValue;
 	}
 	
 	/**
@@ -74,7 +74,14 @@ class MatrixActionsTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getCellContent(string $column, string $value, array $record): string {
-		// TODO: Implement getCellContent() method.
+
+		// the only alteration we need to do here is to our action's name.  we
+		// want to make it a clicker for the display toggling behavior for
+		// our descriptive row as follows:
+
+		return $column === "matrix_action"
+			? sprintf('<a href="#">%s</a>', $value)
+			: $value;
 	}
 	
 }

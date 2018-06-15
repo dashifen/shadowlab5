@@ -5,6 +5,8 @@ namespace Shadowlab\Framework\Domain;
 use Dashifen\Domain\AbstractMysqlDomain;
 use Dashifen\Domain\DomainException;
 use Dashifen\Domain\Payload\PayloadInterface;
+use Dashifen\Database\DatabaseException;
+use Dashifen\Database\Mysql\MysqlException;
 
 /**
  * Class Domain
@@ -15,7 +17,6 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
      * @param array $data
      *
      * @return PayloadInterface
-     * @throws DomainException
      */
     public function create(array $data): PayloadInterface {
 
@@ -34,11 +35,12 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         return $payload;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return PayloadInterface
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DatabaseException
+	 */
     public function read(array $data = []): PayloadInterface {
 
         // when we're reading information, we need to be sure that any
@@ -84,9 +86,10 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         ]);
     }
 
-    /**
-     * @return array
-     */
+	/**
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function getRecords(): array {
         list($idName, $table) = $this->getRecordDetails();
         return $this->db->getCol("SELECT $idName FROM $table");
@@ -131,11 +134,12 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
      */
     abstract protected function getRecordsTitle(array $records, bool $isCollection): string;
 
-    /**
-     * @param array $record
-     *
-     * @return int|null
-     */
+	/**
+	 * @param array $record
+	 *
+	 * @return int|null
+	 * @throws DatabaseException
+	 */
     protected function getNextId(array $record = []): ?int {
 
         // under most circumstances, getting the next ID for a record is
@@ -196,11 +200,12 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         return $this->{$method}($data);
     }
 
-    /**
-     * @param array $data
-     *
-     * @return PayloadInterface
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DatabaseException
+	 */
     public function delete(array $data): PayloadInterface {
 
         // to delete, we must have received a record ID and that ID must
@@ -229,11 +234,21 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         ]);
     }
 
+	/**
+	 * @param string $sheetType
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
     public function getSheetTypeId(string $sheetType): int {
         return $this->db->getVar("SELECT sheet_type_id FROM sheets_types
 			WHERE sheet_type = :sheet_type", ["sheet_type" => $sheetType]);
     }
 
+	/**
+	 * @return string
+	 * @throws DatabaseException
+	 */
     public function getShadowlabMenu(): string {
         $sheetTypeIds = $this->db->getCol("SELECT sheet_type_id
 			FROM sheets_types ORDER BY sheet_type");
@@ -250,11 +265,12 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         return $menu;
     }
 
-    /**
-     * @param int $sheetTypeId
-     *
-     * @return string
-     */
+	/**
+	 * @param int $sheetTypeId
+	 *
+	 * @return string
+	 * @throws DatabaseException
+	 */
     protected function getSheetTypeMenu(int $sheetTypeId): string {
 
         // given a sheet type ID, we want to build the <li> for that
@@ -305,6 +321,12 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         return $subMenu;
     }
 
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DatabaseException
+	 */
     protected function getDataToCreate(array $data): PayloadInterface {
         if ($this->validator->validateCreate($data)) {
 
@@ -346,12 +368,13 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
         return $this->payloadFactory->newCreatePayload(false, $data);
     }
 
-    /**
-     * @param string $table
-     * @param bool   $withFKOptions
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param bool   $withFKOptions
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function getTableDetails(string $table, bool $withFKOptions = true) {
 
         // when working with our data, sometimes it's nice to know about that
@@ -389,13 +412,15 @@ SCHEMA;
         return $schema;
     }
 
-    /**
-     * @param string $table
-     * @param string $column
-     * @param string $dataType
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param string $column
+	 * @param string $dataType
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 * @throws MysqlException
+	 */
     protected function getColumnOptions(string $table, string $column, string $dataType): array {
         $options = [];
 
@@ -414,12 +439,13 @@ SCHEMA;
         return $options;
     }
 
-    /**
-     * @param string $table
-     * @param string $column
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param string $column
+	 *
+	 * @return array
+	 * @throws MysqlException
+	 */
     protected function getEnumOptions(string $table, string $column): array {
 
         // this one's easy; we have a function that does all the work
@@ -431,12 +457,13 @@ SCHEMA;
         return array_combine($options, $options);
     }
 
-    /**
-     * @param string $table
-     * @param string $column
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param string $column
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function getFKOptions(string $table, string $column): array {
         $options = [];
 
@@ -480,12 +507,13 @@ CONSTRAINT;
         return $options;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return PayloadInterface
-     * @throws DomainException
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DomainException
+	 * @throws DatabaseException
+	 */
     protected function createNewRecord(array $data): PayloadInterface {
 
         // to confirm that we've got the information that we need, we need
@@ -582,13 +610,14 @@ CONSTRAINT;
         ]);
     }
 
-    /**
-     * @param string $table
-     * @param array  $record
-     * @param array  $key
-     *
-     * @return int
-     */
+	/**
+	 * @param string $table
+	 * @param array  $record
+	 * @param array  $key
+	 *
+	 * @return int
+	 * @throws DatabaseException
+	 */
     protected function saveRecord(string $table, array $record, array $key): int {
 
         // our $key is our table's primary key ID's name mapped to its value.
@@ -616,11 +645,12 @@ CONSTRAINT;
         return $recordId;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return PayloadInterface
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DatabaseException
+	 */
     protected function getDataToUpdate(array $data): PayloadInterface {
 
         // getting our data to update is a special kind of read action.
@@ -692,12 +722,13 @@ CONSTRAINT;
         return $temp;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return PayloadInterface
-     * @throws DomainException
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return PayloadInterface
+	 * @throws DomainException
+	 * @throws DatabaseException
+	 */
     protected function savePostedData(array $data): PayloadInterface {
 
         // since we need to know our table before we call our validator,
