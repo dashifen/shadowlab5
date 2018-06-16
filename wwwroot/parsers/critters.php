@@ -80,17 +80,18 @@ class CrittersParser extends AbstractParser {
 		$this->qualities = $this->db->getMap("SELECT quality, quality_id FROM qualities");
 		$this->powers = $this->db->getMap("SELECT critter_power, critter_power_id FROM critter_powers");
 
-		// the book calls the "programs" known by technocritters complex
-		// forms.  so, we will, too, even though we know they're not exactly
-		// the same as a TM's complex forms.
-
-		$this->complexforms = $this->db->getMap("SELECT program, program_id FROM programs");
-
 		// we mash-up skills and skill groups into one array.  since that's a
 		// little more complex than the queries we performed above, we'll move
 		// it all to the function below.
 
 		$this->skills = $this->getSkillsMap();
+
+		// we also mash-up complex forms and programs.  the XML calls them all
+		// complexforms, but because they live in different tables in our
+		// database, we need to map them together and so we'll do that
+		// elsewhere.
+
+		$this->complexforms = $this->getComplexFormsMap();
 	}
 
 	/**
@@ -121,6 +122,22 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return $skills;
+	}
+
+	/**
+	 * @return array
+	 * @throws DatabaseException
+	 */
+	protected function getComplexFormsMap(): array {
+
+		// because of the way that the XML lists both programs and complex
+		// forms as complexforms, we'll have to handle them together but also
+		// keep them separate for the database.
+
+		return [
+			"program_id"      => $this->db->getMap("SELECT program, program_id FROM programs"),
+			"complex_form_id" => $this->db->getMap("SELECT complex_form, complex_form_id FROM complex_forms"),
+		];
 	}
 
 	/**
@@ -402,7 +419,6 @@ class CrittersParser extends AbstractParser {
 			"skills"         => ["skill_id", "critters_skills"],
 			"powers"         => ["critter_power_id", "critters_critter_powers"],
 			"optionalpowers" => ["critter_power_id", "critters_critter_powers"],
-			"complexforms"   => ["program_id", "critters_programs"],
 		];
 
 		foreach ($properties as $property => list($propertyId, $table)) {
@@ -422,11 +438,11 @@ class CrittersParser extends AbstractParser {
 			}
 		}
 
-		// there's one set of optional properties for critters that are
-		// different in the XML than the others:  qualities.  in the XML
-		// they're split into positive and negative lists, so the loop
-		// above won't work.  so, we'll create another loop here.
+		// there's two sets of optional properties for critters that are
+		// different in the XML than the others:  qualities and complexforms.
+		// we'll be handling them separately now.
 
+		$this->handleComplexForms($critter, $critterId);
 		$this->handleQualities($critter, $critterId);
 	}
 
@@ -643,7 +659,6 @@ class CrittersParser extends AbstractParser {
 		$propertyIds = array_column($insertions, $propertyId);
 
 
-
 		$valueCounts = array_count_values($propertyIds);
 		return array_filter($valueCounts, function($count) {
 			return $count > 1;
@@ -735,6 +750,77 @@ class CrittersParser extends AbstractParser {
 		}
 
 		return $descriptions ?? [];
+	}
+
+	/**
+	 * @param SimpleXMLElement $critter
+	 * @param int              $critterId
+	 *
+	 * @return void
+	 * @throws DatabaseException
+	 * @throws ParserException
+	 */
+	protected function handleComplexForms(SimpleXMLElement $critter, int $critterId): void {
+
+		// in the XML, both complex forms and programs are included in the
+		// complexforms property of a critter.  the map of them that we have
+		// in our object properties keys both sets of those data by the ID
+		// in our database that they reference (i.e. program_id or
+		// complex_form_id) so that we know where to save them in the database.
+
+		if ($this->hasProperty($critter, "complexforms")) {
+			$critterKey = ["critter_id" => $critterId];
+			$this->db->delete("critters_complex_forms", $critterKey);
+			$this->db->delete("critters_programs", $critterKey);
+
+			foreach ($critter->complexforms->complexform as $complexForm) {
+				$insertion = $this->getElementAttributes($complexForm);
+				if (isset($insertion["option"])) {
+
+					// option is a MySQL keyword, so we'll switch it when
+					// it's present.
+
+					$insertion["description"] = $insertion["option"];
+					unset($insertion["option"]);
+				}
+
+				// now we need to figure out if our $complexForm is actually
+				// a CF or a program.  we'll just have to search through our
+				// map to try and find it.
+
+				$table = "";
+				$formName = (string) $complexForm;
+				foreach ($this->complexforms as $id => $map) {
+					if (in_array($formName, array_keys($map))) {
+
+						// here we can set our table, now that we know where
+						// these data have to live.  then, we add our $id to
+						// the insertion linking it
+
+						$table = $id === "complex_form_id"
+							? "critters_complex_forms"
+							: "critters_programs";
+
+						$insertion[$id] = $map[$formName];
+					}
+				}
+
+				if (empty($table)) {
+
+					// at this point, if we couldn't find a table, then
+					// we've a problem.
+
+					throw new ParserException("Could not find \"complexform:\" $formName");
+				}
+
+				// otherwise, we add this insertion to our database.  because
+				// the insertions might have different column counts and be
+				// going into different tables, this is easier than gathering
+				// them all up and doing a batch insertion.
+
+				$this->db->insert($table, array_merge($insertion, $critterKey));
+			}
+		}
 	}
 
 	/**
