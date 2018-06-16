@@ -1,6 +1,6 @@
 <?php
 
-namespace Shadowlab\Framework\AddOns;
+namespace Shadowlab\Framework\AddOns\FormBuilder;
 
 use Dashifen\Form\Builder\FormBuilderInterface;
 use Dashifen\Form\FormInterface;
@@ -25,12 +25,14 @@ class FormBuilder implements FormBuilderInterface {
 	 * @var int
 	 */
 	protected $currentFieldset = -1;
-	
+
 	/**
 	 * FormBuilder constructor.
 	 *
 	 * @param array  $payload
 	 * @param string $object
+	 *
+	 * @throws FormBuilderException
 	 */
 	public function __construct(array $payload = [], string $object = 'Dashifen\Form\Form') {
 		
@@ -43,12 +45,13 @@ class FormBuilder implements FormBuilderInterface {
 			$this->openForm($payload, $object);
 		}
 	}
-	
+
 	/**
 	 * @param array  $payload
 	 * @param string $object
 	 *
 	 * @return void
+	 * @throws FormBuilderException
 	 */
 	public function openForm(array $payload = [], string $object = 'Dashifen\Form\Form') {
 		$this->confirmPayloadValidity($payload);
@@ -128,12 +131,13 @@ class FormBuilder implements FormBuilderInterface {
 	protected function sanitize(string $unsanitary): string {
 		return strtolower(preg_replace("/\W+/", "-", $unsanitary));
 	}
-	
+
 	/**
 	 * @param array  $payload
 	 * @param string $object
 	 *
 	 * @return void
+	 * @throws FormBuilderException
 	 */
 	public function openFieldset(array $payload = [], string $object = 'Dashifen\Form\Fieldset\Fieldset'): void {
 		$valuesIndex = $this->confirmPayloadValidity($payload);
@@ -596,5 +600,15 @@ class FormBuilder implements FormBuilderInterface {
 	public function build(): string {
 		return $this->getFormJson();
 	}
-	
+
+	/**
+	 * @param string $object
+	 *
+	 * @return FormInterface
+	 */
+	public function buildForm(string $object = 'Dashifen\Form\Form'): FormInterface {
+		/** @var FormInterface $object */
+
+		return $object::parse($this->getFormJson());
+	}
 }

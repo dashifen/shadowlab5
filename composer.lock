@@ -57,7 +57,7 @@
                 "di",
                 "di container"
             ],
-            "time": "2017-10-12T20:08:46+00:00"
+            "time": "2017-10-12 20:08:46"
         },
         {
             "name": "aura/router",
@@ -106,7 +106,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2018-02-15T02:17:11+00:00"
+            "time": "2018-02-15 02:17:11"
         },
         {
             "name": "aura/sql",
@@ -159,7 +159,7 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2018-06-11T12:57:42+00:00"
+            "time": "2018-06-11 12:57:42"
         },
         {
             "name": "authy/php",
@@ -282,20 +282,20 @@
         },
         {
             "name": "dashifen/database",
-            "version": "1.3.0",
+            "version": "1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "9e91569b3040e082bb4596d4debd886771ba0008"
+                "reference": "d49295713beec6ad24f854659d54376c77b7d450"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/9e91569b3040e082bb4596d4debd886771ba0008",
-                "reference": "9e91569b3040e082bb4596d4debd886771ba0008",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/d49295713beec6ad24f854659d54376c77b7d450",
+                "reference": "d49295713beec6ad24f854659d54376c77b7d450",
                 "shasum": ""
             },
             "require": {
-                "aura/sql": "3.x-dev",
+                "aura/sql": "^3.0",
                 "dashifen/exception": "^1",
                 "php": "^7.1"
             },
@@ -327,7 +327,7 @@
                 "database",
                 "pdo"
             ],
-            "time": "2018-06-07T12:19:48+00:00"
+            "time": "2018-06-16T16:26:33+00:00"
         },
         {
             "name": "dashifen/domain",
@@ -738,7 +738,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-01-15T07:18:01+00:00"
+            "time": "2018-01-15 07:18:01"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -789,7 +789,7 @@
                 }
             ],
             "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function.",
-            "time": "2017-01-13T20:44:38+00:00"
+            "time": "2017-01-13 20:44:38"
         },
         {
             "name": "guzzlehttp/streams",
@@ -839,7 +839,7 @@
                 "Guzzle",
                 "stream"
             ],
-            "time": "2016-04-13T16:32:01+00:00"
+            "time": "2016-04-13 16:32:01"
         },
         {
             "name": "psr/container",
@@ -888,7 +888,7 @@
                 "container-interop",
                 "psr"
             ],
-            "time": "2017-06-28T15:35:32+00:00"
+            "time": "2017-06-28 15:35:32"
         },
         {
             "name": "psr/http-message",
@@ -938,7 +938,7 @@
                 "request",
                 "response"
             ],
-            "time": "2016-08-06T14:39:51+00:00"
+            "time": "2016-08-06 14:39:51"
         },
         {
             "name": "psr/log",
@@ -985,7 +985,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-04-03T15:59:15+00:00"
+            "time": "2018-04-03 15:59:15"
         },
         {
             "name": "ralouphie/mimey",
@@ -1071,7 +1071,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2018-06-13T15:59:06+00:00"
+            "time": "2018-06-13 15:59:06"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1124,7 +1124,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2018-05-29T18:52:59+00:00"
+            "time": "2018-05-29 18:52:59"
         }
     ],
     "packages-dev": [],

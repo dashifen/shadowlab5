@@ -40,7 +40,7 @@ class ShadowlabContainerConfig extends ContainerConfig {
 		// exist yet, we'll use the null coalescing operator set a default
 		// of zero.
 		
-		return filemtime($handlerPath) <= ($_COOKIE[self::HANDLERS_CACHED] ?? 0);
+		// return filemtime($handlerPath) <= ($_COOKIE[self::HANDLERS_CACHED] ?? 0);
 	}
 	
 	protected function reloadHandlers(string $handlerPath): array {
@@ -61,8 +61,8 @@ class ShadowlabContainerConfig extends ContainerConfig {
 		// here we simply set two cookies:  the date on which we created
 		// this handler cache and the handlers themselves:
 		
-		setcookie(self::HANDLERS, serialize($handlers), self::EXPIRATION);
-		setcookie(self::HANDLERS_CACHED, time(), self::EXPIRATION);
+		//setcookie(self::HANDLERS, serialize($handlers), self::EXPIRATION);
+		//setcookie(self::HANDLERS_CACHED, time(), self::EXPIRATION);
 	}
 	
 	protected function getHandlerCache() {

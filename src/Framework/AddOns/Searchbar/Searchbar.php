@@ -1,6 +1,6 @@
 <?php
 
-namespace Shadowlab\Framework\AddOns;
+namespace Shadowlab\Framework\AddOns\Searchbar;
 
 use Dashifen\Searchbar\AbstractSearchbar;
 use Dashifen\Searchbar\SearchbarException;
