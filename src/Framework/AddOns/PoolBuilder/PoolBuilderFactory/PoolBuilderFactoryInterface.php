@@ -11,8 +11,8 @@ use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderInterface;
 interface PoolBuilderFactoryInterface {
 	public const OFFENSIVE = 1;
 	public const DEFENSIVE = 2;
-	public const ATTRIBUTE_AND_SKILL = 1;
-	public const ATTRIBUTE_ONLY = 2;
+	public const ATTRIBUTE_AND_SKILL = 4;
+	public const ATTRIBUTE_ONLY = 8;
 
 	/**
 	 * Given a strategy and a type using the constants above, returns a
