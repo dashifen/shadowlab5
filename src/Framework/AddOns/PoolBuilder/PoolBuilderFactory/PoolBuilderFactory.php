@@ -51,10 +51,22 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 		return $strategy === self::OFFENSIVE || $strategy === self::DEFENSIVE;
 	}
 
+	/**
+	 * @param int $constituents
+	 *
+	 * @return bool
+	 */
 	protected function isValidConstituents(int $constituents): bool {
 		return $constituents === self::ATTRIBUTE_AND_SKILL || $constituents === self::ATTRIBUTE_ONLY;
 	}
 
+	/**
+	 * @param int $strategy
+	 * @param int $constituents
+	 *
+	 * @return string
+	 * @throws PoolBuilderFactoryException
+	 */
 	protected function identifyPoolBuilderClassName(int $strategy, int $constituents): string {
 
 		// to identify the pool builder class name that we need, we'll add
@@ -75,12 +87,20 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 			case (self::DEFENSIVE + self::ATTRIBUTE_AND_SKILL):
 				return "DefensiveAttrSkillPoolBuilder";
 		}
+
+		throw new PoolBuilderFactoryException("Unknown pool builder factory error.");
 	}
 
+	/**
+	 * @return PoolBuilderFactoryException
+	 */
 	protected function getException(): PoolBuilderFactoryException {
 		return new PoolBuilderFactoryException($this->getMessage(), $this->getExceptionCode());
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getMessage(): string {
 		if (!$this->validStrategy) {
 			return "Invalid pool strategy.";
@@ -93,6 +113,9 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 		return "Invalid pool strategy and constituents.";
 	}
 
+	/**
+	 * @return int
+	 */
 	protected function getExceptionCode(): int {
 		if (!$this->validStrategy) {
 			return PoolBuilderFactoryException::INVALID_STRATEGY;
