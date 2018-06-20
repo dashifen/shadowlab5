@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets\Matrix\Programs;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 
 /**
  * Class ProgramsActions

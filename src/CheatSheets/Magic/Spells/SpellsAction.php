@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets\Magic\Spells;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Dashifen\Searchbar\SearchbarException;
 
 class SpellsAction extends AbstractAction {

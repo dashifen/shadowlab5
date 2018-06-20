@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets;
 
 use Dashifen\Response\ResponseInterface;
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
 
 class CheatSheetsAction extends AbstractAction {

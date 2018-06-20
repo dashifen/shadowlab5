@@ -25,4 +25,28 @@ interface PoolBuilderFactoryInterface {
 	 * @throws PoolBuilderFactoryException
 	 */
 	public function getPoolBuilder(int $strategy, int $constituents): PoolBuilderInterface;
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 */
+	public function getOffensiveAttrOnlyPoolBuilder(): PoolBuilderInterface;
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 */
+	public function getOffensiveAttrSkillPoolBuilder(): PoolBuilderInterface;
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 */
+	public function getDefensiveAttrOnlyPoolBuilder(): PoolBuilderInterface;
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 */
+	public function getDefensiveAttrSkillPoolBuilder(): PoolBuilderInterface;
 }

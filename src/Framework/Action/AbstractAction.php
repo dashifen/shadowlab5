@@ -9,7 +9,7 @@ use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Form\Builder\FormBuilderInterface;
 use Dashifen\Request\RequestInterface;
 use Dashifen\Response\ResponseInterface;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Shadowlab\Framework\Domain\ShadowlabDomainInterface;
 use Dashifen\Domain\MysqlDomainException;
 use Dashifen\Response\ResponseException;
@@ -313,7 +313,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		/** @var FormBuilderInterface $formBuilder */
 		
 		$payloadData = $payload->getData();
-		$formBuilder = $this->container->get("formBuilder");
+		$formBuilder = $this->container->get("FormBuilder");
 		$payloadData["currentUrl"] = $this->request->getServerVar("SCRIPT_URL");
 		$formBuilder->openForm($payloadData);
 		$form = $formBuilder->getForm();
@@ -380,13 +380,19 @@ abstract class AbstractAction extends DashifenAbstractAction {
 	}
 
 	/**
+	 * @param array|null $post
+	 *
 	 * @return ResponseInterface
 	 * @throws MysqlDomainException
 	 * @throws ServiceNotFound
 	 */
-	protected function createNewRecord(): ResponseInterface {
+	protected function createNewRecord(array $post = null): ResponseInterface {
+		if (is_null($post)) {
+			$post = $this->request->getPost();
+		}
+
 		$payload = $this->domain->create([
-			"posted" => $this->request->getPost(),
+			"posted" => $post,
 			"idName" => $this->getRecordIdName(),
 			"table"  => $this->getTable(),
 		]);
@@ -482,7 +488,7 @@ abstract class AbstractAction extends DashifenAbstractAction {
 		if ($payload->getDatum("count", 0) > 1) {
 			/** @var SearchbarInterface $searchbar */
 			
-			$searchbar = $this->container->get("searchbar");
+			$searchbar = $this->container->get("Searchbar");
 			$searchbar = $this->getSearchbarFields($searchbar, $payload);
 			$searchbarHtml = $searchbar->getBar();
 		}

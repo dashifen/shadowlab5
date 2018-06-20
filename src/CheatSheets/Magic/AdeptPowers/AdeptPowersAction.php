@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets\Magic\AdeptPowers;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Dashifen\Searchbar\SearchbarException;
 use Aura\Di\Exception\ServiceNotFound;
 
@@ -24,7 +24,7 @@ class AdeptPowersAction extends AbstractAction {
 
 		/** @var SearchbarInterface $searchbar */
 		
-		$searchbar = $this->container->get("searchbar");
+		$searchbar = $this->container->get("Searchbar");
 		$searchbar->addSearch("Powers", "power");
 		$searchbar->addFilter("Costs", "cost", $costs, "", "All costs");
 		

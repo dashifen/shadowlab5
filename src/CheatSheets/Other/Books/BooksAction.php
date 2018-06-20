@@ -4,7 +4,7 @@ namespace Shadowlab\CheatSheets\Other\Books;
 
 use Dashifen\Domain\Payload\PayloadInterface;
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 
 class BooksAction extends AbstractAction {
 	/**

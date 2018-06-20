@@ -3,7 +3,7 @@
 namespace Shadowlab\CheatSheets\Other\Qualities;
 
 use Shadowlab\Framework\Action\AbstractAction;
-use Shadowlab\Framework\AddOns\SearchbarInterface;
+use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Searchbar\SearchbarException;
 

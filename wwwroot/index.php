@@ -3,6 +3,7 @@ require("../vendor/autoload.php");
 
 use Aura\Di\ContainerBuilder;
 use Dashifen\Router\RouterException;
+use Aura\Di\Exception\SetterMethodNotFound;
 
 function debug($data, $die = false) {
 	if (is_array($data) || is_object($data)) {
@@ -16,35 +17,34 @@ function debug($data, $die = false) {
 	}
 }
 
-$cb = new ContainerBuilder();
-$app = $cb->newConfiguredInstance([
-	'Shadowlab\Config\ContainerConfig\Database',
-	'Shadowlab\Config\ContainerConfig\Request',
-	'Shadowlab\Config\ContainerConfig\Exceptionator',
-	'Shadowlab\Config\ContainerConfig\Actions',
-	'Shadowlab\Config\ContainerConfig\Domains',
-	'Shadowlab\Config\ContainerConfig\Responses',
-	'Shadowlab\Config\ContainerConfig\Router',
-	'Shadowlab\Config\ContainerConfig\Services',
-]);
-
-/**
- * @var \Shadowlab\Framework\Response\ShadowlabResponse $notFoundResponse
- * @var \Dashifen\Exceptionator\Exceptionator           $exceptionator
- * @var \Dashifen\Router\RouterInterface                $router
- * @var \Dashifen\Action\ActionInterface                $action
- */
-
-// first: we set up our exceptionator.  this "converts" PHP errors
-// into ErrorExceptions and then handles them in a way that makes them
-// print out on the screen in an attractive way.
-
-$exceptionator = $app->newInstance('Dashifen\Exceptionator\Exceptionator');
-$exceptionator->handleExceptions(true);
-$exceptionator->handleErrors(true);
-
 try {
-	
+	$cb = new ContainerBuilder();
+	$app = $cb->newConfiguredInstance([
+		'Shadowlab\Config\ContainerConfig\Database',
+		'Shadowlab\Config\ContainerConfig\Request',
+		'Shadowlab\Config\ContainerConfig\Exceptionator',
+		'Shadowlab\Config\ContainerConfig\Actions',
+		'Shadowlab\Config\ContainerConfig\Domains',
+		'Shadowlab\Config\ContainerConfig\Responses',
+		'Shadowlab\Config\ContainerConfig\Router',
+		'Shadowlab\Config\ContainerConfig\Services',
+	]);
+
+	/**
+	 * @var \Shadowlab\Framework\Response\ShadowlabResponse $notFoundResponse
+	 * @var \Dashifen\Exceptionator\Exceptionator           $exceptionator
+	 * @var \Dashifen\Router\RouterInterface                $router
+	 * @var \Dashifen\Action\ActionInterface                $action
+	 */
+
+	// first: we set up our exceptionator.  this "converts" PHP errors
+	// into ErrorExceptions and then handles them in a way that makes them
+	// print out on the screen in an attractive way.
+
+	$exceptionator = $app->newInstance('Dashifen\Exceptionator\Exceptionator');
+	$exceptionator->handleExceptions(true);
+	$exceptionator->handleErrors(true);
+
 	// in a perfect world, we get our router, let it route us to the
 	// appropriate action that we use to handle this request.  execute
 	// that action and send its response.
@@ -87,4 +87,6 @@ try {
 		
 		throw $e;
 	}
+} catch (SetterMethodNotFound $e) {
+	throw $e;
 }

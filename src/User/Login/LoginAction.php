@@ -5,6 +5,8 @@ namespace Shadowlab\User\Login;
 use Dashifen\Action\AbstractAction;
 use Dashifen\Domain\Payload\PayloadInterface;
 use Dashifen\Response\ResponseInterface;
+use Dashifen\Response\ResponseException;
+use Dashifen\Domain\MysqlDomainException;
 
 /**
  * Class LoginAction
@@ -21,6 +23,8 @@ class LoginAction extends AbstractAction {
 	 * @param array $parameter
 	 *
 	 * @return ResponseInterface
+	 * @throws ResponseException
+	 * @throws MysqlDomainException
 	 */
 	public function execute(array $parameter = []): ResponseInterface {
 		if ($this->request->getSessionObj()->isAuthenticated()) {
@@ -42,9 +46,10 @@ class LoginAction extends AbstractAction {
 		
 		return $this->response;
 	}
-	
+
 	/**
 	 * @return void
+	 * @throws ResponseException
 	 */
 	protected function redirectToSheets(): void {
 		
@@ -56,9 +61,11 @@ class LoginAction extends AbstractAction {
 		$host = $this->request->getServerVar("HTTP_HOST");
 		$this->response->redirect("http://$host/cheat-sheets");
 	}
-	
+
 	/**
 	 * @return void
+	 * @throws ResponseException
+	 * @throws MysqlDomainException
 	 */
 	protected function doAuthentication(): void {
 		
@@ -68,7 +75,6 @@ class LoginAction extends AbstractAction {
 		
 		$email = $this->request->getPostVar("email");
 		$password = $this->request->getPostVar("password");
-		
 		$payload = $this->domain->read([
 			"email"    => $email,
 			"password" => $password,

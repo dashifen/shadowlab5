@@ -2,6 +2,8 @@
 
 namespace Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory;
 
+use Aura\Di\Container;
+use Aura\Di\Exception\ServiceNotFound;
 use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderInterface;
 
 /**
@@ -20,11 +22,26 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	protected $validConstituents = true;
 
 	/**
+	 * @var Container
+	 */
+	protected $container;
+
+	/**
+	 * PoolBuilderFactory constructor.
+	 *
+	 * @param Container $container
+	 */
+	public function __construct(Container $container) {
+		$this->container = $container;
+	}
+
+	/**
 	 * @param int $strategy
 	 * @param int $constituents
 	 *
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
+	 * @throws ServiceNotFound
 	 */
 	public function getPoolBuilder(int $strategy, int $constituents): PoolBuilderInterface {
 		$this->validStrategy = $this->isValidStrategy($strategy);
@@ -34,11 +51,12 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 			// if we have a valid strategy and constituent value, then we
 			// can use them to identify the pool that we want to build.  then,
 			// we instantiate that builder and return it to the calling scope.
+			// note that we have
 
 			$poolBuilder = $this->identifyPoolBuilderClassName($strategy, $constituents);
-			return new $poolBuilder();
+			return new $poolBuilder($this->container->get("database"));
 		} else {
-			throw new $this->getException();
+			throw $this->getException();
 		}
 	}
 
@@ -70,7 +88,7 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	protected function identifyPoolBuilderClassName(int $strategy, int $constituents): string {
 
 		// to identify the pool builder class name that we need, we'll add
-		// our parameters.  the sum for valid comibnations of strategy and
+		// our parameters.  the sum for valid combinations of strategy and
 		// constituent are all different, armed with those sums, we can return
 		// the right name.
 
@@ -126,5 +144,41 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 		}
 
 		return PoolBuilderFactoryException::INVALID_BOTH;
+	}
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 * @throws ServiceNotFound
+	 */
+	public function getOffensiveAttrOnlyPoolBuilder(): PoolBuilderInterface {
+		return $this->getPoolBuilder(self::OFFENSIVE, self::ATTRIBUTE_ONLY);
+	}
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 * @throws ServiceNotFound
+	 */
+	public function getOffensiveAttrSkillPoolBuilder(): PoolBuilderInterface {
+		return $this->getPoolBuilder(self::OFFENSIVE, self::ATTRIBUTE_AND_SKILL);
+	}
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 * @throws ServiceNotFound
+	 */
+	public function getDefensiveAttrOnlyPoolBuilder(): PoolBuilderInterface {
+		return $this->getPoolBuilder(self::DEFENSIVE, self::ATTRIBUTE_ONLY);
+	}
+
+	/**
+	 * @return PoolBuilderInterface
+	 * @throws PoolBuilderFactoryException
+	 * @throws ServiceNotFound
+	 */
+	public function getDefensiveAttrSkillPoolBuilder(): PoolBuilderInterface {
+		return $this->getPoolBuilder(self::DEFENSIVE, self::ATTRIBUTE_AND_SKILL);
 	}
 }

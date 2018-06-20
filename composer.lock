@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "79a040e65d6fd83f89c9cabdfc71a3be",
+    "content-hash": "23f05441905efce086e7043225cee2f0",
     "packages": [
         {
             "name": "aura/di",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Di.git",
-                "reference": "4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5"
+                "reference": "79245a628374ca354e21eba083ff9b08905579c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Di/zipball/4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5",
-                "reference": "4228960e3b42ce5b5a8cd1d8d618ac4e9bc042b5",
+                "url": "https://api.github.com/repos/auraphp/Aura.Di/zipball/79245a628374ca354e21eba083ff9b08905579c8",
+                "reference": "79245a628374ca354e21eba083ff9b08905579c8",
                 "shasum": ""
             },
             "require": {
@@ -57,7 +57,7 @@
                 "di",
                 "di container"
             ],
-            "time": "2017-10-12 20:08:46"
+            "time": "2018-06-18 07:44:00"
         },
         {
             "name": "aura/router",
@@ -1131,7 +1131,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "aura/di": 20,
         "aura/router": 20
     },
     "prefer-stable": false,
