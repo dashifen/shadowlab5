@@ -18,6 +18,6 @@ class Services extends ContainerConfig {
 	public function define(Container $di) {
 		$di->set('Searchbar', $di->lazyNew('Shadowlab\Framework\AddOns\Searchbar\Searchbar'));
 		$di->set('FormBuilder', $di->lazyNew('Shadowlab\Framework\AddOns\FormBuilder\FormBuilder'));
-		$di->set('PoolBuilderFactory', $di->lazyNew('Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory\PoolBuilderFactory', ["container" => $di]));
+		$di->set('PoolBuilderFactory', $di->lazyNew('Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory\PoolBuilderFactory', ["database" => $di->lazyGet("database")]));
 	}
 }

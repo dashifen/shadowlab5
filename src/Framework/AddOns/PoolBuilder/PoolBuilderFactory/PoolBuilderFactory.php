@@ -2,9 +2,8 @@
 
 namespace Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory;
 
-use Aura\Di\Container;
-use Aura\Di\Exception\ServiceNotFound;
 use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderInterface;
+use Shadowlab\Framework\Database\Database;
 
 /**
  * Class PoolBuilderFactory
@@ -22,17 +21,17 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	protected $validConstituents = true;
 
 	/**
-	 * @var Container
+	 * @var Database
 	 */
-	protected $container;
+	protected $database;
 
 	/**
 	 * PoolBuilderFactory constructor.
 	 *
-	 * @param Container $container
+	 * @param Database $database
 	 */
-	public function __construct(Container $container) {
-		$this->container = $container;
+	public function __construct(Database $database) {
+		$this->database = $database;
 	}
 
 	/**
@@ -41,7 +40,6 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	 *
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
-	 * @throws ServiceNotFound
 	 */
 	public function getPoolBuilder(int $strategy, int $constituents): PoolBuilderInterface {
 		$this->validStrategy = $this->isValidStrategy($strategy);
@@ -54,7 +52,7 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 			// note that we have
 
 			$poolBuilder = $this->identifyPoolBuilderClassName($strategy, $constituents);
-			return new $poolBuilder($this->container->get("database"));
+			return new $poolBuilder($this->database);
 		} else {
 			throw $this->getException();
 		}
@@ -149,7 +147,6 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	/**
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
-	 * @throws ServiceNotFound
 	 */
 	public function getOffensiveAttrOnlyPoolBuilder(): PoolBuilderInterface {
 		return $this->getPoolBuilder(self::OFFENSIVE, self::ATTRIBUTE_ONLY);
@@ -158,7 +155,6 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	/**
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
-	 * @throws ServiceNotFound
 	 */
 	public function getOffensiveAttrSkillPoolBuilder(): PoolBuilderInterface {
 		return $this->getPoolBuilder(self::OFFENSIVE, self::ATTRIBUTE_AND_SKILL);
@@ -167,7 +163,6 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	/**
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
-	 * @throws ServiceNotFound
 	 */
 	public function getDefensiveAttrOnlyPoolBuilder(): PoolBuilderInterface {
 		return $this->getPoolBuilder(self::DEFENSIVE, self::ATTRIBUTE_ONLY);
@@ -176,7 +171,6 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	/**
 	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
-	 * @throws ServiceNotFound
 	 */
 	public function getDefensiveAttrSkillPoolBuilder(): PoolBuilderInterface {
 		return $this->getPoolBuilder(self::DEFENSIVE, self::ATTRIBUTE_AND_SKILL);
