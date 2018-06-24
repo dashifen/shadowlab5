@@ -20,6 +20,7 @@ abstract class AbstractDomain extends AbstractMysqlDomain implements ShadowlabDo
      */
     public function create(array $data): PayloadInterface {
 
+
         // when creating, as with updating below, we have a two step
         // process:  first we get information to build the form and
         // collect new information from our visitor.  then, we get that
@@ -517,9 +518,9 @@ CONSTRAINT;
     protected function createNewRecord(array $data): PayloadInterface {
 
         // to confirm that we've got the information that we need, we need
-        // to send the posted $data and the schema for our matrix actions
-        // over to our validator.  it'll tell us what's up.  but, if we
-        // don't know the table's name, we're stuck.
+        // to send the posted $data and the schema for our data over to our
+	    // validator.  it'll tell us what's up.  but, if we don't know the
+	    // table's name, we're stuck.
 
         $table = $data["table"] ?? null;
 
@@ -552,7 +553,9 @@ CONSTRAINT;
             $recordName = str_replace("_id", "", $idName);
             return $this->payloadFactory->newCreatePayload(is_numeric($recordId), [
                 "title"  => $record[$recordName],
+                "item"   => $record[$recordName],
                 "thisId" => $recordId,
+                "nextId" => 0,
             ]);
         }
 

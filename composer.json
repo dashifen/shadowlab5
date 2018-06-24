@@ -30,7 +30,7 @@
 		"dashifen/response": "^1",
 		"dashifen/searchbar": "^1",
 		"aura/di": "^3.4",
-		"authy/php": "2.*",
-		"aura/router": "3.x-dev"
+		"authy/php": "^2.5",
+		"aura/router": "^3.1"
 	}
 }

@@ -6,6 +6,7 @@ use Dashifen\Response\AbstractResponse as DashifenAbstractResponse;
 use Dashifen\Response\Factory\ResponseFactoryInterface;
 use Dashifen\Response\ResponseException;
 use Dashifen\Response\View\ViewInterface;
+use Dashifen\Response\View\ViewException;
 use Zend\Diactoros\Response\EmitterInterface;
 
 /**
@@ -28,7 +29,17 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 	 * @var string
 	 */
 	protected $contentTemplate = "";
-	
+
+	/**
+	 * AbstractResponse constructor.
+	 *
+	 * @param ViewInterface            $view
+	 * @param EmitterInterface         $emitter
+	 * @param ResponseFactoryInterface $responseFactory
+	 * @param string                   $root_path
+	 *
+	 * @throws ResponseException
+	 */
 	public function __construct(
 		ViewInterface $view,
 		EmitterInterface $emitter,
@@ -43,12 +54,13 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 		
 		$this->setDatum("error", "");
 	}
-	
+
 	/**
 	 * @param array  $data
 	 * @param string $action
 	 *
 	 * @return void
+	 * @throws ResponseException
 	 */
 	public function handleSuccess(array $data = [], string $action = "read"): void {
 		$this->setResponseType("success");
@@ -69,12 +81,13 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 		
 		$this->responseType = $responseType;
 	}
-	
+
 	/**
 	 * @param array  $data
 	 * @param string $action
 	 *
 	 * @return void
+	 * @throws ResponseException
 	 */
 	protected function setTemplate(array $data = [], string $action = "read"): void {
 		
@@ -86,7 +99,14 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 		$this->setContent($template);
 		$this->setData($data);
 	}
-	
+
+	/**
+	 * @param array  $data
+	 * @param string $action
+	 *
+	 * @return string
+	 * @throws ResponseException
+	 */
 	protected function getTemplate(array $data = [], string $action = "read"): string {
 		
 		// if we can identify an HTTP Error template, we use it.  otherwise,
@@ -238,34 +258,37 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 		$this->contentTemplate = $content;
 		parent::setContent($content);
 	}
-	
+
 	/**
 	 * @param array  $data
 	 * @param string $action
 	 *
 	 * @return void
+	 * @throws ResponseException
 	 */
 	public function handleFailure(array $data = [], string $action = "read"): void {
 		$this->setResponseType("failure");
 		$this->setTemplate($data, $action);
 	}
-	
+
 	/**
 	 * @param array  $data
 	 * @param string $action
 	 *
 	 * @return void
+	 * @throws ResponseException
 	 */
 	public function handleError(array $data = [], string $action = "read"): void {
 		$this->setResponseType("error");
 		$this->setTemplate($data, $action);
 	}
-	
+
 	/**
 	 * @param array  $data
 	 * @param string $action
 	 *
 	 * @return void
+	 * @throws ResponseException
 	 */
 	public function handleNotFound(array $data = [], string $action = "read"): void {
 		$this->setStatusCode(404);
@@ -314,7 +337,11 @@ abstract class AbstractResponse extends DashifenAbstractResponse {
 					up.</p>";
 		}
 	}
-	
+
+	/**
+	 * @throws ResponseException
+	 * @throws ViewException
+	 */
 	public function send(): void {
 		
 		// before we send this response, if we're printing our error

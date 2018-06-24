@@ -242,33 +242,4 @@ class MatrixActionsDomain extends AbstractDomain {
 	protected function getRecordsTitle(array $records, bool $isCollection): string {
 		return $isCollection ? "Matrix Actions" : $records[0]["matrix_action"];
 	}
-
-	/**
-	 * @param string $table
-	 * @param array  $record
-	 * @param array  $key
-	 *
-	 * @return int
-	 * @throws DatabaseException
-	 */
-	protected function saveRecord(string $table, array $record, array $key): int {
-		$createPayload = $this->payloadFactory->newCreatePayload(true, $record);
-		debug($createPayload, true);
-
-		$transformedPayload = $this->transformer->transformCreate($createPayload);
-		$record = $transformedPayload->getData();
-
-		// now, we're ready to insert into our table.  if our key's value
-		// is empty, then we insert.  otherwise, we can update.
-
-		$recordId = array_shift($key);
-
-		if (empty($recordId)) {
-			$recordId = $this->db->insert($table, $record);
-		} else {
-			$this->db->update($table, $record, $key);
-		}
-
-		return $recordId;
-	}
 }

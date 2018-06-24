@@ -66,6 +66,8 @@ class MatrixActionsAction extends AbstractAction {
 		$defensivePoolBuilder = $factory->getDefensiveAttrOnlyPoolBuilder();
 		$post["offensive_pool_id"] = $offensivePoolBuilder->getPoolId($post);
 		$post["defensive_pool_id"] = $defensivePoolBuilder->getPoolId($post);
+		$post = $offensivePoolBuilder->removePoolComponents($post);
+		$post = $defensivePoolBuilder->removePoolComponents($post);
 		return $post;
 	}
 

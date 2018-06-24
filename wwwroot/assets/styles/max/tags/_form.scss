@@ -235,12 +235,12 @@ select {
 			margin-left: rem(24);
 		}
 
-		&.marks,
+		&.static_defensive_pool,
 		&.defensive_attribute_id {
 			clear: left;
 		}
 
-		&.marks {
+		&.static_defensive_pool {
 			&, & ~ li {
 				position: relative;
 				top: rem(12);

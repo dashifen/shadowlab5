@@ -60,12 +60,13 @@ class SpellsDomain extends AbstractDomain {
         return !$isCollection ? $records[0]["spell"] : "Spells";
     }
 
-    /**
-     * @param string $table
-     * @param bool   $withFKOptions
-     *
-     * @return array
-     */
+	/**
+	 * @param string $table
+	 * @param bool   $withFKOptions
+	 *
+	 * @return array
+	 * @throws DatabaseException
+	 */
     protected function getTableDetails(string $table, bool $withFKOptions = true): array {
         $schema = parent::getTableDetails($table);
 

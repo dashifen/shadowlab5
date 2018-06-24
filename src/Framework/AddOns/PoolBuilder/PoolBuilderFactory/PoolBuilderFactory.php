@@ -2,6 +2,10 @@
 
 namespace Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory;
 
+use Shadowlab\Framework\AddOns\PoolBuilder\OffensiveAttrOnlyPoolBuilder;
+use Shadowlab\Framework\AddOns\PoolBuilder\OffensiveAttrSkillPoolBuilder;
+use Shadowlab\Framework\AddOns\PoolBuilder\DefensiveAttrOnlyPoolBuilder;
+use Shadowlab\Framework\AddOns\PoolBuilder\DefensiveAttrSkillPoolBuilder;
 use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderInterface;
 use Shadowlab\Framework\Database\Database;
 
@@ -51,8 +55,7 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 			// we instantiate that builder and return it to the calling scope.
 			// note that we have
 
-			$poolBuilder = $this->identifyPoolBuilderClassName($strategy, $constituents);
-			return new $poolBuilder($this->database);
+			return $this->identifyPoolBuilderClassName($strategy, $constituents);
 		} else {
 			throw $this->getException();
 		}
@@ -80,10 +83,10 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	 * @param int $strategy
 	 * @param int $constituents
 	 *
-	 * @return string
+	 * @return PoolBuilderInterface
 	 * @throws PoolBuilderFactoryException
 	 */
-	protected function identifyPoolBuilderClassName(int $strategy, int $constituents): string {
+	protected function identifyPoolBuilderClassName(int $strategy, int $constituents): PoolBuilderInterface {
 
 		// to identify the pool builder class name that we need, we'll add
 		// our parameters.  the sum for valid combinations of strategy and
@@ -92,16 +95,16 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 
 		switch ($strategy + $constituents) {
 			case (self::OFFENSIVE + self::ATTRIBUTE_ONLY):
-				return "OffensiveAttrOnlyPoolBuilder";
+				return new OffensiveAttrOnlyPoolBuilder($this->database);
 
 			case (self::OFFENSIVE + self::ATTRIBUTE_AND_SKILL):
-				return "OffensiveAttrSkillPoolBuilder";
+				return new OffensiveAttrSkillPoolBuilder($this->database);
 
 			case (self::DEFENSIVE + self::ATTRIBUTE_ONLY):
-				return "DefensiveAttrOnlyPoolBuilder";
+				return new DefensiveAttrOnlyPoolBuilder($this->database);
 
 			case (self::DEFENSIVE + self::ATTRIBUTE_AND_SKILL):
-				return "DefensiveAttrSkillPoolBuilder";
+				return new DefensiveAttrSkillPoolBuilder($this->database);
 		}
 
 		throw new PoolBuilderFactoryException("Unknown pool builder factory error.");

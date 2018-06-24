@@ -46,14 +46,17 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 			// it.
 
 			$transformedConstituents = $this->transformConstituents($constituents);
-			$statement = $this->getPoolSelect($transformedConstituents);
-			$poolId = $this->db->getVar($statement, $transformedConstituents);
 
-			if (!is_numeric($poolId)) {
-				$poolId = $this->db->insert("pools", $transformedConstituents);
+			if (sizeof($transformedConstituents) > 0) {
+				$statement = $this->getPoolSelect($transformedConstituents);
+				$poolId = $this->db->getVar($statement, $transformedConstituents);
+
+				if (!is_numeric($poolId)) {
+					$poolId = $this->db->insert("pools", $transformedConstituents);
+				}
+
+				return $poolId;
 			}
-
-			return $poolId;
 		}
 
 		// down here, we didn't have some of our necessary constituents to
@@ -127,6 +130,20 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 
 		return $statement . " WHERE " . join(" AND ", $clauses);
 	}
+
+	/**
+	 * @param array $constituents
+	 *
+	 * @return array
+	 */
+	public function removePoolComponents(array $constituents): array {
+		foreach(array_keys(static::CONSTITUENTS) as $constituentKey) {
+			unset($constituents[$constituentKey]);
+		}
+
+		return $constituents;
+	}
+
 
 	/**
 	 * @return string

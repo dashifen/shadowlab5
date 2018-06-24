@@ -34,6 +34,7 @@ abstract class AbstractTransformer implements TransformerInterface {
     protected function removeNullableData(PayloadInterface $payload): PayloadInterface {
         $schema = $payload->getDatum("schema");
         $record = $payload->getDatum("record");
+
         foreach ($schema as $column => $columnData) {
             if ($columnData["IS_NULLABLE"] === "YES") {
 

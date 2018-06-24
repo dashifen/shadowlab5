@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "23f05441905efce086e7043225cee2f0",
+    "content-hash": "e1ba9cc9d299e99337aab8ad41821109",
     "packages": [
         {
             "name": "aura/di",
@@ -282,16 +282,16 @@
         },
         {
             "name": "dashifen/database",
-            "version": "1.3.1",
+            "version": "1.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/database.git",
-                "reference": "d49295713beec6ad24f854659d54376c77b7d450"
+                "reference": "03835324e0d8ee51eebaf2370617c26eeb8c4969"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/database/zipball/d49295713beec6ad24f854659d54376c77b7d450",
-                "reference": "d49295713beec6ad24f854659d54376c77b7d450",
+                "url": "https://api.github.com/repos/dashifen/database/zipball/03835324e0d8ee51eebaf2370617c26eeb8c4969",
+                "reference": "03835324e0d8ee51eebaf2370617c26eeb8c4969",
                 "shasum": ""
             },
             "require": {
@@ -327,7 +327,7 @@
                 "database",
                 "pdo"
             ],
-            "time": "2018-06-16T16:26:33+00:00"
+            "time": "2018-06-24T20:23:37+00:00"
         },
         {
             "name": "dashifen/domain",
@@ -693,12 +693,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2"
+                "reference": "af094f5a5a1558301b3dce0abcafacff6319592d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f9acb4761844317e626a32259205bec1f1bc60d2",
-                "reference": "f9acb4761844317e626a32259205bec1f1bc60d2",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/af094f5a5a1558301b3dce0abcafacff6319592d",
+                "reference": "af094f5a5a1558301b3dce0abcafacff6319592d",
                 "shasum": ""
             },
             "require": {
@@ -738,7 +738,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-01-15 07:18:01"
+            "time": "2018-06-20 21:43:54"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -1130,9 +1130,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "aura/router": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

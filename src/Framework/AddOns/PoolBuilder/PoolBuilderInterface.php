@@ -13,4 +13,11 @@ interface PoolBuilderInterface {
 	 * @return int
 	 */
 	public function getPoolId(array $constituents): int;
+
+	/**
+	 * @param array $constituents
+	 *
+	 * @return array
+	 */
+	public function removePoolComponents(array $constituents): array;
 }
