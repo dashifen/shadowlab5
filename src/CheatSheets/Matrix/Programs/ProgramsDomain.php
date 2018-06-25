@@ -37,7 +37,7 @@ class ProgramsDomain extends AbstractDomain {
 	 */
 	protected function getQuery(): string {
 		return <<< QUERY
-			SELECT program_id, program_type_id, program_type, program, 
+			SELECT program_id, program_type_id, program, program_type, 
 				programs.description, max_rating, availability, book_id, 
 			    book, page 
 			    

@@ -12,7 +12,15 @@ class ProgramsTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getHeaderAbbreviation(string $header, array $records): string {
-		// TODO: Implement getHeaderAbbreviation() method.
+		switch ($header) {
+			case "max_rating":
+				return '<abbr title="Max Rating">Rating</abbr>';
+
+			case "availability":
+				return '<abbr title="Availability">Avail</abbr>';
+		}
+
+		return $header;
 	}
 
 	/**
@@ -22,7 +30,11 @@ class ProgramsTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getHeaderClasses(string $header, array $records): string {
-		// TODO: Implement getHeaderClasses() method.
+		if ($header === "program" || $header === "program_type") {
+			return "nowrap";
+		}
+
+		return "text-right w5";
 	}
 
 	/**
@@ -33,7 +45,12 @@ class ProgramsTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getSearchbarValue(string $column, string $value, array $record): string {
-		// TODO: Implement getSearchbarValue() method.
+		switch ($column) {
+			case "program":
+				return strip_tags($value);
+		}
+
+		return $value;
 	}
 
 	/**
@@ -44,7 +61,13 @@ class ProgramsTransformer extends AbstractTransformer {
 	 * @return string
 	 */
 	protected function getCellContent(string $column, string $value, array $record): string {
-		// TODO: Implement getCellContent() method.
-	}
 
+		// the only alteration we need to do here is to our programs's name.
+		// we want to make it a clicker for the display toggling behavior for
+		// our descriptive row as follows:
+
+		return $column === "program"
+			? sprintf('<a href="#">%s</a>', $value)
+			: $value;
+	}
 }
