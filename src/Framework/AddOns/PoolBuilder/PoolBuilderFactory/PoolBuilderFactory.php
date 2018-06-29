@@ -121,30 +121,30 @@ class PoolBuilderFactory implements PoolBuilderFactoryInterface {
 	 * @return string
 	 */
 	protected function getMessage(): string {
+		if (!$this->validConstituents && !$this->validStrategy) {
+			return "Invalid pool strategy and constituents.";
+		}
+
 		if (!$this->validStrategy) {
 			return "Invalid pool strategy.";
 		}
 
-		if ($this->validConstituents) {
-			return "Invalid pool constituents.";
-		}
-
-		return "Invalid pool strategy and constituents.";
+		return "Invalid pool constituents.";
 	}
 
 	/**
 	 * @return int
 	 */
 	protected function getExceptionCode(): int {
+		if (!$this->validConstituents && !$this->validStrategy) {
+			return PoolBuilderFactoryException::INVALID_BOTH;
+		}
+
 		if (!$this->validStrategy) {
 			return PoolBuilderFactoryException::INVALID_STRATEGY;
 		}
 
-		if ($this->validConstituents) {
-			return PoolBuilderFactoryException::INVALID_CONSTITUENTS;
-		}
-
-		return PoolBuilderFactoryException::INVALID_BOTH;
+		return PoolBuilderFactoryException::INVALID_CONSTITUENTS;
 	}
 
 	/**

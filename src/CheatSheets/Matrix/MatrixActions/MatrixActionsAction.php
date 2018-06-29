@@ -4,6 +4,7 @@ namespace Shadowlab\CheatSheets\Matrix\MatrixActions;
 
 use Dashifen\Response\ResponseInterface;
 use Shadowlab\Framework\Action\AbstractAction;
+use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderException;
 use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory\PoolBuilderFactory;
 use Shadowlab\Framework\AddOns\Searchbar\SearchbarInterface;
 use Dashifen\Domain\Payload\PayloadInterface;
@@ -24,13 +25,13 @@ class MatrixActionsAction extends AbstractAction {
 		return $searchbar;
 	}
 
-
 	/**
 	 * @param array|null $post
 	 *
 	 * @return ResponseInterface
 	 * @throws MysqlDomainException
 	 * @throws PoolBuilderFactoryException
+	 * @throws PoolBuilderException
 	 * @throws ServiceNotFound
 	 */
 	protected function createNewRecord(array $post = null): ResponseInterface {
@@ -52,6 +53,7 @@ class MatrixActionsAction extends AbstractAction {
 	 * @return array
 	 * @throws ServiceNotFound
 	 * @throws PoolBuilderFactoryException
+	 * @throws PoolBuilderException
 	 */
 	protected function handlePools(array $post): array {
 		/** @var PoolBuilderFactory $factory */
@@ -62,13 +64,74 @@ class MatrixActionsAction extends AbstractAction {
 		// selection of the right pool ID for these data.
 
 		$factory = $this->container->get("PoolBuilderFactory");
+		$post = $this->handleOffensivePool($post, $factory);
+		$post = $this->handleDefensivePool($post, $factory);
+	}
+
+	/**
+	 * @param array              $post
+	 * @param PoolBuilderFactory $factory
+	 *
+	 * @return array
+	 * @throws PoolBuilderException
+	 * @throws PoolBuilderFactoryException
+	 */
+	protected function handleOffensivePool(array $post, PoolBuilderFactory $factory): array {
 		$offensivePoolBuilder = $factory->getOffensiveAttrSkillPoolBuilder();
-		$defensivePoolBuilder = $factory->getDefensiveAttrOnlyPoolBuilder();
 		$post["offensive_pool_id"] = $offensivePoolBuilder->getPoolId($post);
-		$post["defensive_pool_id"] = $defensivePoolBuilder->getPoolId($post);
-		$post = $offensivePoolBuilder->removePoolComponents($post);
-		$post = $defensivePoolBuilder->removePoolComponents($post);
-		return $post;
+		return $offensivePoolBuilder->removePoolConstituents($post);
+	}
+
+	/**
+	 * @param array              $post
+	 * @param PoolBuilderFactory $factory
+	 *
+	 * @return array
+	 * @throws PoolBuilderException
+	 * @throws PoolBuilderFactoryException
+	 */
+	protected function handleDefensivePool(array $post, PoolBuilderFactory $factory): array {
+		$defensivePoolBuilder = $factory->getDefensiveAttrOnlyPoolBuilder();
+
+		try {
+
+			// for our defensive pool, sometimes we have attributes to use
+			// (like INT + Firewall).  but, for the Grid Hop actions, there's
+			// simple a static pool.  we'll try to use our pool builder, but
+			// if it ends up throwing a non-numeric constituent exception, we
+			// can fall back on the static pool information.
+
+			$post["defensive_pool_id"] = $defensivePoolBuilder->getPoolId($post);
+		} catch (PoolBuilderException $exception) {
+			if ($exception->getCode() !== PoolBuilderException::NON_NUMERIC_CONSTITUENT) {
+
+				// any other type of of pool builder exception other than our
+				// non-numeric constituent exception we'll just re-throw.  that
+				// probably means the page dies, but that's okay in this case.
+
+				throw $exception;
+			}
+
+			// if we did have a non-numeric constituent exception, then we have
+			// to have a numeric static defensive pool value in the posted
+			// data.  if we don't, we throw a missing constituent pool builder
+			// exception.
+
+			if (!is_numeric(($post["static_defensive_pool"] ?? false))) {
+				throw new PoolBuilderException("Static defensive pool missing.",
+					PoolBuilderException::MISSING_CONSTITUENTS,
+					$exception);
+			}
+		}
+
+		// now, since either (a) we gleaned our defensive pool ID from the
+		// posted data, or (b) it was missing and we had a static pool to use
+		// instead, we want to remove the pool constituents from $post because
+		// they're no longer needed.  we can do this here, instead of the try
+		// block above, because we need to do it regardless of how we reached
+		// this point.
+
+		return $defensivePoolBuilder->removePoolConstituents($post);
 	}
 
 	/**

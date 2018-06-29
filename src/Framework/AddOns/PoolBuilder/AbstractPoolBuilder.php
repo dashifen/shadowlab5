@@ -3,6 +3,7 @@
 namespace Shadowlab\Framework\AddOns\PoolBuilder;
 use Dashifen\Database\DatabaseException;
 use Dashifen\Database\DatabaseInterface;
+use Shadowlab\Framework\AddOns\PoolBuilder\PoolBuilderFactory\PoolBuilderFactoryException;
 
 /**
  * Class PoolBuilder
@@ -72,18 +73,39 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 	 * @param array $constituents
 	 *
 	 * @return bool
+	 * @throws PoolBuilderException
 	 */
 	protected function canGetPoolId(array $constituents): bool {
 
 		// we want to see if all of our needles are in our haystack.  to
 		// do that, we get the intersection of our arrays.  then, if the
 		// size of that intersection is the same as the size of our needles,
-		// we're good to go.
+		// we've met the first criteria:  our data exist.
 
 		$haystack = array_keys($constituents);
 		$needles = array_keys(static::CONSTITUENTS);
 		$intersection = array_intersect($needles, $haystack);
-		return sizeof($intersection) === sizeof($needles);
+		if (sizeof($intersection) === sizeof($needles)) {
+
+			// now that we know our data exists, we need to see if they're
+			// valid.  if they are, then they're all numbers (since we get
+			// attribute and skill IDs from the form).  if we find all numbers,
+			// we can return true.
+
+			foreach ($constituents as $constituent => $value) {
+				if (!is_numeric($value)) {
+					throw new PoolBuilderException("Non-numeric $constituent.", PoolBuilderException::NON_NUMERIC_CONSTITUENT);
+				}
+			}
+		} else {
+			throw new PoolBuilderException("Missing constituents.", PoolBuilderException::MISSING_CONSTITUENTS);
+		}
+
+		// if we made it all the way here, then we didn't throw any exceptions
+		// above.  therefore, we must have all the pool constituents we need
+		// and their values are all numeric.  so, we return true.
+
+		return true;
 	}
 
 	/**
@@ -136,7 +158,7 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 	 *
 	 * @return array
 	 */
-	public function removePoolComponents(array $constituents): array {
+	public function removePoolConstituents(array $constituents): array {
 		foreach(array_keys(static::CONSTITUENTS) as $constituentKey) {
 			unset($constituents[$constituentKey]);
 		}
