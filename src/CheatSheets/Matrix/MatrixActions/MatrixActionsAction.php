@@ -66,6 +66,7 @@ class MatrixActionsAction extends AbstractAction {
 		$factory = $this->container->get("PoolBuilderFactory");
 		$post = $this->handleOffensivePool($post, $factory);
 		$post = $this->handleDefensivePool($post, $factory);
+		return $post;
 	}
 
 	/**
@@ -103,19 +104,24 @@ class MatrixActionsAction extends AbstractAction {
 
 			$post["defensive_pool_id"] = $defensivePoolBuilder->getPoolId($post);
 		} catch (PoolBuilderException $exception) {
-			if ($exception->getCode() !== PoolBuilderException::NON_NUMERIC_CONSTITUENT) {
+			$catchThese = [
+				PoolBuilderException::MISSING_CONSTITUENTS,
+				PoolBuilderException::NON_NUMERIC_CONSTITUENT,
+			];
 
-				// any other type of of pool builder exception other than our
-				// non-numeric constituent exception we'll just re-throw.  that
-				// probably means the page dies, but that's okay in this case.
+			if (!in_array($exception->getCode(), $catchThese)) {
+
+				// any other type of of pool builder exception other than the
+				// the one's listed above, we'll just re-throw.  that probably
+				// means the page dies, but that's okay in this case.
 
 				throw $exception;
 			}
 
-			// if we did have a non-numeric constituent exception, then we have
-			// to have a numeric static defensive pool value in the posted
-			// data.  if we don't, we throw a missing constituent pool builder
-			// exception.
+			// if we did have one of the exceptions we can catch and handle
+			// here, then we have to have a numeric static defensive pool value
+			// in the posted data.  if we don't, we throw a missing constituent
+			// pool builder exception.
 
 			if (!is_numeric(($post["static_defensive_pool"] ?? false))) {
 				throw new PoolBuilderException("Static defensive pool missing.",

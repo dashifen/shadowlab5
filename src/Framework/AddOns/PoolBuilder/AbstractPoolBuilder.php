@@ -82,8 +82,10 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 		// size of that intersection is the same as the size of our needles,
 		// we've met the first criteria:  our data exist.
 
-		$haystack = array_keys($constituents);
+		$constituents = array_filter($constituents);
 		$needles = array_keys(static::CONSTITUENTS);
+		$haystack = array_keys($constituents);
+
 		$intersection = array_intersect($needles, $haystack);
 		if (sizeof($intersection) === sizeof($needles)) {
 
@@ -92,9 +94,9 @@ abstract class AbstractPoolBuilder implements PoolBuilderInterface {
 			// attribute and skill IDs from the form).  if we find all numbers,
 			// we can return true.
 
-			foreach ($constituents as $constituent => $value) {
-				if (!is_numeric($value)) {
-					throw new PoolBuilderException("Non-numeric $constituent.", PoolBuilderException::NON_NUMERIC_CONSTITUENT);
+			foreach ($needles as $needle) {
+				if (!is_numeric($constituents[$needle])) {
+					throw new PoolBuilderException("Non-numeric $needle.", PoolBuilderException::NON_NUMERIC_CONSTITUENT);
 				}
 			}
 		} else {
